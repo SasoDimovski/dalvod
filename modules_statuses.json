@@ -1,0 +1,10 @@
+{
+    "Modules": true,
+    "Users": true,
+    "Auth": true,
+    "Groups": true,
+    "Main": true,
+    "Languages": true,
+    "User": true,
+    "Projects": true
+}

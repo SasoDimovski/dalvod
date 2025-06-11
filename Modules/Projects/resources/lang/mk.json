@@ -1,0 +1,59 @@
+{
+
+    "GLOBAL": "//////////////////////////////////////////",
+    "projects.id" :"ID",
+    "projects.title" :"Име на водот",
+    "projects.id_voltage" :"Номинален напон Un[kV]",
+    "projects.id_conductor" :"Тип на спроводник",
+    "projects.id_ground_wires" :"Тип на заштитно јаже",
+    "projects.id_starting_point" :"Почетна точка",
+    "projects.id_ending_point" :"Крајна точка",
+    "projects.tensile_stress_cond" :"Максимално работно напрегање ([daN/mm²])",
+    "projects.tensile_stress_ground" :"Максимално работно напрегање ([daN/mm²])",
+    "projects.kn" :"Коеф. на нормално затегнување до дозволено (теоретско)",
+    "projects.ki" :"Коеф. на исклучително затегнување до дозволено (теоретско)",
+    "projects.id_wind_pressure" :"Притисок на ветер (Pv[daN/mm²])",
+    "projects.id_insulator_chain" :"Тип на изолаторски елемент",
+    "projects.approx_field_length" :"Приближна далечина помеѓу столбови",
+    "projects.approx_number_towers" :"Приближен број на столбови",
+    "projects.var_v" :"",
+    "projects.num_cond_systems" :"Број на системи на спроводници",
+    "projects.num_cond_bundle" :"Број на спроводници/фаза (сноп)",
+    "projects.num_ground_wires" :"Број на заштитни јажиња",
+    "projects.active" :"Активен",
+    "projects.deleted" :"Избришан",
+    "projects.created_at" :"Датум на креирање",
+    "projects.updated_at" :" Датум на промени",
+    "projects.created_by" :"Креирано од",
+    "projects.updated_by" :"Променето од",
+
+
+    "VIEW": "//////////////////////////////////////////",
+
+    "projects.edit.send_email_title": "Дали сакате да испратите email?",
+    "projects.edit.send_email_description": "На корисникот ќе му пристигне email на кој се наоѓа линк за внесување нова лозинка.<br> Во исто време постоечката лозинка ќе се ресетира со рандом генерирана лозинка. ",
+    "projects.edit.send_email_hint" : "Испрати емаил за регистрација или ресетирање на лозинка",
+    "projects.edit.send_email_success" : "Успешно e испратен email за регистрација или ресетирање на лозинка",
+    "projects.edit.send_email_error" : "Неуспешно испраќање email за регистрација или ресетирање на лозинка",
+    "projects.edit.image.title_res" : "Задолжителни рестрикции",
+    "projects.edit.image.size" : "Дозволена големина за слика при качување е <strong>:size</strong> MB",
+    "projects.edit.image.type" : "Дозволени се само следните формати за прирачување: <br> <strong>jpg, jpeg, gif</strong> и <strong>png</strong>",
+    "projects.edit.image.attach" : "Прикачи слика",
+    "projects.edit.image.detach" : "Откачи слика",
+    "projects.edit.image.delete_warning" : "<strong>Сликата ќе биде избришана од системот кога ќе кликнете на копчето „Зачувај“</strong>",
+    "projects.edit.image.save_warning" : "<strong>Сликата ќе биде снимена во системот кога ќе кликнете на копчето „Зачувај“</strong>",
+
+
+
+    "CONTROLLER": "//////////////////////////////////////////",
+
+    "SERVICES": "//////////////////////////////////////////",
+    "projects.ProjectServices.error_no_existing_projects": "Проектот на е пронајден во базата на податоци",
+    "projects.ProjectServices.error_update_project": "Грешка при промена на податоци за проектот",
+    "projects.ProjectServices.success_with_warnings_update_activity": "Активностите кои се употребени во табелата „records“ не може да се избришат",
+
+
+    "REQUEST": "//////////////////////////////////////////",
+    "projects.UsersUpdateRequest.min_string"  : "Полето <strong>:attribute</strong> мора да содржи минимум <strong>:min</strong> карактери.",
+    "projects.UsersUpdateRequest.same_string" : "Полето <strong>:attribute</strong> и полето <strong>:other</strong> мора да ја имаат истата вредност."
+}
