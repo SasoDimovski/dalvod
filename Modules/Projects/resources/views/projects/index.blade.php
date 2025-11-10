@@ -16,6 +16,7 @@
     $url = url($url_base);
     $url_create= url($url_base.'/create/');
     $url_edit = url($url_base.'/edit/');
+    $url_edit_points = url($url_base.'/edit_endpoints/');
     $url_show = url($url_base.'/show/');
     $url_delete = url($url_base.'/delete/');
 
@@ -28,9 +29,13 @@
         <section class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
+
+
                     <div class="col-sm-6">
                         <h1><i class="fa {{$module->design->icon}}"></i> {{$module->title}} <a class="btn btn-danger btn-sm" href="{{$url_create}}">{{__('global.new_record')}}</a></h1>
                     </div>
+
+
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a
@@ -38,6 +43,9 @@
                             </li>
                         </ol>
                     </div>
+
+
+
                 </div>
             </div><!-- /.container-fluid -->
         </section>

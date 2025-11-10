@@ -224,7 +224,7 @@ function getContentID(url, modal, title) {
     if ($('button[onclick*="' + url + '"]').hasClass('modal90')) {
         // Постави динамичка ширина
         $('#' + modal + ' .modal-dialog').css({
-            'max-width': '90%',   // Пример: 80% од прозорецот
+            'max-width': '60%',   // Пример: 80% од прозорецот
             'width': 'auto'       // Автоматски прилагодување според содржината
         });
     } else {
@@ -509,10 +509,10 @@ $(document).on('click', '.btn-submit', function (e) {
         });
 
         // Ако нема ниту едно пополнето duration поле, означи го како невалидно
-        if (!hasAtLeastOneDuration) {
-            toastr.error("At least one duration field must be filled with a valid value (1-16).");
-            isValid = false;
-        }
+        // if (!hasAtLeastOneDuration) {
+        //     toastr.error("At least one duration field must be filled with a valid value (1-16).");
+        //     isValid = false;
+        // }
     }
 
     // Ако не е валидно, спречи submit
@@ -534,9 +534,9 @@ $(document).on('click', '.btn-submit', function (e) {
             toastr.success("Successfully updated!");
 
             // Додај повик за рефреш на контејнерот
-            let refreshContainer = document.getElementById('refresh-container').value;
-            let refreshRoute = document.getElementById('refresh-route').value;
-            refreshIndexContainer(refreshContainer, refreshRoute);
+            // let refreshContainer = document.getElementById('refresh-container').value;
+            // let refreshRoute = document.getElementById('refresh-route').value;
+            // refreshIndexContainer(refreshContainer, refreshRoute);
         }, 0, formData);
     } else {
         // Ако нема ajax класа, дозволи класичен submit
@@ -599,7 +599,7 @@ function moveColumnBasedOnWidth() {
 
     // Проверете дали табелата постои
     if (!table) {
-        console.warn('Table with id "example2" not found.');
+        //console.warn('Table with id "example2" not found.');
         return; // Ако табелата не постои, излезете од функцијата
     }
 
@@ -669,6 +669,15 @@ function savePicture() {
 }
 
 // ===========================================================================
+function showGroundWires2(el) {
+    //alert(el.value);
+    if (el.value === '1') {
+        document.getElementById('ground_wires2').style.display = 'none';
+        document.getElementById('id_ground_wires2').value = ''
+        document.getElementById('tensile_stress_ground2').value = ''
 
+    }
+    if (el.value === '2') {document.getElementById('ground_wires2').style.display = 'block' }
+}
 
 

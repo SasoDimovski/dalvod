@@ -15,10 +15,12 @@ class Projects extends Model
         'id_voltage',
         'id_conductor',
         'id_ground_wires',
+        'id_ground_wires2',
         'id_starting_point',
         'id_ending_point',
         'tensile_stress_cond',
         'tensile_stress_ground',
+        'tensile_stress_ground2',
         'kn',
         'ki',
         'id_wind_pressure',
@@ -48,6 +50,10 @@ class Projects extends Model
     {
         return $this->belongsTo(GroundWires::class, 'id_ground_wires');
     }
+    public function groundWires2(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(GroundWires::class, 'id_ground_wires2');
+    }
     public function startingPoint(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Endpoints::class, 'id_starting_point');
@@ -63,5 +69,9 @@ class Projects extends Model
     public function insulatorChain(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(InsulatorChain::class, 'id_insulator_chain');
+    }
+    public function raspres(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Raspres::class, 'id_project');
     }
 }

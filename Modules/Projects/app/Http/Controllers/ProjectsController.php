@@ -46,6 +46,13 @@ class ProjectsController extends Controller
         return redirect(url($url_return.'/'.$return->data['id']).'?'.$query)->with('success', $message_success);
     }
 
+    public function storePoint($lang, $id_module, $id, Request $request)
+    {
+
+        $return = $this->projectsServices->storePoint($request);
+        return view('Projects::projects/_edit-points', $return['data']);
+    }
+
     public function show($lang, $id_module, $id): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
         $return = $this->projectsServices->show( $id);
@@ -57,6 +64,28 @@ class ProjectsController extends Controller
         $return = $this->projectsServices->edit($id);
         return view('Projects::projects/edit', $return['data']);
     }
+    public function editEndPoints($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->editEndPoints($id_project);
+        return view('Projects::projects/edit-endpoints', $return['data']);
+    }
+    public function editPoints($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->editPoints($id_project);
+        return view('Projects::projects/edit-points', $return['data']);
+    }
+    public function editRaspres($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->editRaspres($id_project);
+        return view('Projects::projects/edit-raspres', $return['data']);
+    }
+
+    public function editZatpol($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->editZatpol($id_project);
+        return view('Projects::projects/edit-zatpol', $return['data']);
+    }
+
 
     public function update($lang, $id_module, $id, ProjectsUpdateRequest $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
@@ -69,6 +98,40 @@ class ProjectsController extends Controller
 
         $message_error= $return->data['message_error'] ?? $request->get('message_error') ;
         $message_success=$return->data['message_success'] ?? $request->get('message_success') ;
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
+    public function updateEndPoints($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        //dd($request);
+        $url_return= $request->get('url_return') ;
+        $query= $request->get('query') ;
+
+
+
+        $return = $this->projectsServices->updateEndPoints($id, $request->all());
+
+        $message_error= $return->data['message_error'] ?? $request->get('message_error') ;
+        $message_success=$return->data['message_success'] ?? $request->get('message_success') ;
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
+
+    public function destroyPoint($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        //dd($id);
+        $url_return= $request->get('url_return_war') ;
+        $query= $request->get('query_war') ;
+        $message_error= $request->get('error_war') ;
+        $message_success= $request->get('success_war') ;
+
+        $return = $this->projectsServices->deletePoint($id);
 
         if($return->status=='error'){
             return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);

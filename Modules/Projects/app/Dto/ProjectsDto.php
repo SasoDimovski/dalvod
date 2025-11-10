@@ -12,10 +12,12 @@ class ProjectsDto
     public ?int $id_voltage;
     public ?int $id_conductor;
     public ?int $id_ground_wires;
+    public ?int $id_ground_wires2;
     public ?int $id_starting_point;
     public ?int $id_ending_point;
     public ?float $tensile_stress_cond;
     public ?float $tensile_stress_ground;
+    public ?float $tensile_stress_ground2;
     public ?float $kn;
     public ?float $ki;
     public ?int $id_wind_pressure;
@@ -39,10 +41,12 @@ class ProjectsDto
         $dto->id_voltage = (int)$request->input('id_voltage');
         $dto->id_conductor = (int)$request->input('id_conductor');
         $dto->id_ground_wires = (int)$request->input('id_ground_wires');
+        $dto->id_ground_wires2 = (int)$request->input('id_ground_wires2');
         $dto->id_starting_point = (int)$request->input('id_starting_point');
         $dto->id_ending_point = (int)$request->input('id_ending_point');
         $dto->tensile_stress_cond = (float)$request->input('tensile_stress_cond');
         $dto->tensile_stress_ground = (float)$request->input('tensile_stress_ground');
+        $dto->tensile_stress_ground2 = (float)$request->input('tensile_stress_ground2');
         $dto->kn = (float)$request->input('kn');
         $dto->ki = (float)$request->input('ki');
         $dto->id_wind_pressure = (int)$request->input('id_wind_pressure');

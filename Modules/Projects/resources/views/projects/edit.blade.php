@@ -12,10 +12,12 @@
     $id_voltage = $project->id_voltage ?? old('id_voltage');
     $id_conductor = $project->id_conductor  ?? old('id_conductor');
     $id_ground_wires = $project->id_ground_wires  ?? old('id_ground_wires');
+    $id_ground_wires2 = $project->id_ground_wires2  ?? old('id_ground_wires2');
     $id_starting_point = $project->id_starting_point  ?? old('id_starting_point');
     $id_ending_point = $project->id_ending_point  ?? old('id_ending_point');
     $tensile_stress_cond = $project->tensile_stress_cond  ?? old('tensile_stress_cond');
     $tensile_stress_ground = $project->tensile_stress_ground  ?? old('tensile_stress_ground');
+    $tensile_stress_ground2 = $project->tensile_stress_ground2  ?? old('tensile_stress_ground2');
     $kn = $project->kn  ?? old('kn');
     $ki = $project->ki  ?? old('ki');
     $id_wind_pressure = $project->id_wind_pressure  ?? old('id_wind_pressure');
@@ -44,6 +46,11 @@
     $url_action = !empty($id) ? $url_update : $url_store;
     $url_return = url($url_base.'/edit/' . $id);
 
+    $url_edit_endpoints = url($url_base.'/edit_endpoints/');
+    $url_edit_points = url($url_base.'/edit_points/');
+    $url_edit_raspres = url($url_base.'/edit_raspres/');
+    $url_edit_zatpol = url($url_base.'/edit_zatpol/');
+
     $path_upload = 'uploads/projects/';
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
@@ -59,10 +66,14 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <div class="container-fluid">
+
+
                 <div class="row mb-2">
+
                     <div class="col-sm-6">
                         <h1><i class="fa {{$module->design->icon}}"></i> {{$module->title }} </h1>
                     </div>
+
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a
@@ -70,7 +81,10 @@
                             </li>
                         </ol>
                     </div>
+
                 </div>
+
+
             </div>
             <!-- /.container-fluid -->
         </section>
@@ -78,6 +92,7 @@
 
         <!-- Main content -->
         <section class="content">
+
             <div class="container-fluid">
                 @include('admin._flash-message')
                 @if (count($errors) > 0)
@@ -103,6 +118,26 @@
                 @endif
 
                 <div class="row">
+
+
+@if($id)
+
+                    <div class="col-sm-12 col-md-12 col-lg-12 col-xll-6">
+                        <button class="btn btn-info modal90"
+                                onclick="getContentID('{{$url_edit_endpoints.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.endpoints_long')}}')">
+                            {{__('projects.edit.menu.endpoints')}}</button>
+                        <button class="btn btn-success modal90"
+                                onclick="getContentID('{{$url_edit_points.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.points_long')}}')">
+                            {{__('projects.edit.menu.points')}}</button>
+                        <button class="btn btn-warning modal90"
+                                onclick="getContentID('{{$url_edit_raspres.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.raspres_long')}}')">
+                            {{__('projects.edit.menu.raspres')}}</button>
+                        <button class="btn btn-warning modal90"
+                                onclick="getContentID('{{$url_edit_zatpol.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.zatpol_long')}}')">
+                            {{__('projects.edit.menu.zatpol')}}</button>
+                    </div>
+                    @endif
+
                     <div class="col-sm-12 col-md-12 col-lg-12 col-xll-6">
                         <!-- Form-->
                         <form class="needs-validation" role="form" id="form_edit" name="form_edit"
@@ -188,9 +223,17 @@
                                             $input_value = $id_voltage;
                                             $input_name = 'id_voltage';
                                             $input_desc = __('projects.id_voltage');
-                                            $input_readonly = '';
+                                            if($id){$input_readonly = 'disabled';
+                                                $isLocked = $id ? true : false;
+
+                                            }else{$input_readonly = '';}
+                                            $isLocked = $id ? true : false;
                                             $input_css = 'text-red';
                                             ?>
+                                            @if($isLocked)
+                                                <input type="hidden" name="{{ $input_name }}"  id="{{ $input_name }}"  value="{{ $input_value }}">
+                                            @endif
+
                                             <div class="form-group">
                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
@@ -210,6 +253,8 @@
                                             </div>
                                         </div>
                                         </div>
+                                    {{--=========================================================--}}
+
                                         <div class="row">
                                         <div class="col-sm-3">
                                             <?php
@@ -307,7 +352,7 @@
                                             $input_value = $tensile_stress_cond ;
                                             $input_name = 'tensile_stress_cond';
                                             $input_desc = __('projects.tensile_stress_cond');
-                                            $input_maxlength = 5;
+                                            $input_maxlength = 6;
                                             $input_readonly = '';
                                             $input_css = 'text-red';
                                             $input_style = 'width: 20%;';
@@ -315,9 +360,19 @@
                                             <div class="form-group">
                                                 <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
                                                     *</label>
-                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}" style="{{$input_style}}"
-                                                       class="form-control" value="{{$input_value}}"
-                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                <input type="text"
+                                                       id="{{$input_name}}"
+                                                       name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control"
+                                                       value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}"
+                                                       pattern="^\d{1,3}(\.\d{1,2})?$"
+                                                       inputmode="decimal"
+                                                       title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
+                                                       oninput="validateNumberInput(this)"
+                                                      {{$input_readonly}}>
+                                                Дозволена вредности: три цели и две децимали
                                             </div>
                                         </div>
 
@@ -325,16 +380,42 @@
                                     </div>
                                     {{--=========================================================--}}
                                     <div class="row">
-                                        <div class="col-sm-3">
+                                        <div class="col-sm-4">
                                             <?php
 
+                                            $input_value = $num_ground_wires;
+                                            $input_name = 'num_ground_wires';
+                                            $input_desc = __('projects.num_ground_wires');
+                                            $input_readonly = '';
+                                            $input_css = 'text-red';
+
+                                            ?>
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        autocomplete="off" {{ $input_readonly }}
+                                                        onchange="showGroundWires2(this)"
+                                                >
+                                                    <option value="1" {{ ($num_ground_wires)==1 ? 'selected' : '' }}>1
+                                                    </option>
+                                                    <option value="2" {{ ($num_ground_wires)==2 ? 'selected' : '' }}>2
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    {{--=========================================================--}}
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <?php
                                             $input_value = $id_ground_wires;
                                             $input_name = 'id_ground_wires';
                                             $input_desc = __('projects.id_ground_wires');
                                             $input_readonly = '';
                                             $input_css = 'text-red';
                                             $input_style = 'width:100%;';
-
                                             ?>
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
@@ -355,12 +436,84 @@
                                             </div>
 
                                         </div>
+
+                                            <div class="col-sm-6">
+                                                <?php
+                                                $input_value = $tensile_stress_ground;
+                                                $input_name = 'tensile_stress_ground';
+                                                $input_desc = __('projects.tensile_stress_ground');
+                                                $input_maxlength = 6;
+                                                $input_readonly = '';
+                                                $input_css = 'text-red';
+                                                $input_style = 'width: 20%;';
+                                                ?>
+                                                <div class="form-group">
+                                                    <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
+                                                        *</label>
+                                                    <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                           style="{{$input_style}}"
+                                                           class="form-control" value="{{$input_value}}"
+                                                           maxlength="{{$input_maxlength}}"
+                                                           pattern="^\d{1,3}(\.\d{1,2})?$"
+                                                           inputmode="decimal"
+                                                           title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
+                                                           oninput="validateNumberInput(this)"
+                                                        {{$input_readonly}}>
+                                                    Дозволена вредности: три цели и две децимали
+
+                                                </div>
+                                            </div>
+
+                                    </div>
+
+                                    {{--=========================================================--}}
+
+                                    <?php
+                                    $input_value = $id_ground_wires2;
+                                    $input_name = 'id_ground_wires2';
+                                    $input_desc = __('projects.id_ground_wires');
+                                    $input_readonly = '';
+                                    $input_css = 'text-red';
+                                    $input_style = 'width:100%;';
+
+                                    if($id&&$num_ground_wires==2){$Style_wires = 'display: block';
+
+                                    }else{$Style_wires = 'display: none';}
+
+                                    ?>
+
+
+                                    <div  id="ground_wires2" style="{{ $Style_wires }}">
+
+                                        <div class="row" >
+                                        <div class="col-sm-3">
+
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}" style="{{$input_style}}"
+                                                        autocomplete="off" {{ $input_readonly }}>
+                                                    @if (count($groundWires) > 0)
+                                                        <option value="">&nbsp;</option>
+                                                        @foreach ($groundWires as $groundWire)
+                                                            <option
+                                                                value="{{ $groundWire->id }}"
+                                                                {{ (($id_ground_wires2)==$groundWire->id) ? 'selected' : '' }}>
+                                                                {{ $groundWire->type }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+
+                                        </div>
+
                                         <div class="col-sm-6">
                                             <?php
-                                            $input_value = $tensile_stress_ground ;
-                                            $input_name = 'tensile_stress_ground';
+                                            $input_value = $tensile_stress_ground2;
+                                            $input_name = 'tensile_stress_ground2';
                                             $input_desc = __('projects.tensile_stress_ground');
-                                            $input_maxlength = 5;
+                                            $input_maxlength = 6;
                                             $input_readonly = '';
                                             $input_css = 'text-red';
                                             $input_style = 'width: 20%;';
@@ -368,17 +521,25 @@
                                             <div class="form-group">
                                                 <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
                                                     *</label>
-                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"  style="{{$input_style}}"
+                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
                                                        class="form-control" value="{{$input_value}}"
-                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                       maxlength="{{$input_maxlength}}"
+                                                       pattern="^\d{1,3}(\.\d{1,2})?$"
+                                                       inputmode="decimal"
+                                                       title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
+                                                       oninput="validateNumberInput(this)"
+                                                    {{$input_readonly}}>
+                                                Дозволена вредности: три цели и две децимали
                                             </div>
                                         </div>
 
-
+                                    </div>
                                     </div>
                                     {{--=========================================================--}}
+
                                     <div class="row">
-                                        <div class="col-sm-6">
+                                        <div class="col-sm-4">
                                             <?php
                                             $input_value = $kn;
                                             $input_name = 'kn';
@@ -391,14 +552,19 @@
                                             <div class="form-group">
                                                 <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
                                                     *</label>
-                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"  style="{{$input_style}}"
+                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
                                                        class="form-control" value="{{$input_value}}"
-                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                       maxlength="{{$input_maxlength}}"
+                                                    {{$input_readonly}}
+                                                       oninput="validateKnInput(this)">
+                                                Дозволени вредности: од <b>1</b> до <b>4</b> / Препорачани вредности: <b>1</b>; <b>1.6</b>; <b>2.5</b>; <b>4</b>
                                             </div>
                                         </div>
-                                        </div>
-                                        <div class="row">
-                                        <div class="col-sm-6">
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
                                             <?php
                                             $input_value = $ki;
                                             $input_name = 'ki';
@@ -411,16 +577,17 @@
                                             <div class="form-group">
                                                 <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
                                                     *</label>
-                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"  style="{{$input_style}}"
+                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
                                                        class="form-control" value="{{$input_value}}"
-                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                       oninput="validateKiInput(this)"
+                                                >
+                                                Дозволени вредности: од <b>2</b> до <b>4</b>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {{--=========================================================--}}
-                                    <div class="row">
-                                        <div class="col-sm-4">
+                                        <div class="col-sm-3">
                                             <?php
 
                                             $input_value = $id_wind_pressure;
@@ -505,8 +672,6 @@
                                                         <option value="">&nbsp;</option>
                                                         <option value="1" {{ ($num_cond_systems)==1 ? 'selected' : '' }}>1</option>
                                                         <option value="2" {{ ($num_cond_systems)==2 ? 'selected' : '' }}>2</option>
-                                                        <option value="3" {{ ($num_cond_systems)==3 ? 'selected' : '' }}>3</option>
-                                                        <option value="4" {{ ($num_cond_systems)==4 ? 'selected' : '' }}>4</option>
 
 
                                                 </select>
@@ -538,33 +703,14 @@
                                             </div>
 
                                         </div>
-                                        <div class="col-sm-4">
-                                            <?php
 
-                                            $input_value = $num_ground_wires;
-                                            $input_name = 'num_ground_wires';
-                                            $input_desc = __('projects.num_ground_wires');
-                                            $input_readonly = '';
-                                            $input_css = 'text-red';
-
-                                            ?>
-                                            <div class="form-group">
-                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
-                                                <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        autocomplete="off" {{ $input_readonly }}>
-                                                    <option value="">&nbsp;</option>
-                                                    <option value="1" {{ ($num_ground_wires)==1 ? 'selected' : '' }}>1</option>
-                                                    <option value="2" {{ ($num_ground_wires)==2 ? 'selected' : '' }}>2</option>
-                                                </select>
-                                            </div>
-
-                                        </div>
 
                                     </div>
                                     {{--=========================================================--}}
-                                    <button type="button" onclick="form_edit.submit();"
-                                            class="btn btn-success float-right">{{__('global.save')}}</button>
+                                    <button type="button" class="btn btn-success float-right"
+                                            onclick="document.getElementById('form_edit').requestSubmit();">
+                                        {{ __('global.save') }}
+                                    </button>
                                 </div>
                                 <!-- /.card-body -->
 
@@ -750,5 +896,128 @@
 
 
     </script>
+    <script>
+        function validateNumberInput(input) {
+            // дозволи само бројки и максимум една точка
+            let value = input.value.replace(/[^0-9.]/g, '');
 
+            // дозволи само една точка
+            let parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts[1];
+            }
+
+            // ограничување: 3 цели + 2 децимали
+            if (parts[0].length > 3) {
+                parts[0] = parts[0].slice(0, 3);
+            }
+            if (parts[1] && parts[1].length > 2) {
+                parts[1] = parts[1].slice(0, 2);
+            }
+
+            input.value = parts.join('.');
+        }
+
+        function validateKnInput(input) {
+            let value = input.value;
+
+            // дозволи само бројки и точка
+            value = value.replace(/[^0-9.]/g, '');
+
+            // дозволи само една точка
+            let parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts[1];
+                parts = value.split('.');
+            }
+
+            // дозволи ".", "1.", "1.2", "1.23"
+            if (value === ".") {
+                input.value = ".";
+                return;
+            }
+
+            // ако има децимали -> максимум 2
+            if (parts[1] && parts[1].length > 2) {
+                parts[1] = parts[1].slice(0, 2);
+                value = parts.join('.');
+            }
+
+            // ако има само "." или ".x" не го парсираме уште
+            if (value.endsWith(".")) {
+                input.value = value;
+                return;
+            }
+
+            // конвертирај во број (кога веќе има смислена вредност)
+            let num = parseFloat(value);
+
+            if (!isNaN(num)) {
+                // ограничување 1 → 4
+                if (num < 1) num = 1;
+                if (num > 4) num = 4;
+
+                // врати назад со 2 децимали ако има децимална точка
+                value = num.toString();
+                if (value.includes('.')) {
+                    let p = value.split('.');
+                    p[1] = p[1].slice(0, 2);
+                    value = p.join('.');
+                }
+            }
+
+            input.value = value;
+        }
+
+        function validateKiInput(input) {
+            let value = input.value;
+
+            // дозволи само бројки и точка
+            value = value.replace(/[^0-9.]/g, '');
+
+            // дозволи само една точка
+            let parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts[1];
+                parts = value.split('.');
+            }
+
+            // дозволи ".", "1.", "1.2", "1.23"
+            if (value === ".") {
+                input.value = ".";
+                return;
+            }
+
+            // ако има децимали -> максимум 2
+            if (parts[1] && parts[1].length > 2) {
+                parts[1] = parts[1].slice(0, 2);
+                value = parts.join('.');
+            }
+
+            // ако има само "." или ".x" не го парсираме уште
+            if (value.endsWith(".")) {
+                input.value = value;
+                return;
+            }
+
+            // конвертирај во број (кога веќе има смислена вредност)
+            let num = parseFloat(value);
+
+            if (!isNaN(num)) {
+                // ограничување 1 → 4
+                if (num < 2) num = 2;
+                if (num > 4) num = 4;
+
+                // врати назад со 2 децимали ако има децимална точка
+                value = num.toString();
+                if (value.includes('.')) {
+                    let p = value.split('.');
+                    p[1] = p[1].slice(0, 2);
+                    value = p.join('.');
+                }
+            }
+
+            input.value = value;
+        }
+    </script>
 @endsection

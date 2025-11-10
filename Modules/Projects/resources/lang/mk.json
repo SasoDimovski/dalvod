@@ -30,6 +30,49 @@
 
     "VIEW": "//////////////////////////////////////////",
 
+    "projects.edit.menu.endpoints": "Почеток и крај",
+    "projects.edit.menu.endpoints_long": "Податоци за почеток и крај на водот",
+
+    "projects.edit.menu.points": "Траса",
+    "projects.edit.menu.points_long": "Внес и промена на податоци за трасата на водот",
+
+    "projects.edit.menu.view": "Преглед",
+    "projects.edit.menu.view_long": "Преглед на податоци",
+
+    "projects.edit.menu.raspres": "Распреес",
+    "projects.edit.menu.raspres_long": "Преглед на податоците од табелата РАСПРЕС",
+
+    "projects.edit.menu.zatpol": "Затпол",
+    "projects.edit.menu.zatpol_long": "Преглед на податоците од табелата ЗАТПОЛ",
+
+    "projects.edit-points.id": "ID",
+    "projects.edit-points.stacionaza": "Стационажа [m]",
+    "projects.edit-points.kota": "Кота [m]",
+    "projects.edit-points.agol": "Агол на траса []",
+    "projects.edit-points.stolb": "Тип на столб",
+    "projects.edit-points.trafo": "Трафостаница (портал)",
+    "projects.edit-points.izolam1": "Тип на изолациона верига 1",
+    "projects.edit-points.izolam2": "Тип на изолациона верига 2",
+    "projects.edit-points.add_stolb": "Додади столб",
+
+    "projects.edit-endpoints.first": "Почеток на водот",
+    "projects.edit-endpoints.end": "Крај на водот",
+
+    "projects.edit-endpoints.trafo": "Трафостаница (Портал)",
+
+    "projects.edit-endpoints.stac_t": "Стационажа",
+    "projects.edit-endpoints.kota_t": "Кота",
+    "projects.edit-endpoints.agol_tr": "Агол",
+
+    "projects.edit-endpoints.ime": "Име на објект",
+    "projects.edit-endpoints.visna_p": "Висина на спроводник",
+    "projects.edit-endpoints.visina_zj": "Висина на заштитно јаже",
+    "projects.edit-endpoints.hor_ras": "Хоризонтално растојание помеѓу изолациона верига",
+    "projects.edit-endpoints.stolb": "Столб",
+    "projects.edit-endpoints.stolb_tip": "Тип на столб",
+
+    "projects.edit-endpoints.id_izolam1": "Тип на изолациона верига",
+
     "projects.edit.send_email_title": "Дали сакате да испратите email?",
     "projects.edit.send_email_description": "На корисникот ќе му пристигне email на кој се наоѓа линк за внесување нова лозинка.<br> Во исто време постоечката лозинка ќе се ресетира со рандом генерирана лозинка. ",
     "projects.edit.send_email_hint" : "Испрати емаил за регистрација или ресетирање на лозинка",

@@ -113,11 +113,19 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                         ->group(function () {
                             Route::get('/', [ProjectsController::class, 'index'])->name('projects.index');
                             Route::get('edit/{id}', [ProjectsController::class, 'edit']);
+                            Route::get('edit_endpoints/{id}', [ProjectsController::class, 'editEndPoints']);
+                            Route::get('edit_points/{id}', [ProjectsController::class, 'editPoints']);
+                            Route::get('edit_raspres/{id}', [ProjectsController::class, 'editRaspres']);
+                            Route::get('edit_zatpol/{id}', [ProjectsController::class, 'editZatpol']);
+
                             Route::put('update/{id}', [ProjectsController::class, 'update']);
+                            Route::put('update_endpoints/{id}', [ProjectsController::class, 'updateEndPoints']);
                             Route::get('create', [ProjectsController::class, 'create']);
                             Route::put('store', [ProjectsController::class, 'store']);
+                            Route::match(['get', 'post', 'delete'.'put'],'store-point/{id}', [ProjectsController::class, 'storePoint']);
                             Route::get('show/{id}', [ProjectsController::class, 'show']);
                             Route::match(['get', 'post', 'delete'],'delete/{id}', [ProjectsController::class, 'destroy']);
+                            Route::match(['get', 'post', 'delete'],'delete-point/{id}', [ProjectsController::class, 'destroyPoint']);
 
                         });
                     //.MODULE PROJECTS

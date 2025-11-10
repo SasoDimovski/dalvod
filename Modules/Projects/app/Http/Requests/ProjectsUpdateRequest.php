@@ -38,7 +38,7 @@ class ProjectsUpdateRequest extends FormRequest
     {
         return [
             'title.required' => __('global.required', ['name' => __('projects.title')]),
-            'id_voltage.required' => __('global.required', ['name' => __('projects.title')]),
+            'id_voltage.required' => __('global.required', ['name' => __('projects.id_voltage')]),
             'id_starting_point.required' => __('global.required', ['name' => __('projects.id_starting_point')]),
             'id_ending_point.required' => __('global.required', ['name' => __('projects.id_ending_point')]),
             'id_conductor.required' => __('global.required', ['name' => __('projects.id_conductor')]),
