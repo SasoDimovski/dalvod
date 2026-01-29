@@ -2,7 +2,6 @@
 
 namespace Modules\Conductors\Repositories;
 
-use App\Models\ConductorChain;
 use App\Models\Conductors;
 use App\Models\Projects;
 
