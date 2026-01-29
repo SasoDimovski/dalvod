@@ -70,6 +70,8 @@ class Users extends Authenticatable
 
 
 
+
+
     public function modules(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Modules::class, 'modules_users', 'user_id', 'module_id'); // дефинирање однос еден на многу

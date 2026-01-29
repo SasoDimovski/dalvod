@@ -6,5 +6,10 @@
     "Main": true,
     "Languages": true,
     "User": true,
-    "Projects": true
+    "Projects": true,
+    "Towers": true,
+    "Insulator": true,
+    "Insulators": true,
+    "Conductors": true,
+    "GroundWires": true
 }

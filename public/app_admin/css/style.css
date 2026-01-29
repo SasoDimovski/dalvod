@@ -65,11 +65,12 @@
 .table_grid th {
     background: linear-gradient(#17a2b8, #179cb1);
     border-left: 1px solid #fff;
+    font-size: 13px;
 
     /*box-shadow: inset 0 1px 0 #999;*/
     color: #fff;
     font-weight: bold;
-    padding: 8px 10px;
+    padding: 8px 5px;
     position: relative;
     /*text-shadow: 0 1px 0 #fff;*/
 }

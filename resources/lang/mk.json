@@ -28,6 +28,7 @@
     "global.delete" : "Бриши",
     "global.delete_des" : "Избриши го записот",
     "global.delete_search_field_des" : "Избриши го полето од пребарувањето",
+    "global.delete_search_field" : "Избриши го полето од пребарувањето",
     "global.send_mail": "Испрати email",
 
     "HINTS": "//////////////////////////////////////////",
@@ -49,6 +50,7 @@
     "global.user_no_longer_active" : "Корисничкиот профил не е активен",
 
     "LABELS": "//////////////////////////////////////////",
+    "global.id" :"ID",
     "global.listing" :"Листај",
     "global.all" :"Сите",
     "global.active" : "Активен",
@@ -57,6 +59,11 @@
     "global.expired_no" : "Во тек",
     "global.active_status" : "Статус на активност",
     "global.expired_status" : "Статус на истекување",
+    "global.created_at" :"Датум на креирање",
+    "global.updated_at" :"Датум на промени",
+    "global.created_by" :"Креирано од",
+    "global.updated_by" :"Променето од",
+
 
     "PAGINATION": "//////////////////////////////////////////",
     "global.show_from" :"Прикажани од",

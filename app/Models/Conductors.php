@@ -16,9 +16,10 @@ class Conductors extends Model
         'diameter',
         'mass',
         'model',
-        'resistance_per_km',
-        'nominal_voltage',
-        'test_voltage',
+        'temp_del',
+        'allowable_stress_normal',
+        'allowable_stress_emergency',
+        'picture',
         'active',
         'deleted',
         'created_by',
@@ -28,5 +29,14 @@ class Conductors extends Model
     public function projects(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Projects::class, 'id_conductor');
+    }
+    public function createdBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Users::class, 'created_by');
+    }
+
+    public function updatedBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Users::class, 'updated_by');
     }
 }

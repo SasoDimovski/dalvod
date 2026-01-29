@@ -1,0 +1,11 @@
+{
+    "name": "Conductors",
+    "alias": "conductors",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Conductors\\Providers\\ConductorsServiceProvider"
+    ],
+    "files": []
+}

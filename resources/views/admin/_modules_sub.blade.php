@@ -4,16 +4,16 @@
         @php
             $child['children'] = collect($child['children'])->toArray();
         @endphp
-        {{--        @if(empty($child['children']))--}}
-        {{--            <li class="nav-item">--}}
-        {{--                <a href="{{ url('admin/'.$lang.'/'.$child['link'])}}"--}}
-        {{--                   class="nav-link {{ $child['button_color'] }} @if($id_module ==$child['id']) {{'active'}} @endif">--}}
-        {{--                        <i class="nav-icon {{ $child['icon'] }}"></i>--}}
-        {{--                        <p class="{{ $child['text_color'] }}" >{{ $child['title'] }}</p>--}}
-        {{--                </a>--}}
-        {{--            </li>--}}
+                @if(empty($child['children']))
+                    <li class="nav-item">
+                        <a href="{{ url('admin/'.$lang.'/'.$child['link'])}}"
+                           class="nav-link {{ $child['button_color'] }} @if($id_module ==$child['id']) {{'active'}} @endif">
+                                <i class="nav-icon {{ $child['icon'] }}"></i>
+                                <p class="{{ $child['text_color'] }}" >{{ $child['title'] }}</p>
+                        </a>
+                    </li>
 
-        {{--        @else--}}
+                @else
             <?php
             $array = json_decode(json_encode($child['children']), true);
             $key = App\Models\Modules::search_in_multidimensional_array($id_module, $array, array('$'));
@@ -33,7 +33,7 @@
                 @include('admin._modules_sub',['children' => $child['children']])
             @endif
         </li>
-        {{--        @endif--}}
+                @endif
     </ul>
 @endforeach
 

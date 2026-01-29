@@ -23,6 +23,8 @@ function deleteSearchField(temp) {
     form.submit();
 }
 
+
+
 function deleteSearchInput(temp, query) {
 
     let params = new URLSearchParams(query);// Претвори `query` во `URLSearchParams`
@@ -209,8 +211,8 @@ function checkImage(object, message_title, message_type, message_size, size, war
 function getContentID(url, modal, title) {
     console.log("Generated URL:", url);
 
+    // alert(url);
 
-//alert(url);
     // Отвори го modal-от
     $('#' + modal).modal({
         backdrop: 'static',
@@ -222,6 +224,7 @@ function getContentID(url, modal, title) {
 
     // Проверка за `refresh-on-close` класа
     if ($('button[onclick*="' + url + '"]').hasClass('modal90')) {
+        //alert(url);
         // Постави динамичка ширина
         $('#' + modal + ' .modal-dialog').css({
             'max-width': '60%',   // Пример: 80% од прозорецот
@@ -234,9 +237,9 @@ function getContentID(url, modal, title) {
             'width': ''        // Отстрани поставената ширина
         });
     }
-
+    //alert(url);
     // Вчитај содржина во modal-от
-    getJSP(url, 'content_show', null, function() {
+    getAJAX(url, 'content_show', null, function() {
         console.log("Content successfully loaded into modal.");
     }, 0);
 }
@@ -247,7 +250,45 @@ $('#ModalShow').on('hidden.bs.modal', function () {
         location.reload();
     }
 });
+function getContentIDCustom(url, modal, title, type_modal=false) {
+    console.log("Generated URL:", url);
 
+    // alert(url);
+
+    // Отвори го modal-от
+    $('#' + modal).modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+
+    // Постави наслов за modal-от
+    $('#' + modal + ' .modal-title').html('<i class="fa fa-exclamation-circle text-red"></i> ' + title);
+
+    // директно од параметар
+    if (type_modal) {
+        $('#' + modal + ' .modal-dialog').css({
+            'max-width': '70%',
+            'width': 'auto'
+        });
+    } else {
+        $('#' + modal + ' .modal-dialog').css({
+            'max-width': '',
+            'width': ''
+        });
+    }
+    //alert(url);
+    // Вчитај содржина во modal-от
+    getAJAX(url, 'content_show', null, function() {
+        console.log("Content successfully loaded into modal.");
+    }, 0);
+}
+
+// Listener за затворање на модал
+$('#ModalShow').on('hidden.bs.modal', function () {
+    if ($(this).attr('data-refresh') === 'true') {
+        location.reload();
+    }
+});
 function toggleSwap() {
 //alert(document.getElementById("toggle").src);
     img = document.getElementById("toggle");
@@ -364,13 +405,13 @@ function fillDropdown(url, container) {
     //alert(url);
     // return false;
     console.log("Generated  URL:", url);
-    getJSP(url, container, null, null, 0);
+    getAJAX(url, container, null, null, 0);
 }
 function fillDropdownActivity(url, container, id_group) {
     console.log("Generated URL:", url);
 
-    // Повик на getJSP со обработка на `container`
-    getJSP(url, container, null, function () {
+    // Повик на getAJAX со обработка на `container`
+    getAJAX(url, container, null, function () {
         const containerElement = document.getElementById(container);
         if (containerElement) {
             console.log(`Container content updated. Content: ${containerElement.innerHTML}`);
@@ -394,8 +435,8 @@ function fillDropdownActivity(url, container, id_group) {
 function fillDropdownAssignment(url, container, id_group) {
     console.log("Generated URL:", url);
 
-    // Повик на getJSP со обработка на `container`
-    getJSP(url, container, null, function () {
+    // Повик на getAJAX со обработка на `container`
+    getAJAX(url, container, null, function () {
         const containerElement = document.getElementById(container);
         if (containerElement) {
             console.log(`Container content updated. Content: ${containerElement.innerHTML}`);
@@ -475,7 +516,6 @@ $(document).on("click", ".open_modal3", function () {
 $(document).on('click', '.btn-submit', function (e) {
     let form = $(this).closest('form');  // Најди ја формата што е поврзана со копчето
     let isValid = true;
-    let hasAtLeastOneDuration = false;
 
     // Валидација на сите required полиња (освен duration[])
     form.find('[required]').each(function () {
@@ -487,33 +527,6 @@ $(document).on('click', '.btn-submit', function (e) {
         }
     });
 
-
-    if ($(this).hasClass('check-duration')) {
-        let hasAtLeastOneDuration = false; // Флаг за проверка на duration полиња
-
-        // Проверка на сите `duration-input` полиња во оваа форма
-        form.find('.duration-input').each(function () {
-            let value = $(this).val();
-
-            if (value) {
-                if (value.match(/^[1-9]$|^1[0-6]$/)) {
-                    hasAtLeastOneDuration = true; // Најдено е валидно duration поле
-                    $(this).removeClass('is-invalid'); // Отстрани ја невалидната класа ако е валидно
-                } else {
-                    $(this).addClass('is-invalid'); // Додај класа за грешка ако вредноста не е валидна
-                    isValid = false;
-                }
-            } else {
-                $(this).removeClass('is-invalid'); // Отстрани ја невалидната класа ако е празно
-            }
-        });
-
-        // Ако нема ниту едно пополнето duration поле, означи го како невалидно
-        // if (!hasAtLeastOneDuration) {
-        //     toastr.error("At least one duration field must be filled with a valid value (1-16).");
-        //     isValid = false;
-        // }
-    }
 
     // Ако не е валидно, спречи submit
     if (!isValid) {
@@ -530,8 +543,8 @@ $(document).on('click', '.btn-submit', function (e) {
         let targetContainer = form.find('input[name="container"]').val();
 
         // AJAX повик за внесување на записите
-        getJSP(url, targetContainer, null, function () {
-            toastr.success("Successfully updated!");
+        getAJAX(url, targetContainer, null, function () {
+            //toastr.success("Successfully updated!");
 
             // Додај повик за рефреш на контејнерот
             // let refreshContainer = document.getElementById('refresh-container').value;
@@ -550,7 +563,7 @@ function refreshIndexContainer(refreshContainer, refreshRoute) {
     $.get(refreshRoute, function (data) {
         $('#' + refreshContainer).html(data); // Освежи го контејнерот
     }).fail(function () {
-        toastr.error("Failed to refresh records list.");
+       // toastr.error("Failed to refresh records list.");
     });
 }
 
@@ -642,22 +655,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-// function toggleInputField(selectElement) {
-//     // Пронајди го input полето што е поврзано со select полето
-//     const inputField = document.getElementById(`custom_${selectElement.id}`);
-//
-//     if (selectElement.value === 'custom') {
-//         // Ако е избрано "Other", покажи го input полето
-//         inputField.style.display = 'block';
-//         inputField.focus();
-//     } else {
-//         // Сокриј го input полето ако е избрана друга опција
-//         inputField.style.display = 'none';
-//         inputField.value = ''; // Исчисти го внесот
-//     }
-// }
-
 // ===========================================================================
 function savePicture() {
     alert('fsdfsd');
@@ -679,5 +676,183 @@ function showGroundWires2(el) {
     }
     if (el.value === '2') {document.getElementById('ground_wires2').style.display = 'block' }
 }
+// ===========================================================================
 
+/**
+ * Универзална функција за Towers:
+ * mode:
+ *  - 'search'
+ *  - 'reset'
+ *  - 'deleteField'
+ *  - 'checkbox'
+ *  - 'dropdown'
+ *  - 'order'
+ *  - 'page'
+ *
+ * opts:
+ *  - triggerEl
+ *  - trasa_id, id_tower
+ *  - fieldName
+ *  - order, sort
+ *  - page
+ */
+function elementsReload(mode, opts = {}) {
+
+    let $form = $('#form_search');
+
+    let baseUrl = $form.attr('action');
+
+    //alert(baseUrl);
+    let targetContainer = 'edit-elements-container';
+    let params          = new URLSearchParams();
+
+    // =======================================================
+    // RESET → посебен случај
+    // =======================================================
+    if (mode === 'reset') {
+        // 1) ресет на формата визуелно
+        if ($form[0]) {
+            $form[0].reset();
+        }
+
+        // 2) фиксни параметри што мора да останат
+        if (opts.name) {
+            params.set('name', opts.name);
+        }
+        if (typeof opts.value !== 'undefined') {
+            params.set('value', opts.value);
+        }
+
+        // ако сакаш default listing = 50:
+        let $listing = $form.find('select[name="listing"]');
+        if ($listing.length) {
+            $listing.val('50');
+            params.set('listing', '50');
+        }
+
+        // секогаш прва страница после reset
+        params.set('page', 1);
+
+    } else {
+        // =======================================================
+        // СИТЕ ДРУГИ CASE-ови: читање од формата
+        // =======================================================
+
+        // ако бришеме конкретно поле → прво избриши го во формата
+        if (mode === 'deleteField' && opts.fieldName) {
+            $form.find('[name="' + opts.fieldName + '"]')
+                .val('')
+                .removeClass('is-invalid');
+        }
+
+        // Собери ги полињата од формата
+        let raw = {};
+        $form.serializeArray().forEach(function (item) {
+            if (item.name === '_token' || item.name === '_method') return;
+            raw[item.name] = item.value;
+        });
+
+        // Ако беше deleteField → осигурај се дека од тој field нема вредност
+        if (mode === 'deleteField' && opts.fieldName) {
+            raw[opts.fieldName] = '';
+        }
+
+        // Филтрирај празни
+        Object.keys(raw).forEach(function (name) {
+            if (raw[name] !== '') {
+                params.append(name, raw[name]);
+            }
+        });
+
+        // Секој mode си има логика за page/order/sort
+        if (mode === 'search' || mode === 'checkbox' || mode === 'dropdown' || mode === 'order') {
+            // нов филтер → секогаш page=1
+            params.set('page', 1);
+        }
+
+        if (mode === 'order') {
+            if (opts.order) params.set('order', opts.order);
+            if (opts.sort)  params.set('sort',  opts.sort);
+        }
+
+        if (mode === 'page') {
+            params.set('page', opts.page || 1);
+        }
+    }
+
+    // Финален URL
+    let finalUrl = baseUrl + '?' + params.toString();
+    //alert(finalUrl);
+    console.log('towersReload[' + mode + ']:', finalUrl);
+
+    getAJAX(finalUrl, targetContainer, null, function () {
+        console.log('towersReload DONE (' + mode + ')');
+    }, 0, null);
+}
+
+
+
+function searchElements() {
+    elementsReload('search', {});
+}
+function resetSearchElements(value, name) {
+    elementsReload('reset', {
+        name: name,
+        value: value ?? '',
+
+    });
+}
+function deleteSearchFieldElements(fieldName) {
+    elementsReload('deleteField', {
+        fieldName: fieldName
+    });
+}
+function checkboxChangeElements() {
+    elementsReload('checkbox', {});
+}
+function dropdownChangeElements() {
+    elementsReload('dropdown', {  });
+}
+function orderByElements(order, sort) {
+    elementsReload('order', {
+        order: order,
+        sort: sort
+    });
+}
+function paginationElements(page) {
+    elementsReload('page', {
+        page: page
+    });
+}
+
+$(document).on('click', '#elements-pagination .pagination a', function (e) {
+    e.preventDefault();
+
+    let href = $(this).attr('href');
+    let page = href.split('page=')[1] || 1;
+
+    paginationElements(page);
+});
+
+
+
+
+
+function selectElement(id, label, fieldName) {
+
+    let hiddenId = '#'+ fieldName;
+    let textId = '#' + fieldName + '_';
+    $(hiddenId).val(id);
+    $(textId).val(label);
+    $('#ModalShow').modal('hide');
+}
+function deleteElementSelected(fieldName) {
+
+    let hiddenId = '#'+ fieldName;
+    let textId = '#' + fieldName + '_';
+    $(hiddenId).val('');
+    $(textId).val('');
+    $('#ModalShow').modal('hide');
+
+}
 

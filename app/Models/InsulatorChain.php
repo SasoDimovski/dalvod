@@ -19,6 +19,9 @@ class InsulatorChain extends Model
     {
         return $this->hasMany(Projects::class, 'id_insulator_chain');
     }
-
+    public function izolam (): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Insulators::class, 'id_insulator_chain');
+    }
 
 }

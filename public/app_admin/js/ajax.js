@@ -1,4 +1,7 @@
-function getJSP(url, div, before, after, popup, formData = null) {
+function getAJAX(url, div, before, after, popup, formData = null) {
+    console.log('ajax.js LOADED v3');
+    console.log('getJSP URL:', url);
+    console.log('options before fetch:', { hasFormData: !!formData });
     if (before) before();
     const contentDiv = document.getElementById(div);
 

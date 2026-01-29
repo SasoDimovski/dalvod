@@ -1,0 +1,48 @@
+{
+
+    "GLOBAL": "//////////////////////////////////////////",
+    "groundwires.id" :"ID",
+    "groundwires.id_des" :"ID на проводник",
+    "groundwires.type" :"Тип",
+    "groundwires.type_des" :"Тип на проводник",
+    "groundwires.cross_section" :"Пресек [mm²]",
+    "groundwires.cross_section_des" :"Пресек на проводник",
+    "groundwires.diameter" :"Дијаметар [mm]",
+    "groundwires.diameter_des" :"Дијаметар на проводник",
+    "groundwires.mass" :"Маса [kg]",
+    "groundwires.mass_des" :"Маса на проводник",
+    "groundwires.model" :"Модел",
+    "groundwires.model_des" :"Модел на проводник",
+    "groundwires.temp_exp_coeff" :"Отпор по километар [Ω/km]",
+    "groundwires.temp_exp_coeff_des" :"Отпор по километар [Ω/km]",
+    "groundwires.allowable_stress_normal" :"Номинален напон [kV]",
+    "groundwires.allowable_stress_normal_des" :"Номинален напон [kV]",
+    "groundwires.allowable_stress_emergency" :"Тестен напон [kV]",
+    "groundwires.allowable_stress_emergency_des" :"Тестен напон [kV]",
+
+
+    "VIEW": "//////////////////////////////////////////",
+    "groundwires.edit.image.title_res" : "Задолжителни рестрикции",
+    "groundwires.edit.image.size" : "Дозволена големина за слика при качување е <strong>:size</strong> MB",
+    "groundwires.edit.image.type" : "Дозволени се само следните формати за прирачување: <br> <strong>jpg, jpeg, gif</strong> и <strong>png</strong>",
+    "groundwires.edit.image.attach" : "Прикачи слика",
+    "groundwires.edit.image.detach" : "Откачи слика",
+    "groundwires.edit.image.delete_warning" : "<strong>Сликата ќе биде избришана од системот кога ќе кликнете на копчето „Зачувај“</strong>",
+    "groundwires.edit.image.save_warning" : "<strong>Сликата ќе биде снимена во системот кога ќе кликнете на копчето „Зачувај“</strong>",
+
+
+
+    "CONTROLLER": "//////////////////////////////////////////",
+    "groundwires.groundwiresController.error_is_used": "Записот е веќе употребен во апликацијата и не може да се избрише",
+    "groundwires.groundwiresController.error_tower_not_exist": "Записот не постои",
+
+    "groundwires.groundwiresController.error_password_used": "Лозинката е веќе употребена",
+    "groundwires.groundwiresController.error_update_user": "Грешка при едитирање на податоците за корисникот",
+    "groundwires.groundwiresController.error_update_paas_in_pass": "Грешка при запишување на лозинката во табелата passwords",
+    "groundwires.groundwiresController.error_update_paas_in_groundwires": "Грешка при запишување на лозинката во табелата groundwires",
+
+
+    "REQUEST": "//////////////////////////////////////////",
+    "groundwires.groundwiresUpdateRequest.min_string"  : "Полето <strong>:attribute</strong> мора да содржи минимум <strong>:min</strong> карактери.",
+    "groundwires.groundwiresUpdateRequest.same_string" : "Полето <strong>:attribute</strong> и полето <strong>:other</strong> мора да ја имаат истата вредност."
+}

@@ -28,6 +28,7 @@
     "global.delete" : "Delete",
     "global.delete_des" : "Delete record",
     "global.delete_search_field_des" : "Delete the search field",
+    "global.delete_search_field" : "Delete the search field",
     "global.send_mail": "Send email",
 
     "HINTS": "//////////////////////////////////////////",

@@ -10,23 +10,23 @@
     $id = $project->id ?? '';
     $title = $project->title ?? old('title');
     $id_voltage = $project->id_voltage ?? old('id_voltage');
-    $id_conductor = $project->id_conductor  ?? old('id_conductor');
-    $id_ground_wires = $project->id_ground_wires  ?? old('id_ground_wires');
-    $id_ground_wires2 = $project->id_ground_wires2  ?? old('id_ground_wires2');
-    $id_starting_point = $project->id_starting_point  ?? old('id_starting_point');
-    $id_ending_point = $project->id_ending_point  ?? old('id_ending_point');
-    $tensile_stress_cond = $project->tensile_stress_cond  ?? old('tensile_stress_cond');
-    $tensile_stress_ground = $project->tensile_stress_ground  ?? old('tensile_stress_ground');
-    $tensile_stress_ground2 = $project->tensile_stress_ground2  ?? old('tensile_stress_ground2');
-    $kn = $project->kn  ?? old('kn');
-    $ki = $project->ki  ?? old('ki');
-    $id_wind_pressure = $project->id_wind_pressure  ?? old('id_wind_pressure');
-    $id_insulator_chain = $project->id_insulator_chain  ?? old('id_insulator_chain');
-    $approx_field_length = $project->approx_field_length  ?? old('approx_field_length');
-    $approx_number_towers = $project->approx_number_towers  ?? old('approx_number_towers');
-    $num_cond_systems = $project->num_cond_systems  ?? old('num_cond_systems');
-    $num_cond_bundle = $project->num_cond_bundle  ?? old('num_cond_bundle');
-    $num_ground_wires = $project->num_ground_wires  ?? old('num_ground_wires');
+    $id_conductor = $project->id_conductor ?? old('id_conductor');
+    $id_ground_wires = $project->id_ground_wires ?? old('id_ground_wires');
+    $id_ground_wires2 = $project->id_ground_wires2 ?? old('id_ground_wires2');
+    $id_starting_point = $project->id_starting_point ?? old('id_starting_point');
+    $id_ending_point = $project->id_ending_point ?? old('id_ending_point');
+    $tensile_stress_cond = $project->tensile_stress_cond ?? old('tensile_stress_cond');
+    $tensile_stress_ground = $project->tensile_stress_ground ?? old('tensile_stress_ground');
+    $tensile_stress_ground2 = $project->tensile_stress_ground2 ?? old('tensile_stress_ground2');
+    $kn = $project->kn ?? old('kn');
+    $ki = $project->ki ?? old('ki');
+    $id_wind_pressure = $project->id_wind_pressure ?? old('id_wind_pressure');
+    $id_insulator_chain = $project->id_insulator_chain ?? old('id_insulator_chain');
+    $approx_field_length = $project->approx_field_length ?? old('approx_field_length');
+    $approx_number_towers = $project->approx_number_towers ?? old('approx_number_towers');
+    $num_cond_systems = $project->num_cond_systems ?? old('num_cond_systems');
+    $num_cond_bundle = $project->num_cond_bundle ?? old('num_cond_bundle');
+    $num_ground_wires = $project->num_ground_wires ?? old('num_ground_wires');
 
 
     $created_at = (isset($project->created_at)) ? date("d.m.Y H:i:s", strtotime($project->created_at)) : old('created_at');
@@ -34,22 +34,24 @@
 
 
     $created_by = $project->created_by ?? old('created_by');
-    $updated_by= $project->updated_by ?? old('updated_by');
+    $updated_by = $project->updated_by ?? old('updated_by');
 
     $active = $project->active ?? '';
 
-    $url_base = 'admin/' . $lang . '/' . $module->link;
 
-    $url = url($url_base);
-    $url_store = url($url_base.'/store/');
-    $url_update = url($url_base.'/update/' . $id);
+    $url = url('admin/' . $lang . '/' . $module->link);
+
+    $url_store =  $url . '/store/';
+    $url_update =  $url . '/update/'. $id;
+    $url_edit =  $url . '/edit';
     $url_action = !empty($id) ? $url_update : $url_store;
-    $url_return = url($url_base.'/edit/' . $id);
+    $url_return =  $url . '/edit';
 
-    $url_edit_endpoints = url($url_base.'/edit_endpoints/');
-    $url_edit_points = url($url_base.'/edit_points/');
-    $url_edit_raspres = url($url_base.'/edit_raspres/');
-    $url_edit_zatpol = url($url_base.'/edit_zatpol/');
+    $url_edit_endpoints = $url . '/edit_endpoints';
+    $url_edit_points = $url . '/edit_points';
+    $url_edit_raspres = $url . '/edit_raspres';
+    $url_edit_zatpol = $url . '/edit_zatpol';
+    $url_edit_gapres = $url . '/edit_gapres';
 
     $path_upload = 'uploads/projects/';
 
@@ -120,33 +122,20 @@
                 <div class="row">
 
 
-@if($id)
-
-                    <div class="col-sm-12 col-md-12 col-lg-12 col-xll-6">
-                        <button class="btn btn-info modal90"
-                                onclick="getContentID('{{$url_edit_endpoints.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.endpoints_long')}}')">
-                            {{__('projects.edit.menu.endpoints')}}</button>
-                        <button class="btn btn-success modal90"
-                                onclick="getContentID('{{$url_edit_points.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.points_long')}}')">
-                            {{__('projects.edit.menu.points')}}</button>
-                        <button class="btn btn-warning modal90"
-                                onclick="getContentID('{{$url_edit_raspres.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.raspres_long')}}')">
-                            {{__('projects.edit.menu.raspres')}}</button>
-                        <button class="btn btn-warning modal90"
-                                onclick="getContentID('{{$url_edit_zatpol.'/'.$id.'?'.$query }}','ModalShow','{{__('projects.edit.menu.zatpol_long')}}')">
-                            {{__('projects.edit.menu.zatpol')}}</button>
-                    </div>
+                    @if($id)
+                        @include('Projects::projects.edit-submenu')
                     @endif
 
                     <div class="col-sm-12 col-md-12 col-lg-12 col-xll-6">
                         <!-- Form-->
                         <form class="needs-validation" role="form" id="form_edit" name="form_edit"
-                              action="{{ "{$url_action}" }}" method="POST" enctype="multipart/form-data">
+                              action="{{ "{$url_action}" }}" method="POST" enctype="multipart/form-data" autocomplete="off">
 
                             <input type="hidden" id="url_return" name="url_return" value="{{ $url_return }}">
                             <input type="hidden" id="query" name="query" value="{{$query}}">
                             <input type="hidden" id="message_error" name="message_error" value="{{ $message_error }}">
-                            <input type="hidden" id="message_success" name="message_success" value="{{ $message_success }}">
+                            <input type="hidden" id="message_success" name="message_success"
+                                   value="{{ $message_success }}">
                             <input type="hidden" id="id" name="id" value="{{ $id}}">
                             <input type="hidden" id="id_module" name="id_module" value="{{ $id_module}}">
                             {{csrf_field()}}
@@ -184,9 +173,11 @@
                                                     <input class="custom-control-input" type="checkbox"
                                                            id="{{$input_name}}"
                                                            name="{{$input_name}}"
-                                                           value="1" @if($input_value==1||$input_value=='') {{'checked'}} @endif {{$input_readonly}}>
+                                                           value="1" @if($input_value==1||$input_value=='')
+                                                        {{'checked'}}
+                                                        @endif {{$input_readonly}}>
                                                     <label class="custom-control-label" for="{{$input_name}}"
-                                                    {{$input_css}} id="{{$input_name}}">{{$input_desc}}</label>
+                                                           {{$input_css}} id="{{$input_name}}">{{$input_desc}}</label>
                                                 </div>
                                             </div>
 
@@ -196,7 +187,7 @@
                                     </div>
                                     {{--=========================================================--}}
                                     <div class="row">
-                                        <div class="col-sm-12">
+                                        <div class="col-sm-9 ">
                                             <?php
                                             $input_value = $title;
                                             $input_name = 'title';
@@ -214,31 +205,31 @@
                                             </div>
                                         </div>
 
-                                    </div>
-                                    {{--=========================================================--}}
-                                    <div class="row">
+
                                         <div class="col-sm-3">
                                             <?php
 
                                             $input_value = $id_voltage;
                                             $input_name = 'id_voltage';
                                             $input_desc = __('projects.id_voltage');
-                                            if($id){$input_readonly = 'disabled';
-                                                $isLocked = $id ? true : false;
-
-                                            }else{$input_readonly = '';}
+                                            if ($id) {
+                                                $input_readonly = 'disabled';
+                                            } else {
+                                                $input_readonly = '';
+                                            }
                                             $isLocked = $id ? true : false;
                                             $input_css = 'text-red';
                                             ?>
                                             @if($isLocked)
-                                                <input type="hidden" name="{{ $input_name }}"  id="{{ $input_name }}"  value="{{ $input_value }}">
+                                                <input type="hidden" name="{{ $input_name }}" id="{{ $input_name }}"
+                                                       value="{{ $input_value }}">
                                             @endif
 
                                             <div class="form-group">
-                                               <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
                                                         id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        autocomplete="off" {{ $input_readonly }}>
+                                                        autocomplete="off" {{ $input_readonly }} style="width: 60%">
                                                     @if (count($voltages) > 0)
                                                         <option value="">&nbsp;</option>
                                                         @foreach ($voltages as $voltage)
@@ -252,10 +243,10 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        </div>
+                                    </div>
                                     {{--=========================================================--}}
 
-                                        <div class="row">
+                                    <div class="row">
                                         <div class="col-sm-3">
                                             <?php
 
@@ -269,7 +260,8 @@
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"  style="{{$input_style}}"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        style="{{$input_style}}"
                                                         autocomplete="off" {{ $input_readonly }}>
                                                     @if (count($endpoints) > 0)
                                                         <option value="">&nbsp;</option>
@@ -298,7 +290,8 @@
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"  style="{{$input_style}}"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        style="{{$input_style}}"
                                                         autocomplete="off" {{ $input_readonly }}>
                                                     @if (count($endpoints) > 0)
                                                         <option value="">&nbsp;</option>
@@ -317,7 +310,7 @@
 
                                     </div>
                                     {{--=========================================================--}}
-                                    <div class="row">
+                                    <div class="row" style="background-color:#fff5e4">
                                         <div class="col-sm-3">
                                             <?php
 
@@ -331,7 +324,8 @@
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}" style="{{$input_style}}"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        style="{{$input_style}}"
                                                         autocomplete="off" {{ $input_readonly }}>
                                                     @if (count($conductors) > 0)
                                                         <option value="">&nbsp;</option>
@@ -347,9 +341,9 @@
                                             </div>
 
                                         </div>
-                                        <div class="col-sm-6">
+                                        <div class="col-sm-3">
                                             <?php
-                                            $input_value = $tensile_stress_cond ;
+                                            $input_value = $tensile_stress_cond;
                                             $input_name = 'tensile_stress_cond';
                                             $input_desc = __('projects.tensile_stress_cond');
                                             $input_maxlength = 6;
@@ -371,15 +365,72 @@
                                                        inputmode="decimal"
                                                        title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
                                                        oninput="validateNumberInput(this)"
-                                                      {{$input_readonly}}>
+                                                    {{$input_readonly}}>
                                                 Дозволена вредности: три цели и две децимали
                                             </div>
                                         </div>
+                                        <div class="col-sm-3">
+                                            <?php
 
+                                            $input_value = $num_cond_systems;
+                                            $input_name = 'num_cond_systems';
+                                            $input_desc = __('projects.num_cond_systems');
+                                            $input_readonly = '';
+                                            $input_css = 'text-red';
+                                            $input_style = 'width: 20%;';
+
+                                            ?>
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        autocomplete="off" {{ $input_readonly }} style="{{$input_style}}">
+
+                                                    <option value="">&nbsp;</option>
+                                                    <option value="1" {{ ($num_cond_systems)==1 ? 'selected' : '' }}>1
+                                                    </option>
+                                                    <option value="2" {{ ($num_cond_systems)==2 ? 'selected' : '' }}>2
+                                                    </option>
+
+
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <?php
+
+                                            $input_value = $num_cond_bundle;
+                                            $input_name = 'num_cond_bundle';
+                                            $input_desc = __('projects.num_cond_bundle');
+                                            $input_readonly = '';
+                                            $input_css = 'text-red';
+                                            $input_style = 'width: 20%;';
+
+                                            ?>
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        autocomplete="off" {{ $input_readonly }} style="{{$input_style}}">
+                                                    <option value="">&nbsp;</option>
+                                                    <option value="1" {{ ($num_cond_bundle)==1 ? 'selected' : '' }}>1
+                                                    </option>
+                                                    <option value="2" {{ ($num_cond_bundle)==2 ? 'selected' : '' }}>2
+                                                    </option>
+                                                    <option value="3" {{ ($num_cond_bundle)==3 ? 'selected' : '' }}>3
+                                                    </option>
+                                                    <option value="4" {{ ($num_cond_bundle)==4 ? 'selected' : '' }}>4
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                        </div>
 
                                     </div>
                                     {{--=========================================================--}}
-                                    <div class="row">
+                                    <div class="row" style="background-color: #ddffd9">
                                         <div class="col-sm-4">
                                             <?php
 
@@ -388,6 +439,7 @@
                                             $input_desc = __('projects.num_ground_wires');
                                             $input_readonly = '';
                                             $input_css = 'text-red';
+                                            $input_style = 'width: 20%;';
 
                                             ?>
                                             <div class="form-group">
@@ -396,6 +448,7 @@
                                                         id="{{ $input_name }}" name="{{ $input_name }}"
                                                         autocomplete="off" {{ $input_readonly }}
                                                         onchange="showGroundWires2(this)"
+                                                        style="{{$input_style}}"
                                                 >
                                                     <option value="1" {{ ($num_ground_wires)==1 ? 'selected' : '' }}>1
                                                     </option>
@@ -407,7 +460,7 @@
                                         </div>
                                     </div>
                                     {{--=========================================================--}}
-                                    <div class="row">
+                                    <div class="row" style="background-color: #ddffd9">
                                         <div class="col-sm-3">
                                             <?php
                                             $input_value = $id_ground_wires;
@@ -420,7 +473,8 @@
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}" style="{{$input_style}}"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        style="{{$input_style}}"
                                                         autocomplete="off" {{ $input_readonly }}>
                                                     @if (count($groundWires) > 0)
                                                         <option value="">&nbsp;</option>
@@ -437,81 +491,10 @@
 
                                         </div>
 
-                                            <div class="col-sm-6">
-                                                <?php
-                                                $input_value = $tensile_stress_ground;
-                                                $input_name = 'tensile_stress_ground';
-                                                $input_desc = __('projects.tensile_stress_ground');
-                                                $input_maxlength = 6;
-                                                $input_readonly = '';
-                                                $input_css = 'text-red';
-                                                $input_style = 'width: 20%;';
-                                                ?>
-                                                <div class="form-group">
-                                                    <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
-                                                        *</label>
-                                                    <input type="text" id="{{$input_name}}" name="{{$input_name}}"
-                                                           style="{{$input_style}}"
-                                                           class="form-control" value="{{$input_value}}"
-                                                           maxlength="{{$input_maxlength}}"
-                                                           pattern="^\d{1,3}(\.\d{1,2})?$"
-                                                           inputmode="decimal"
-                                                           title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
-                                                           oninput="validateNumberInput(this)"
-                                                        {{$input_readonly}}>
-                                                    Дозволена вредности: три цели и две децимали
-
-                                                </div>
-                                            </div>
-
-                                    </div>
-
-                                    {{--=========================================================--}}
-
-                                    <?php
-                                    $input_value = $id_ground_wires2;
-                                    $input_name = 'id_ground_wires2';
-                                    $input_desc = __('projects.id_ground_wires');
-                                    $input_readonly = '';
-                                    $input_css = 'text-red';
-                                    $input_style = 'width:100%;';
-
-                                    if($id&&$num_ground_wires==2){$Style_wires = 'display: block';
-
-                                    }else{$Style_wires = 'display: none';}
-
-                                    ?>
-
-
-                                    <div  id="ground_wires2" style="{{ $Style_wires }}">
-
-                                        <div class="row" >
-                                        <div class="col-sm-3">
-
-                                            <div class="form-group">
-                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
-                                                <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}" style="{{$input_style}}"
-                                                        autocomplete="off" {{ $input_readonly }}>
-                                                    @if (count($groundWires) > 0)
-                                                        <option value="">&nbsp;</option>
-                                                        @foreach ($groundWires as $groundWire)
-                                                            <option
-                                                                value="{{ $groundWire->id }}"
-                                                                {{ (($id_ground_wires2)==$groundWire->id) ? 'selected' : '' }}>
-                                                                {{ $groundWire->type }}
-                                                            </option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                            </div>
-
-                                        </div>
-
                                         <div class="col-sm-6">
                                             <?php
-                                            $input_value = $tensile_stress_ground2;
-                                            $input_name = 'tensile_stress_ground2';
+                                            $input_value = $tensile_stress_ground;
+                                            $input_name = 'tensile_stress_ground';
                                             $input_desc = __('projects.tensile_stress_ground');
                                             $input_maxlength = 6;
                                             $input_readonly = '';
@@ -531,10 +514,85 @@
                                                        oninput="validateNumberInput(this)"
                                                     {{$input_readonly}}>
                                                 Дозволена вредности: три цели и две децимали
+
                                             </div>
                                         </div>
 
                                     </div>
+
+                                    {{--=========================================================--}}
+
+                                    <?php
+                                    $input_value = $id_ground_wires2;
+                                    $input_name = 'id_ground_wires2';
+                                    $input_desc = __('projects.id_ground_wires');
+                                    $input_readonly = '';
+                                    $input_css = 'text-red';
+                                    $input_style = 'width:100%;';
+
+                                    if ($id && $num_ground_wires == 2) {
+                                        $Style_wires = 'display: block';
+
+                                    } else {
+                                        $Style_wires = 'display: none';
+                                    }
+
+                                    ?>
+
+
+                                    <div id="ground_wires2" style="{{ $Style_wires }}">
+
+                                        <div class="row"  style="background-color: #ddffd9">
+                                            <div class="col-sm-3">
+
+                                                <div class="form-group">
+                                                    <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                    <select class="select2bs4"
+                                                            id="{{ $input_name }}" name="{{ $input_name }}"
+                                                            style="{{$input_style}}"
+                                                            autocomplete="off" {{ $input_readonly }}>
+                                                        @if (count($groundWires) > 0)
+                                                            <option value="">&nbsp;</option>
+                                                            @foreach ($groundWires as $groundWire)
+                                                                <option
+                                                                    value="{{ $groundWire->id }}"
+                                                                    {{ (($id_ground_wires2)==$groundWire->id) ? 'selected' : '' }}>
+                                                                    {{ $groundWire->type }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-sm-6">
+                                                <?php
+                                                $input_value = $tensile_stress_ground2;
+                                                $input_name = 'tensile_stress_ground2';
+                                                $input_desc = __('projects.tensile_stress_ground');
+                                                $input_maxlength = 6;
+                                                $input_readonly = '';
+                                                $input_css = 'text-red';
+                                                $input_style = 'width: 20%;';
+                                                ?>
+                                                <div class="form-group">
+                                                    <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
+                                                        *</label>
+                                                    <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                           style="{{$input_style}}"
+                                                           class="form-control" value="{{$input_value}}"
+                                                           maxlength="{{$input_maxlength}}"
+                                                           pattern="^\d{1,3}(\.\d{1,2})?$"
+                                                           inputmode="decimal"
+                                                           title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
+                                                           oninput="validateNumberInput(this)"
+                                                        {{$input_readonly}}>
+                                                    Дозволена вредности: три цели и две децимали
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                     {{--=========================================================--}}
 
@@ -556,14 +614,13 @@
                                                        style="{{$input_style}}"
                                                        class="form-control" value="{{$input_value}}"
                                                        maxlength="{{$input_maxlength}}"
-                                                    {{$input_readonly}}
+                                                       {{$input_readonly}}
                                                        oninput="validateKnInput(this)">
-                                                Дозволени вредности: од <b>1</b> до <b>4</b> / Препорачани вредности: <b>1</b>; <b>1.6</b>; <b>2.5</b>; <b>4</b>
+                                                Дозволени вредности: од <b>1</b> до <b>4</b> / Препорачани вредности:
+                                                <b>1</b>; <b>1.6</b>; <b>2.5</b>; <b>4</b>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="row">
                                         <div class="col-sm-4">
                                             <?php
                                             $input_value = $ki;
@@ -595,13 +652,14 @@
                                             $input_desc = __('projects.id_wind_pressure');
                                             $input_readonly = '';
                                             $input_css = 'text-red';
+                                            $input_style = 'width: 20%;';
 
                                             ?>
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
                                                         id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        autocomplete="off" {{ $input_readonly }}>
+                                                        autocomplete="off" {{ $input_readonly }}  style="{{$input_style}}">
                                                     @if (count($windPressure) > 0)
                                                         <option value="">&nbsp;</option>
                                                         @foreach ($windPressure as $windPressure_)
@@ -616,19 +674,29 @@
                                             </div>
 
                                         </div>
-                                        </div>
+                                    </div>
 
-                                        <div class="row">
+                                    <div class="row">
                                         <div class="col-sm-4">
                                             <?php
 
                                             $input_value = $id_insulator_chain;
                                             $input_name = 'id_insulator_chain';
                                             $input_desc = __('projects.id_insulator_chain');
-                                            $input_readonly = '';
+                                            if ($id) {
+                                                $input_readonly = 'disabled';
+                                            } else {
+                                                $input_readonly = '';
+                                            }
+                                            $isLocked1 = $id ? true : false;
                                             $input_css = 'text-red';
-
                                             ?>
+                                            @if($isLocked1)
+                                                <input type="hidden" name="{{ $input_name }}" id="{{ $input_name }}"
+                                                       value="{{ $input_value }}">
+                                            @endif
+
+
                                             <div class="form-group">
                                                 <label class="{{ $input_css }}">{{ $input_desc }} *</label>
                                                 <select class="select2bs4"
@@ -653,56 +721,7 @@
                                     </div>
                                     {{--=========================================================--}}
                                     <div class="row">
-                                        <div class="col-sm-4">
-                                            <?php
 
-                                            $input_value = $num_cond_systems;
-                                            $input_name = 'num_cond_systems';
-                                            $input_desc = __('projects.num_cond_systems');
-                                            $input_readonly = '';
-                                            $input_css = 'text-red';
-
-                                            ?>
-                                            <div class="form-group">
-                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
-                                                <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        autocomplete="off" {{ $input_readonly }}>
-
-                                                        <option value="">&nbsp;</option>
-                                                        <option value="1" {{ ($num_cond_systems)==1 ? 'selected' : '' }}>1</option>
-                                                        <option value="2" {{ ($num_cond_systems)==2 ? 'selected' : '' }}>2</option>
-
-
-                                                </select>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="col-sm-4">
-                                            <?php
-
-                                            $input_value = $num_cond_bundle;
-                                            $input_name = 'num_cond_bundle';
-                                            $input_desc = __('projects.num_cond_bundle');
-                                            $input_readonly = '';
-                                            $input_css = 'text-red';
-
-                                            ?>
-                                            <div class="form-group">
-                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
-                                                <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        autocomplete="off" {{ $input_readonly }}>
-                                                    <option value="">&nbsp;</option>
-                                                    <option value="1" {{ ($num_cond_bundle)==1 ? 'selected' : '' }}>1</option>
-                                                    <option value="2" {{ ($num_cond_bundle)==2 ? 'selected' : '' }}>2</option>
-                                                    <option value="3" {{ ($num_cond_bundle)==3 ? 'selected' : '' }}>3</option>
-                                                    <option value="4" {{ ($num_cond_bundle)==4 ? 'selected' : '' }}>4</option>
-                                                </select>
-                                            </div>
-
-                                        </div>
 
 
                                     </div>
@@ -714,9 +733,9 @@
                                 </div>
                                 <!-- /.card-body -->
 
-{{--                                <div class="card-footer">--}}
-{{--                                  --}}
-{{--                                </div>--}}
+                                {{--                                <div class="card-footer">--}}
+                                {{--                                  --}}
+                                {{--                                </div>--}}
                                 <!-- /.card-footer -->
                             </div>
                             <!-- /.card -->
@@ -730,12 +749,9 @@
                     </div>
 
 
-
-
                 </div>
 
                 <!-- /.row-->
-
 
 
             </div>
@@ -763,6 +779,7 @@
         .daterangepicker.single .drp-buttons {
             display: block !important;
         }
+
         .target-cell {
             display: none;
         }
@@ -776,8 +793,9 @@
                 display: table-cell;
             }
         }
+
         @media (min-width: 1300px) {
-            .col-xll-6{
+            .col-xll-6 {
                 flex: 0 0 70%;
                 max-width: 70%;
             }
@@ -858,6 +876,7 @@
                     $(this).val('');
                 });
             }
+
             // Функција за end_date која секогаш го поставува времето на 23:59:59
             function initializeEndDateTimePicker(selector) {
                 const inputField = $(selector);
@@ -879,12 +898,12 @@
                     $(this).val('');
                 });
             }
+
             // Иницијализација за `start_date`
             initializeDateTimePicker('input[name="start_date"]');
             // Иницијализација за `end_date` (ако е потребно)
             initializeEndDateTimePicker('input[name="end_date"]');
         });
-
 
 
         //Initialize Select2 Elements

@@ -1,0 +1,68 @@
+{
+
+    "GLOBAL": "//////////////////////////////////////////",
+    "insulators.id" :"ID",
+    "insulators.id_des" :"ID на изолаторска верига",
+    "insulators.sifra" :"Шифра",
+    "insulators.sifra_des" :"Шифра на изолаторска верига",
+    "insulators.type" :"Тип",
+    "insulators.type_des" :"Тип на изолаторска верига",
+    "insulators.voltage" :"Напон",
+    "insulators.voltage_des" :"Напон на изолаторска верига",
+    "insulators.length" :"Должина [m]",
+    "insulators.length_des" :"Должина на изолаторска верига",
+    "insulators.mass" :"Маса [kg]",
+    "insulators.mass_des" :"Маса на изолаторска верига",
+    "insulators.massd" :"Маса на ДТ [kg]",
+    "insulators.massd_des" :"Маса на додатен товар",
+    "insulators.id_insulator_chain" :"Вид",
+    "insulators.id_insulator_chain_des" :"Вид на изолаторска верига",
+    "insulators.support_insulator" :"Потпорен",
+    "insulators.support_insulator_des" :"Потпорен",
+    "insulators.insulator_material" :"Материјал",
+    "insulators.insulator_material_des" :"Материјал на изолаторска верига",
+    "insulators.number" :"Број на ИЕ",
+    "insulators.number_des" :"Број на изолаторски елементи",
+    "insulators.breaking_load" :"Сила на кинење [kN]",
+    "insulators.breaking_load_des" :"Сила на кинење",
+
+
+    "VIEW": "//////////////////////////////////////////",
+    "insulators.mail-registration.hi": "Здраво",
+    "insulators.mail-registration.made": "Креиран е вашиот профил во апликацијата:",
+    "insulators.mail-registration.username": "Корисничкото име со кое треба да се најавувате во апликацијата е:",
+    "insulators.mail-registration.link": "За да се најавите во апликацијата потребно е да регистрирате лозинка на следниот линк:",
+    "insulators.mail-registration.note": "Профилот нема да биде активен доколку не кликнете на наведениот линк и не ја регистрирате лозинката.",
+    "insulators.mail-registration.expire": "Важноста на линкот е :name часа.",
+    "insulators.mail-registration.link_app": "Линк до апликацијата:",
+    "insulators.mail-registration.regards": "Ви благодариме и поздрав,",
+
+    "insulators.edit.send_email_title": "Дали сакате да испратите email?",
+    "insulators.edit.send_email_description": "На корисникот ќе му пристигне email на кој се наоѓа линк за внесување нова лозинка.<br> Во исто време постоечката лозинка ќе се ресетира со рандом генерирана лозинка. ",
+    "insulators.edit.send_email_hint" : "Испрати емаил за регистрација или ресетирање на лозинка",
+    "insulators.edit.send_email_success" : "Успешно e испратен email за регистрација или ресетирање на лозинка",
+    "insulators.edit.send_email_error" : "Неуспешно испраќање email за регистрација или ресетирање на лозинка",
+    "insulators.edit.image.title_res" : "Задолжителни рестрикции",
+    "insulators.edit.image.size" : "Дозволена големина за слика при качување е <strong>:size</strong> MB",
+    "insulators.edit.image.type" : "Дозволени се само следните формати за прирачување: <br> <strong>jpg, jpeg, gif</strong> и <strong>png</strong>",
+    "insulators.edit.image.attach" : "Прикачи слика",
+    "insulators.edit.image.detach" : "Откачи слика",
+    "insulators.edit.image.delete_warning" : "<strong>Сликата ќе биде избришана од системот кога ќе кликнете на копчето „Зачувај“</strong>",
+    "insulators.edit.image.save_warning" : "<strong>Сликата ќе биде снимена во системот кога ќе кликнете на копчето „Зачувај“</strong>",
+
+
+
+    "CONTROLLER": "//////////////////////////////////////////",
+    "insulators.insulatorsController.error_is_used": "Записот е веќе употребен во апликацијата и не може да се избрише",
+    "insulators.insulatorsController.error_tower_not_exist": "Записот не постои",
+
+    "insulators.insulatorsController.error_password_used": "Лозинката е веќе употребена",
+    "insulators.insulatorsController.error_update_user": "Грешка при едитирање на податоците за корисникот",
+    "insulators.insulatorsController.error_update_paas_in_pass": "Грешка при запишување на лозинката во табелата passwords",
+    "insulators.insulatorsController.error_update_paas_in_insulators": "Грешка при запишување на лозинката во табелата insulators",
+
+
+    "REQUEST": "//////////////////////////////////////////",
+    "insulators.insulatorsUpdateRequest.min_string"  : "Полето <strong>:attribute</strong> мора да содржи минимум <strong>:min</strong> карактери.",
+    "insulators.insulatorsUpdateRequest.same_string" : "Полето <strong>:attribute</strong> и полето <strong>:other</strong> мора да ја имаат истата вредност."
+}

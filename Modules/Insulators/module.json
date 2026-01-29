@@ -1,0 +1,11 @@
+{
+    "name": "Insulators",
+    "alias": "insulators",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Insulators\\Providers\\InsulatorsServiceProvider"
+    ],
+    "files": []
+}

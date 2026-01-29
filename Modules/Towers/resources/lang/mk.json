@@ -1,0 +1,57 @@
+{
+
+    "GLOBAL": "//////////////////////////////////////////",
+
+    "towers.id" :"ID",
+    "towers.id_des" :"ID на столбот",
+    "towers.sif" :"Шифра",
+    "towers.sif_des" :"Шифра на столбот",
+    "towers.type" :"Тип",
+    "towers.type_des" :"Тип на столбот",
+    "towers.voltage" :"Напон [KV]",
+    "towers.voltage_des" :"Напон на столбот",
+    "towers.angle" :"Агол [O]",
+    "towers.angle_des" :"Агол на столбот",
+    "towers.mass" :"Маса [kg]",
+    "towers.mass_des" :"Маса на столбот",
+    "towers.vid" :"Вид",
+    "towers.vid_des" :"Вид на столбот",
+    "towers.vis" :"Висина [m]",
+    "towers.vis_des" :"Висина на долна конзола",
+    "towers.vig" :"Висина на глава [m]",
+    "towers.vig_des" :"Висина на глава",
+    "towers.mhr" :"МХР [m]",
+    "towers.mhr_des" :"Минимално хоризонтално растојание",
+    "towers.dkp" :"ДКП [m]",
+    "towers.dkp_des" :"Критично растојание за спроводник",
+    "towers.dkz" :"ДКЗ [m]",
+    "towers.dkz_des" :"Критично растојание за заштитно јаже",
+    "towers.rap" :"РАП",
+    "towers.rap_des" :"Распоред на спроводник",
+    "towers.raz" :"РАЗ",
+    "towers.raz_des" :"Распоред на заштитно јаже",
+    "towers.select_tower" :"Одбери столб",
+    "towers.list_towers" :"Листа на столбови",
+
+
+    "VIEW": "//////////////////////////////////////////",
+
+    "towers.edit.image.title_res" : "Задолжителни рестрикции",
+    "towers.edit.image.size" : "Дозволена големина за слика при качување е <strong>:size</strong> MB",
+    "towers.edit.image.type" : "Дозволени се само следните формати за прирачување: <br> <strong>jpg, jpeg, gif</strong> и <strong>png</strong>",
+    "towers.edit.image.attach" : "Прикачи слика",
+    "towers.edit.image.detach" : "Откачи слика",
+    "towers.edit.image.delete_warning" : "<strong>Сликата ќе биде избришана од системот кога ќе кликнете на копчето „Зачувај“</strong>",
+    "towers.edit.image.save_warning" : "<strong>Сликата ќе биде снимена во системот кога ќе кликнете на копчето „Зачувај“</strong>",
+
+
+
+    "CONTROLLER": "//////////////////////////////////////////",
+    "towers.towersController.error_is_used": "Записот е веќе употребен во апликацијата и не може да се избрише",
+    "towers.towersController.error_tower_not_exist": "Записот не постои",
+    "towers.towersController.error_update_paas_in_towers": "Грешка при запишување на лозинката во табелата towers",
+
+
+    "REQUEST": "//////////////////////////////////////////"
+
+}

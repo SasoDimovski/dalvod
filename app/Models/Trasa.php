@@ -13,28 +13,29 @@ class Trasa extends Model
         'id_project',
         'stac_t',
         'kota_t',
+        'x_t',
         'agol_tr',
-        'id_stolb',
+        'id_tower',
         'id_trafo',
-        'id_izolam1',
-        'id_izolam2',
+        'id_insulator1',
+        'id_insulator2',
     ];
 
     public function trafo(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Trafo::class, 'id_trafo');
     }
-    public function stolb(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function tower(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Stolb::class, 'id_stolb');
+        return $this->belongsTo(Towers::class, 'id_tower');
     }
 
-    public function izolam1(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function insulator1(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Izolam::class, 'id_izolam1');
+        return $this->belongsTo(Insulators::class, 'id_insulator1');
     }
-    public function izolam2(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function insulator2(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(Izolam::class, 'id_izolam2');
+        return $this->belongsTo(Insulators::class, 'id_insulator2');
     }
 }

@@ -1,0 +1,48 @@
+{
+
+    "GLOBAL": "//////////////////////////////////////////",
+    "conductors.id" :"ID",
+    "conductors.id_des" :"ID на проводник",
+    "conductors.type" :"Тип",
+    "conductors.type_des" :"Тип на проводник",
+    "conductors.cross_section" :"Пресек [mm²]",
+    "conductors.cross_section_des" :"Пресек на проводник",
+    "conductors.diameter" :"Дијаметар [mm]",
+    "conductors.diameter_des" :"Дијаметар на проводник",
+    "conductors.mass" :"Маса [kg]",
+    "conductors.mass_des" :"Маса на проводник",
+    "conductors.model" :"Модул на еластичност [daN/mm²]",
+    "conductors.model_des" :"Модул на еластичност на проводник",
+    "conductors.temp_exp_coeff" :"Коеф. на темп. дил. [1/°C]",
+    "conductors.temp_exp_coeff_des" :"Коефициент на температурна дилатација [1/°C]",
+    "conductors.allowable_stress_normal" :"Доз. мех. напр. - нормално [daN/mm²]",
+    "conductors.allowable_stress_normal_des" :"Дозволено механичко напрегање - нормално [daN/mm²]",
+    "conductors.allowable_stress_emergency" :"Доз. мех. напр. - исклучително [daN/mm²]",
+    "conductors.allowable_stress_emergency_des" :"Дозволено механичко напрегање - исклучително [daN/mm²]",
+
+
+    "VIEW": "//////////////////////////////////////////",
+    "conductors.edit.image.title_res" : "Задолжителни рестрикции",
+    "conductors.edit.image.size" : "Дозволена големина за слика при качување е <strong>:size</strong> MB",
+    "conductors.edit.image.type" : "Дозволени се само следните формати за прирачување: <br> <strong>jpg, jpeg, gif</strong> и <strong>png</strong>",
+    "conductors.edit.image.attach" : "Прикачи слика",
+    "conductors.edit.image.detach" : "Откачи слика",
+    "conductors.edit.image.delete_warning" : "<strong>Сликата ќе биде избришана од системот кога ќе кликнете на копчето „Зачувај“</strong>",
+    "conductors.edit.image.save_warning" : "<strong>Сликата ќе биде снимена во системот кога ќе кликнете на копчето „Зачувај“</strong>",
+
+
+
+    "CONTROLLER": "//////////////////////////////////////////",
+    "conductors.conductorsController.error_is_used": "Записот е веќе употребен во апликацијата и не може да се избрише",
+    "conductors.conductorsController.error_tower_not_exist": "Записот не постои",
+
+    "conductors.conductorsController.error_password_used": "Лозинката е веќе употребена",
+    "conductors.conductorsController.error_update_user": "Грешка при едитирање на податоците за корисникот",
+    "conductors.conductorsController.error_update_paas_in_pass": "Грешка при запишување на лозинката во табелата passwords",
+    "conductors.conductorsController.error_update_paas_in_conductors": "Грешка при запишување на лозинката во табелата conductors",
+
+
+    "REQUEST": "//////////////////////////////////////////",
+    "conductors.conductorsUpdateRequest.min_string"  : "Полето <strong>:attribute</strong> мора да содржи минимум <strong>:min</strong> карактери.",
+    "conductors.conductorsUpdateRequest.same_string" : "Полето <strong>:attribute</strong> и полето <strong>:other</strong> мора да ја имаат истата вредност."
+}

@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/conductors",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Conductors\\": "app/",
+            "Modules\\Conductors\\Database\\Factories\\": "database/factories/",
+            "Modules\\Conductors\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Conductors\\Tests\\": "tests/"
+        }
+    }
+}

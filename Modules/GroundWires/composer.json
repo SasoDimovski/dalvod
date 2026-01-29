@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/groundwires",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\GroundWires\\": "app/",
+            "Modules\\GroundWires\\Database\\Factories\\": "database/factories/",
+            "Modules\\GroundWires\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\GroundWires\\Tests\\": "tests/"
+        }
+    }
+}

@@ -2,14 +2,18 @@
 
 namespace App\Providers;
 
-use App\Models\Projects;
+use App\Models\Conductors;
 use Illuminate\Support\ServiceProvider;
 use Modules\Auth\Providers\AuthServiceProvider;
+use Modules\Conductors\Providers\ConductorsServiceProvider;
+use Modules\GroundWires\Providers\GroundWiresServiceProvider;
 use Modules\Groups\Providers\GroupsServiceProvider;
+use Modules\Insulators\Providers\InsulatorsServiceProvider;
 use Modules\Languages\Providers\LanguagesServiceProvider;
 use Modules\Main\Providers\MainServiceProvider;
 use Modules\Modules\Providers\ModulesServiceProvider;
 use Modules\Projects\Providers\ProjectsServiceProvider;
+use Modules\Towers\Providers\TowersServiceProvider;
 use Modules\User\Providers\UserServiceProvider;
 use Modules\Users\Providers\UsersServiceProvider;
 
@@ -29,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->register(GroupsServiceProvider::class);
         $this->app->register(UserServiceProvider::class);
         $this->app->register(ProjectsServiceProvider::class);
+        $this->app->register(TowersServiceProvider::class);
+        $this->app->register(InsulatorsServiceProvider::class);
+        $this->app->register(ConductorsServiceProvider::class);
+        $this->app->register(GroundWiresServiceProvider::class);
     }
 
     /**

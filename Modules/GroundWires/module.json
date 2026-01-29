@@ -1,0 +1,11 @@
+{
+    "name": "GroundWires",
+    "alias": "groundwires",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\GroundWires\\Providers\\GroundWiresServiceProvider"
+    ],
+    "files": []
+}

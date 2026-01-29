@@ -73,9 +73,9 @@ CREATE TABLE `conductors` (
   `diameter` decimal(10,2) DEFAULT NULL,
   `mass` decimal(10,2) DEFAULT NULL,
   `model` decimal(10,2) DEFAULT NULL,
-  `resistance_per_km` decimal(12,8) DEFAULT NULL,
-  `nominal_voltage` decimal(10,1) DEFAULT NULL,
-  `test_voltage` decimal(10,1) DEFAULT NULL,
+  `temp_exp_coeff` decimal(12,8) DEFAULT NULL,
+  `allowable_stress_normal` decimal(10,1) DEFAULT NULL,
+  `allowable_stress_emergency` decimal(10,1) DEFAULT NULL,
   `active` int NOT NULL DEFAULT '1',
   `deleted` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -88,7 +88,7 @@ CREATE TABLE `conductors` (
 -- Dumping data for table `conductors`
 --
 
-INSERT INTO `conductors` (`id`, `type`, `cross_section`, `diameter`, `mass`, `model`, `resistance_per_km`, `nominal_voltage`, `test_voltage`, `active`, `deleted`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT INTO `conductors` (`id`, `type`, `cross_section`, `diameter`, `mass`, `model`, `temp_exp_coeff`, `allowable_stress_normal`, `allowable_stress_emergency`, `active`, `deleted`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 (1, 'Al/Fe-16/2.5', 17.85, 5.40, 62.00, 7700.00, 0.00001890, 13.0, 24.5, 1, 0, '2025-03-29 15:44:24', '2025-03-29 15:44:55', NULL, NULL),
 (2, 'Al/Fe-25/4', 27.80, 6.80, 97.00, 7700.00, 0.00001890, 13.0, 24.5, 1, 0, '2025-03-29 15:44:24', '2025-03-29 15:44:55', NULL, NULL),
 (3, 'Al/Fe-35/6', 40.00, 8.10, 140.00, 7700.00, 0.00001890, 13.0, 24.5, 1, 0, '2025-03-29 15:44:24', '2025-03-29 15:44:55', NULL, NULL),
@@ -189,9 +189,9 @@ CREATE TABLE `ground_wires` (
   `diameter` decimal(10,2) DEFAULT NULL,
   `mass` decimal(10,2) DEFAULT NULL,
   `model` decimal(10,2) DEFAULT NULL,
-  `resistance_per_km` decimal(12,8) DEFAULT NULL,
-  `nominal_voltage` decimal(10,1) DEFAULT NULL,
-  `test_voltage` decimal(10,1) DEFAULT NULL,
+  `temp_exp_coeff` decimal(12,8) DEFAULT NULL,
+  `allowable_stress_normal` decimal(10,1) DEFAULT NULL,
+  `allowable_stress_emergency` decimal(10,1) DEFAULT NULL,
   `active` int NOT NULL DEFAULT '1',
   `deleted` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -204,7 +204,7 @@ CREATE TABLE `ground_wires` (
 -- Dumping data for table `ground_wires`
 --
 
-INSERT INTO `ground_wires` (`id`, `type`, `cross_section`, `diameter`, `mass`, `model`, `resistance_per_km`, `nominal_voltage`, `test_voltage`, `active`, `deleted`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
+INSERT INTO `ground_wires` (`id`, `type`, `cross_section`, `diameter`, `mass`, `model`, `temp_exp_coeff`, `allowable_stress_normal`, `allowable_stress_emergency`, `active`, `deleted`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES
 (1, 'Fe-I-35/7', 34.36, 7.50, 272.00, 17500.00, 0.00001100, 14.5, 26.5, 1, 0, '2025-03-29 16:02:01', '2025-03-29 16:02:01', NULL, NULL),
 (2, 'Fe-I-50/7', 49.48, 9.00, 391.00, 17500.00, 0.00001100, 14.5, 26.5, 1, 0, '2025-03-29 16:02:01', '2025-03-29 16:02:01', NULL, NULL),
 (3, 'Fe-I-50/19', 48.36, 9.00, 384.00, 17500.00, 0.00001100, 14.5, 26.5, 1, 0, '2025-03-29 16:02:01', '2025-03-29 16:02:01', NULL, NULL),

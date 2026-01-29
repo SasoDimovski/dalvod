@@ -1,0 +1,11 @@
+{
+    "name": "Towers",
+    "alias": "towers",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Towers\\Providers\\TowersServiceProvider"
+    ],
+    "files": []
+}
