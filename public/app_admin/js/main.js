@@ -494,11 +494,11 @@ $(document).on("click", ".open_modal3", function () {
     $("#description").val($(this).data('description'));
 
     $("#file").val('');
-    if ($(this).data('publish') == '1') {
+    if ($(this).data('publish') === '1') {
         $('#publish_pic').attr('checked', 'checked');
         //alert($(this).data('publish'));
     }
-    if ($(this).data('publish') == '0') {
+    if ($(this).data('publish') === '0') {
         //alert($(this).data('publish'));
         document.getElementById('publish_pic').checked = false
         //$('#publish_doc').attr('checked', '');
