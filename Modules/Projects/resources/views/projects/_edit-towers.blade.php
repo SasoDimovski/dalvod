@@ -778,7 +778,7 @@ $path_upload = 'uploads/towers/';
                                                 @else
                                                     <button type="button"
                                                             class="btn btn-info"
-                                                            onclick="selectElement({{ $tower->id }},'{{ $tower->type }}','{{ app('request')->input('name') }}')">
+                                                            onclick="selectElement({{ $tower->id }},'{{ $tower->tip }}','{{ app('request')->input('name') }}')">
                                                         <i class="fas fa-arrow-alt-circle-right"
                                                            title="{{__('projects.edit-towers.select_tower')}}"></i>
                                                     </button>

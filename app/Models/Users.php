@@ -83,6 +83,6 @@ class Users extends Authenticatable
     // Users може да ја има во повеќе записи (Records)
     public function records(): \Illuminate\Database\Eloquent\Relations\hasMany
     {
-        return $this->hasMany(Records::class, 'insertedby','id');
+        return $this->hasMany(Projects::class, 'created_by','id');
     }
 }

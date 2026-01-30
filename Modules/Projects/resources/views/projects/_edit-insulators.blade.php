@@ -200,9 +200,9 @@ $path_upload = 'uploads/insulators/';
                                    id="{{$name}}">{{$desc}}</label>
                         </div>
                     </div>
-
-
                 </div>
+
+
                 <div class="row" style="height: 7px"></div>
 
                 <div class="row">
@@ -374,7 +374,7 @@ $path_upload = 'uploads/insulators/';
 
                 </div>
             </div>
-
+        </div>
     </form>
     <!-- card card-red card-outline  END =============================================================================================== -->
     <!-- Search end=============================================================================================== -->

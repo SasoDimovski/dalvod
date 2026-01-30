@@ -2,11 +2,10 @@
 
 namespace Modules\GroundWires\Repositories;
 
-use App\Models\GroundWireChain;
+
 use App\Models\GroundWires;
 use App\Models\Projects;
-use App\Models\Trasa;
-use App\Models\Voltages;
+
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Modules\GroundWires\Dto\GroundWiresDto;

@@ -33,7 +33,7 @@ $path_upload = 'uploads/conductors/';
                     <br>
                     <span class="bg-gradient-gray" style="margin-top: 3px">  <i class="fas fa-circle text-warning"></i> <strong>{{__('global.id')}}</strong>: {{ $id }}</span>
                     <span class="bg-gradient-gray" style="margin-top: 3px"><i class="fas fa-clock text-warning"></i> <strong>{{__('global.created_at')}}</strong>: {{ $created_at}}</span>
-                    <span class="bg-gradient-gray" style="margin-top: 3px"> <i class="fas fa-clock text-warning "></i></i> <strong> {{__('global.updated_at')}}</strong>: {{ $updated_at }}</span>
+                    <span class="bg-gradient-gray" style="margin-top: 3px"> <i class="fas fa-clock text-warning "></i> <strong> {{__('global.updated_at')}}</strong>: {{ $updated_at }}</span>
                 </div>
                 <!--   ================================================================================-->
                 <div>

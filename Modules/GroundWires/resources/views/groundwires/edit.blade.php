@@ -93,9 +93,9 @@
                             <!-- Errors ---------->
                             @if (count($errors) > 0)
                                 <div id="toast-container" class="toast-top-full-width" onclick="closeErrorWindow(this)"
-                                     style="width:100%" ;>
+                                     style="width:100%" >
 
-                                    <div class="toast toast-error" aria-live="assertive" style="width:100%" ;>
+                                    <div class="toast toast-error" aria-live="assertive" style="width:100%" >
                                         <div class="toast-progress" style="width:100%;"></div>
                                         <button type="button" class="close" data-dismiss="toast-top-full-width"
                                                 role="button" onclick="closeErrorWindow(this)">×
@@ -530,11 +530,6 @@
     <!-- Select2 -->
     <script src="{{url('LTE/plugins/select2/js/select2.full.min.js')}}"></script>
 
-    <style>
-        .daterangepicker.single .drp-buttons {
-            display: block !important;
-        }
-    </style>
     <script>
         ////////////////////////////////////////////////////////////////////////
         // Query the elements

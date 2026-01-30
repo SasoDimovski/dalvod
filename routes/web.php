@@ -97,17 +97,17 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                         });
 
                     //MODULE USER
-                    Route::prefix('user')
-                        ->group(function () {
-                            Route::middleware([UserRerouteMiddleware::class])->group(function () {
-                                Route::get('edit')->name('edit');
-                            });
-                            Route::middleware([UserUnauthorizedMiddleware::class])->group(function () {
-                                Route::get('edit/{id}', [UserController::class, 'edit'])->name('edit.user');
-                                Route::put('update/{id}', [UserController::class, 'update']);
-                            });
-
-                        });
+//                    Route::prefix('user')
+//                        ->group(function () {
+//                            Route::middleware([UserRerouteMiddleware::class])->group(function () {
+//                                Route::get('edit')->name('edit');
+//                            });
+//                            Route::middleware([UserUnauthorizedMiddleware::class])->group(function () {
+//                                Route::get('edit/{id}', [UserController::class, 'edit'])->name('edit.user');
+//                                Route::put('update/{id}', [UserController::class, 'update']);
+//                            });
+//
+//                        });
                     //.MODULE USER
 
                     //MODULE PROJECTS
