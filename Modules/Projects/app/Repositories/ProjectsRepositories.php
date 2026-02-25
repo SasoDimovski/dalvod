@@ -718,6 +718,7 @@ class ProjectsRepositories
             // ----- Читање на трасата, сортирано по станица -----
             $points = Trasa::with(['tower', 'insulator1', 'insulator2'])
                 ->where('id_project', $projectId)
+                ->where('id_tower','>',0)
                 ->orderBy('stac_t', 'asc')  // важно
                 ->get();
 
@@ -746,7 +747,9 @@ class ProjectsRepositories
                 // ПОДАТОЦИ ЗА СТОЛБ
                 //Висина на долна конзола
                 $stolb_vis1 = (float) optional($p1->tower)->vis ?? 0.0; // прилагоди име на колона
+                $stolb_agol1 = (float) optional($p1->tower)->angle ?? 0.0;
                 $stolb_vis2 = (float) optional($p2->tower)->vis ?? 0.0;
+                $stolb_agol2 = (float) optional($p2->tower)->angle ?? 0.0;
 
                 //Висина на глава
                 $stolb_vig1 = (float) optional($p1->tower)->vig ?? 0.0; // вис. јарем (ако ја имаш)
@@ -772,8 +775,13 @@ class ProjectsRepositories
                 // Висина на проводник на столб 1, kota_pro
                 if ($insulator1_potp1 == 1) {
                     $kota_pro1 = $kota_t1 + $stolb_vis1 + $insulator1_dolzi1 ;
-                } else {
+                } elseif ($stolb_agol1==0)
+                {
                     $kota_pro1 = ($kota_t1 + $stolb_vis1) - $insulator1_dolzi1 ;
+                }
+                else
+                {
+                    $kota_pro1 = ($kota_t1 + $stolb_vis1) ;
                 }
 
                 // Висина на заземјач на столб 1, kota_zaj
@@ -786,8 +794,13 @@ class ProjectsRepositories
                 //  Висина на проводник на столб 2, kota_pro
                 if ($insulator1_potp2 == 1) {
                     $kota_pro2 = $kota_t2 + $stolb_vis2 + $insulator1_dolzi2;
-                } else {
+                }  elseif ($stolb_agol2==0)
+                {
                     $kota_pro2 = ($kota_t2 + $stolb_vis2) - $insulator1_dolzi2;
+                }
+                else
+                {
+                    $kota_pro2 = ($kota_t2 + $stolb_vis2);
                 }
 
                 // Висина на заземјач на столб 2, kota_zaj
