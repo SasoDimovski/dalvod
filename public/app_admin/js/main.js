@@ -211,7 +211,7 @@ function checkImage(object, message_title, message_type, message_size, size, war
 function getContentID(url, modal, title) {
     console.log("Generated URL:", url);
 
-    // alert(url);
+    alert(url);
 
     // Отвори го modal-от
     $('#' + modal).modal({

@@ -9,7 +9,7 @@
 
                 <table id="example2" class="table_grid">
                     <thead>
-                    <tr>
+                    <tr> <th class="text-center" style="white-space: nowrap; width: 1px;"></th>
                         <th class="text-center">id</th>
                         <th class="text-center">id_project</th>
                         <th class="text-center">po_stolb</th>
@@ -54,9 +54,13 @@
                     </thead>
 
                     <tbody>
+                        <?php
+                        $n=0;
+                        ?>
                     @foreach($zatpol as $zatpol_)
 
                             <?php
+                            $n=$n+1;
                             $id=$zatpol_->id ?? '';
                             $id_project=$zatpol_->id_project ?? '';
                             $po_stolb=$zatpol_->po_stolb ?? '';
@@ -99,6 +103,8 @@
                             ?>
 
                         <tr>
+
+                                <td class="text-center">{{$n}}</td>
                             <td class="text-center">{{$id}}</td>
                             <td class="text-center">{{$id_project}}</td>
                             <td class="text-center">{{$po_stolb}}</td>

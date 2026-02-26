@@ -19,6 +19,12 @@ class Trasa extends Model
         'id_trafo',
         'id_insulator1',
         'id_insulator2',
+        'nap_pro',
+        'nap_zaj',
+        'nap_zaj2',
+        'kndt',
+        'kidt',
+        'priv',
     ];
 
     public function trafo(): \Illuminate\Database\Eloquent\Relations\BelongsTo

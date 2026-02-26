@@ -2,9 +2,10 @@
     $isEndpoints = request()->is('*edit_endpoints*');
     $isPoints    = request()->is('*edit_points*');
     $isPoint    = request()->is('*edit_point*');
-    $isRaspres   = request()->is('*edit_raspres*');
-    $isZatpol    = request()->is('*edit_zatpol*');
-    $isGapres    = request()->is('*edit_gapres*');
+    $isRaspres   = request()->is('*show_raspres*');
+    $isZatpol    = request()->is('*show_zatpol*');
+    $isGapres    = request()->is('*show_gapres*');
+    $isCalculations    = request()->is('*calculations*');
     $isEdit      = request()->is('*edit/'.$id);
 @endphp
 
@@ -27,24 +28,31 @@
     </a>
 
     <button class="btn modal90 {{ $isRaspres ? 'btn-success' : 'btn-very-light' }}"
-            onclick="getContentID('{{ $url_edit_raspres.'/'.$id.'?' }}',
+            onclick="getContentID('{{ $url_show_raspres.'/'.$id.'?' }}',
                                   'ModalShow',
                                   '{{ __('projects.edit.menu.raspres_long') }}')">
         {{ __('projects.edit.menu.raspres') }}
     </button>
 
     <button class="btn modal90 {{ $isZatpol ? 'btn-success' : 'btn-very-light' }}"
-            onclick="getContentID('{{ $url_edit_zatpol.'/'.$id.'?' }}',
+            onclick="getContentID('{{ $url_show_zatpol.'/'.$id.'?' }}',
                                   'ModalShow',
                                   '{{ __('projects.edit.menu.zatpol_long') }}')">
         {{ __('projects.edit.menu.zatpol') }}
     </button>
 
     <button class="btn modal90 {{ $isGapres ? 'btn-success' : 'btn-very-light' }}"
-            onclick="getContentID('{{ $url_edit_gapres.'/'.$id.'?' }}',
+            onclick="getContentID('{{ $url_show_gapres.'/'.$id.'?' }}',
                                   'ModalShow',
                                   '{{ __('projects.edit.menu.gapres_long') }}')">
         {{ __('projects.edit.menu.gapres') }}
+    </button>
+
+    <button class="btn modal90 {{ $isCalculations ? 'btn-success' : 'btn-very-light' }}"
+            onclick="getContentID('{{ $url_all_tables.'/'.$id.'?' }}',
+                                  'ModalShow',
+                                  '{{ __('projects.edit.menu.calculations_long') }}')">
+        {{ __('projects.edit.menu.calculations') }}
     </button>
 
 </div>

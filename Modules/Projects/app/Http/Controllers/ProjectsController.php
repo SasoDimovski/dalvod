@@ -243,22 +243,26 @@ class ProjectsController extends Controller
 
 
 
-    public function editRaspres($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    public function showRaspres($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
-        $return = $this->projectsServices->editRaspres($id_project);
-        return view('Projects::projects/edit-raspres', $return['data']);
+        $return = $this->projectsServices->showRaspres($id_project);
+        return view('Projects::projects/show-raspres', $return['data']);
     }
 
-    public function editZatpol($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    public function showZatpol($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
-        $return = $this->projectsServices->editZatpol($id_project);
-        return view('Projects::projects/edit-zatpol', $return['data']);
+        $return = $this->projectsServices->showZatpol($id_project);
+        return view('Projects::projects/show-zatpol', $return['data']);
     }
-    public function editGapres($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    public function showGapres($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
-        $return = $this->projectsServices->editGapres($id_project);
-        return view('Projects::projects/edit-gapres', $return['data']);
+        $return = $this->projectsServices->showGapres($id_project);
+        return view('Projects::projects/show-gapres', $return['data']);
     }
 
-
+    public function calculations($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->calculations($id_project);
+        return view('Projects::projects/show-all-tables', $return['data']);
+    }
 }

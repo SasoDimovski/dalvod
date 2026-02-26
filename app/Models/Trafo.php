@@ -12,7 +12,7 @@ class Trafo extends Model
     protected $fillable = [
         'id_project',
         'ime',
-        'visna_p',
+        'visina_p',
         'visina_zj',
         'hor_ras',
     ];

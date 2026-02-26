@@ -49,9 +49,11 @@
 
     $url_edit_endpoints = $url . '/edit_endpoints';
     $url_edit_points = $url . '/edit_points';
-    $url_edit_raspres = $url . '/edit_raspres';
-    $url_edit_zatpol = $url . '/edit_zatpol';
-    $url_edit_gapres = $url . '/edit_gapres';
+
+    $url_show_raspres = $url . '/show_raspres';
+    $url_show_zatpol = $url . '/show_zatpol';
+    $url_show_gapres = $url . '/show_gapres';
+    $url_all_tables = $url . '/calculations';
 
     $path_upload = 'uploads/projects/';
 

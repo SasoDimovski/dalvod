@@ -132,9 +132,11 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
 
                             Route::get('show-tower/{id}', [ProjectsController::class, 'showTower']);
 
-                            Route::get('edit_raspres/{id}', [ProjectsController::class, 'editRaspres']);
-                            Route::get('edit_zatpol/{id}', [ProjectsController::class, 'editZatpol']);
-                            Route::get('edit_gapres/{id}', [ProjectsController::class, 'editGapres']);
+                            Route::get('show_raspres/{id}', [ProjectsController::class, 'showRaspres']);
+                            Route::get('show_zatpol/{id}', [ProjectsController::class, 'showZatpol']);
+                            Route::get('show_gapres/{id}', [ProjectsController::class, 'showGapres']);
+
+                            Route::get('calculations/{id}', [ProjectsController::class, 'calculations']);
 
                             Route::match(['get','post'],'import_points/{id}', [ProjectsController::class, 'importPoints']);
                             Route::match(['get','post','delete'],'delete_imported_points/{id}', [ProjectsController::class, 'deleteImportedPoints']);

@@ -290,42 +290,59 @@ class ProjectsServices
 
     }
 
-    public function editRaspres( int $id_project): array
+    public function calculations( int $id_project): array
     {
+
+        $this->projectsRepositories->deleteRaspres($id_project);
         $this->projectsRepositories->raspres($id_project);
-        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
 
-        return ['data' => [
-            'raspres' => $raspres,
+        $this->projectsRepositories->deleteZatpol($id_project);
+        $this->projectsRepositories->zatpol($id_project);
 
+        $this->projectsRepositories->napreg($id_project);
 
-        ]];
-    }
-    public function editGapres( int $id_project): array
-    {
+        $this->projectsRepositories->rastotal($id_project);
+
+        $this->projectsRepositories->deleteGraviras($id_project);
         $this->projectsRepositories->graviras($id_project);
+
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
+        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
         $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
 
         return ['data' => [
+            'raspres' => $raspres,
+            'zatpol' => $zatpol,
             'gapres' => $gapres,
 
 
         ]];
     }
-
-
-    public function editZatpol( int $id_project): array
+    public function showRaspres( int $id_project): array
     {
-        $this->projectsRepositories->raspres($id_project);
-        $this->projectsRepositories->zatpol($id_project);
-        $this->projectsRepositories->napreg($id_project);
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
+        return ['data' => [
+            'raspres' => $raspres,
+        ]];
+    }
+
+    public function showZatpol( int $id_project): array
+    {
         $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
         return ['data' => [
             'zatpol' => $zatpol,
         ]];
     }
 
+    public function showGapres( int $id_project): array
+    {
+        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
+        return ['data' => [
+            'gapres' => $gapres,
 
+
+        ]];
+    }
     public function importPoints(int $projectId, Request $request): ResponseError|ResponseSuccess
     {
         $methodName = 'importPoints(int $projectId, Request $request)';

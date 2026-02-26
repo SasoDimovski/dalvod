@@ -2994,7 +2994,7 @@ CREATE TABLE `trafo` (
   `id` int UNSIGNED NOT NULL,
   `id_project` int NOT NULL,
   `ime` varchar(100) DEFAULT NULL,
-  `visna_p` varchar(20) DEFAULT NULL,
+  `visina_p` varchar(20) DEFAULT NULL,
   `visina_zj` varchar(20) DEFAULT NULL,
   `hor_ras` varchar(20) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -3005,7 +3005,7 @@ CREATE TABLE `trafo` (
 -- Dumping data for table `trafo`
 --
 
-INSERT INTO `trafo` (`id`, `id_project`, `ime`, `visna_p`, `visina_zj`, `hor_ras`, `created_at`, `updated_at`) VALUES
+INSERT INTO `trafo` (`id`, `id_project`, `ime`, `visina_p`, `visina_zj`, `hor_ras`, `created_at`, `updated_at`) VALUES
 (6, 12, 'test13', NULL, NULL, NULL, '2025-11-03 07:58:39', '2025-11-03 07:58:39'),
 (40, 14, NULL, NULL, NULL, NULL, '2025-11-10 05:51:43', '2025-11-10 05:51:43'),
 (43, 11, NULL, NULL, NULL, NULL, '2025-12-08 13:02:39', '2025-12-08 13:02:39'),

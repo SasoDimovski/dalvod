@@ -49,9 +49,10 @@
     $url_edit_points = $url . '/edit_points';
 
 
-    $url_edit_raspres = $url . '/edit_raspres';
-    $url_edit_zatpol = $url . '/edit_zatpol';
-    $url_edit_gapres = $url . '/edit_gapres';
+    $url_show_raspres = $url . '/show_raspres';
+    $url_show_zatpol = $url . '/show_zatpol';
+    $url_show_gapres = $url . '/show_gapres';
+    $url_all_tables = $url . '/calculations';
 
 
     $path_upload = 'uploads/projects/';
@@ -265,10 +266,10 @@
                                             <div class="row">
                                                 <div class="col-sm-3">
                                                         <?php
-                                                        $input_value = $trasa_->trafo->visna_p;
-                                                        $input_name = "trafo[{$trasa_->id_trafo}][visna_p]";
-                                                        $input_id = "trafo{$trasa_->id_trafo}_visna_p";
-                                                        $input_desc = __('projects.edit-endpoints.visna_p');
+                                                        $input_value = $trasa_->trafo->visina_p;
+                                                        $input_name = "trafo[{$trasa_->id_trafo}][visina_p]";
+                                                        $input_id = "trafo{$trasa_->id_trafo}_visina_p";
+                                                        $input_desc = __('projects.edit-endpoints.visina_p');
                                                         $input_maxlength = 100;
                                                         $input_readonly = '';
                                                         $input_css = 'text-red';

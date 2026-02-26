@@ -234,7 +234,7 @@ class ProjectsRepositories
 
                 $trafoUpdate = array_filter([
                     'ime'       => data_get($data, 'ime'),
-                    'visna_p'   => data_get($data, 'visna_p'),
+                    'visina_p'   => data_get($data, 'visina_p'),
                     'visina_zj' => data_get($data, 'visina_zj'),
                     'hor_ras'   => data_get($data, 'hor_ras'),
                 ], fn($v) => !is_null($v));
@@ -447,6 +447,12 @@ class ProjectsRepositories
             'id_tower'   => $request->id_tower ?: null,
             'id_insulator1' => $request->id_insulator1 ?: null,
             'id_insulator2' => $request->id_insulator2 ?: null,
+            'nap_pro' => $request->nap_pro ?: null,
+            'nap_zaj' => $request->nap_zaj ?: null,
+            'nap_zaj2' => $request->nap_zaj2 ?: null,
+            'kndt' => $request->kndt ?: null,
+            'kidt' => $request->kidt ?: null,
+            'priv' => $request->priv ?: null,
         ]);
 
         return $point;
@@ -463,6 +469,13 @@ class ProjectsRepositories
             $point->id_tower  = $request['id_tower']  ?? null;
             $point->id_insulator1 = $request['id_insulator1'] ?? null;
             $point->id_insulator2 = $request['id_insulator2'] ?? null;
+            $point->nap_pro = $request['nap_pro'] ?? null;
+            $point->nap_zaj = $request['nap_zaj'] ?? null;
+            $point->nap_zaj2 = $request['nap_zaj2'] ?? null;
+            $point->kndt = $request['kndt'] ?? null;
+            $point->kidt = $request['kidt'] ?? null;
+            $point->priv = $request['priv'] ?? null;
+
             if ($point->save()) {
                 return $point;
             }
@@ -681,6 +694,11 @@ class ProjectsRepositories
             ->get();
     }
 
+    public function deleteRaspres(int $projectId): int
+    {
+        return Raspres::where('id_project', $projectId)->delete();
+    }
+
     public function raspres(int $projectId): int
     {
         return DB::transaction(function () use ($projectId) {
@@ -716,19 +734,19 @@ class ProjectsRepositories
             }
 
             // ----- Читање на трасата, сортирано по станица -----
-            $points = Trasa::with(['tower', 'insulator1', 'insulator2'])
+            $points = Trasa::with(['tower', 'insulator1', 'insulator2', 'trafo'])
                 ->where('id_project', $projectId)
-                ->where('id_tower','>',0)
-                ->orderBy('stac_t', 'asc')  // важно
+                ->where(function ($q) {
+                    $q->where('id_tower', '>', 0)
+                        ->orWhere('id_trafo', '>', 0);
+                })
+                ->orderBy('stac_t','asc')
                 ->get();
 
             // Нема пресметка ако имаме < 2 точки
             if ($points->count() < 2) {
                 return 0;
             }
-
-            // исчисти претходни пресметки
-             Raspres::where('id_project', $projectId)->delete();
 
             $inserted = 0;
 
@@ -738,27 +756,79 @@ class ProjectsRepositories
                 $p1 = $points[$i];
                 $p2 = $points[$i + 1];
 
+                //=======================================================================================================
                 // Базични полиња
                 $stac_t1 = (float) ($p1->stac_t ?? 0.0);
                 $stac_t2 = (float) ($p2->stac_t ?? 0.0);
+
                 $kota_t1 = (float) ($p1->kota_t ?? 0.0);
                 $kota_t2 = (float) ($p2->kota_t ?? 0.0);
 
+                //=======================================================================================================
                 // ПОДАТОЦИ ЗА СТОЛБ
+                //=======================================================================================================
                 //Висина на долна конзола
-                $stolb_vis1 = (float) optional($p1->tower)->vis ?? 0.0; // прилагоди име на колона
-                $stolb_agol1 = (float) optional($p1->tower)->angle ?? 0.0;
-                $stolb_vis2 = (float) optional($p2->tower)->vis ?? 0.0;
-                $stolb_agol2 = (float) optional($p2->tower)->angle ?? 0.0;
 
+                if ($p1->id_tower) {
+                    $stolb_vis1 = (float) (optional($p1->tower)->vis ?? 0.0);
+                } elseif ($p1->id_trafo) {
+                    $stolb_vis1 = (float) (optional($p1->trafo)->visina_p ?? 0.0);
+                } else {
+                    $stolb_vis1 = 0.0;
+                }
+
+                if ($p2->id_tower) {
+                    $stolb_vis2 = (float) (optional($p2->tower)->vis ?? 0.0);
+                } elseif ($p2->id_trafo) {
+                    $stolb_vis2 = (float) (optional($p2->trafo)->visina_p ?? 0.0);
+                } else {
+                    $stolb_vis2 = 0.0;
+                }
+
+                //=======================================================================================================
                 //Висина на глава
-                $stolb_vig1 = (float) optional($p1->tower)->vig ?? 0.0; // вис. јарем (ако ја имаш)
-                $stolb_vig2 = (float) optional($p2->tower)->vig ?? 0.0;
 
+                if ($p1->id_tower) {
+                    $stolb_vig1 = (float) (optional($p1->tower)->vig ?? 0.0); // вис. јарем (ако ја имаш)
+                } elseif ($p1->id_trafo) {
+                    $stolb_vig1 = (float) (optional($p1->trafo)->visina_zj ?? 0.0);
+                } else {
+                    $stolb_vig1 = 0.0;
+                }
+
+                if ($p2->id_tower) {
+                    $stolb_vig2 = (float) (optional($p2->tower)->vig ?? 0.0);
+                } elseif ($p2->id_trafo) {
+                    $stolb_vig2 = (float) (optional($p2->trafo)->visina_zj ?? 0.0);
+                } else {
+                    $stolb_vig2= 0.0;
+                }
+
+                //=======================================================================================================
+                //Агол на столб
+                $rawAgol1= null;
+                if ($p1->id_tower) {
+                    $rawAgol1 = optional($p1->tower)->angle;   // може да е null
+                } elseif ($p1->id_trafo) {
+                    $rawAgol1 = $p1->agol_tr;                  // може да е null/''
+                }
+                $stolb_agol1 = (float) ($rawAgol1 ?? 0.0);
+
+
+                $rawAgol2 = null;
+                if ($p2->id_tower) {
+                    $rawAgol2 = optional($p2->tower)->angle;   // може да е null
+                } elseif ($p2->id_trafo) {
+                    $rawAgol2 = $p2->agol_tr;                  // може да е null/''
+                }
+                $stolb_agol2 = (float) ($rawAgol2 ?? 0.0);
+
+
+                //=======================================================================================================
                 // ПОДАТОЦИ ЗА ИЗОЛАТОР
                 //Должина на изолаторска верига
-                $insulator1_dolzi1    = (float) optional($p1->insulator1)->length  ?? 0.0;
-                $insulator1_dolzi2   = (float) optional($p2->insulator1)->length  ?? 0.0;
+                $insulator1_dolzi1    = (float) (optional($p1->insulator1)->length  ?? 0.0);
+                $insulator1_dolzi2   = (float) (optional($p2->insulator1)->length  ?? 0.0);
 
                 //Дали е потпорен 1=да. 0=не
                 $insulator1_potp1  =  (int) (optional($p1->insulator1)->support_insulator ?? 0);
@@ -772,51 +842,67 @@ class ProjectsRepositories
                 // Распон, raspon
                 $raspon = $stac_t2 - $stac_t1;
 
-                // Висина на проводник на столб 1, kota_pro
+
+                //=======================================================================================================
+                 // Висина на проводник на столб 1, kota_pro
                 if ($insulator1_potp1 == 1) {
-                    $kota_pro1 = $kota_t1 + $stolb_vis1 + $insulator1_dolzi1 ;
-                } elseif ($stolb_agol1==0)
-                {
-                    $kota_pro1 = ($kota_t1 + $stolb_vis1) - $insulator1_dolzi1 ;
+                    $kota_pro1 = $kota_t1 + $stolb_vis1 + $insulator1_dolzi1;
+                } elseif (abs($stolb_agol1) < 0.000001) {
+                    $kota_pro1 = ($kota_t1 + $stolb_vis1) - $insulator1_dolzi1;
+                } else {
+                    $kota_pro1 = ($kota_t1 + $stolb_vis1);
                 }
-                else
-                {
-                    $kota_pro1 = ($kota_t1 + $stolb_vis1) ;
+                if ($p1->id_trafo) {
+                    $kota_pro1 = ($kota_t1 + $stolb_vis1);
                 }
 
+                //=======================================================================================================
                 // Висина на заземјач на столб 1, kota_zaj
                 if ($hasGround) {
                     $kota_zaj1 = $kota_t1 + $stolb_vis1 + $stolb_vig1;
                 } else {
                     $kota_zaj1 = 0.0;
                 }
+                if ($p1->id_trafo) {
+                    $kota_zaj1 = ($kota_t1 + $stolb_vig1);
+                    //dd($kota_zaj1);
+                }
 
+
+                //=======================================================================================================
                 //  Висина на проводник на столб 2, kota_pro
                 if ($insulator1_potp2 == 1) {
                     $kota_pro2 = $kota_t2 + $stolb_vis2 + $insulator1_dolzi2;
-                }  elseif ($stolb_agol2==0)
-                {
+                } elseif (abs($stolb_agol2) < 0.000001) {
                     $kota_pro2 = ($kota_t2 + $stolb_vis2) - $insulator1_dolzi2;
+                } else {
+                    $kota_pro2 = ($kota_t2 + $stolb_vis2);
                 }
-                else
-                {
+                if ($p2->id_trafo) {
                     $kota_pro2 = ($kota_t2 + $stolb_vis2);
                 }
 
+                //=======================================================================================================
                 // Висина на заземјач на столб 2, kota_zaj
                 if ($hasGround) {
                     $kota_zaj2 = $kota_t2 + $stolb_vis2 + $stolb_vig2;
                 } else {
                     $kota_zaj2 = 0.0;
                 }
+                if ($p2->id_trafo) {
+                    $kota_zaj2 = ($kota_t2 + $stolb_vig2);
+                }
 
+                //=======================================================================================================
                 // Разлики во висини на проводник, vr_pro
                 $vr_pro= $kota_pro2 - $kota_pro1;
 
-
+                //=======================================================================================================
                 // Разлики во висини на  заштитно јаже (заземјувач), vr_zaj
                 $vr_zaj = $kota_zaj2 - $kota_zaj1;
 
+               // dd($vr_zaj);
+                //=======================================================================================================
                 // Должини на проводник и заштитно јаже, dol_pro, dol_zaj
 
                 // (користи sinh; масата е kg/km → во kg/m е $mas/1000) -----
@@ -855,26 +941,32 @@ class ProjectsRepositories
         });
     }
 
+    public function deleteZatpol(int $projectId): int
+    {
+        return  Zatpol::where('id_project', $projectId)->delete();
+    }
+
     public function zatpol(int $projectId): void
     {
-        // 1) Проект параметри (аналог на Osparam)
 
-        $project = Projects::with('windPressure')->findOrFail($projectId);
-
-        $napPro = $project->tensile_stress_cond;
-        $napZaj = $project->tensile_stress_ground;
-        $kndt   = $project->kn;
-        $kidt   = $project->ki;
-        $priv   = optional($project->windPressure)->title;
+        $project = Projects::with([
+            'conductors',
+            'groundWires',
+            'insulatorChain',
+        ])->findOrFail($projectId);
 
 
-        // 2) Ресет (бришење) на претходни записи
-        Zatpol::where('id_project', $projectId)->delete();
-
-
-        // 3) Земи ја трасата подредена по stac_t (растечки).
-        $trasa = Trasa::with(['tower'])
+        $trasa = Trasa::with(['tower', 'insulator1', 'insulator2', 'trafo'])
             ->where('id_project', $projectId)
+            ->where(function ($q) {
+                $q->where(function ($q2) {
+                    $q2->where('id_tower', '>', 0)
+                        ->whereHas('tower', function ($t) {
+                            $t->where('angle', '>', 0);
+                        });
+                })
+                    ->orWhere('id_trafo', '>', 0);
+            })
             ->orderBy('stac_t', 'asc')
             ->get();
 
@@ -882,41 +974,15 @@ class ProjectsRepositories
             return;
         }
 
-        // 4) Детекција на граници на полето:
-        //    „Boundary“ ако: agol_tr > 0 ИЛИ stolb->nap == 0 (ако постои)
-        $boundaries = [];
-        foreach ($trasa as $row) {
-            $angle = (float)($row->agol_tr ?? 0);
-            $voltage   = $row->tower->voltage ?? null; // ако го имаш
-            $isBoundary = $angle > 0 || (isset($voltage) && (float)$voltage == 0);
-            if ($isBoundary) {
-                $boundaries[] = $row;
-            }
-        }
-
-        // Ако нема boundary, тогаш земи само прв и последен како граница
-        if (empty($boundaries)) {
-            $boundaries = [$trasa->first(), $trasa->last()];
-        } else {
-            // Осигурај се првиот е старт, последниот е крај на последното поле.
-            if ($boundaries[0]->id !== $trasa->first()->id) {
-                array_unshift($boundaries, $trasa->first());
-            }
-            if (end($boundaries)->id !== $trasa->last()->id) {
-                $boundaries[] = $trasa->last();
-            }
-        }
-
-        // 5) Итерираме преку соседни парови граници: [b[i], b[i+1]]
-
         $brojPole = 1;
 
-        for ($i = 0; $i + 1 < count($boundaries); $i++) {
-            $start = $boundaries[$i];
-            $end   = $boundaries[$i + 1];
+        for ($i = 0; $i + 1 < count($trasa); $i++) {
+            $start = $trasa[$i];
+            $end   = $trasa[$i + 1];
 
             $stacPo = (float)$start->stac_t;
             $stacKr = (float)$end->stac_t;
+
             $poId   = (int) ($start->id_tower ?? 0);
             $krId   = (int) ($end->id_tower ?? 0);
 
@@ -925,23 +991,74 @@ class ProjectsRepositories
                 continue;
             }
 
-            // 6) Агрегации врз RASpres во опсег [stacPo, stacKr)
+            // ---- 1) најди pom_post / pom_krst (br_raspon) преку Raspres.id ----
+
+            $eps = 0.0001; // толеранција за float stac_t (прилагоди ако треба)
+
+            $pom_post = Raspres::where('id_project', $projectId)
+                ->whereBetween('stac_t', [$stacPo - $eps, $stacPo + $eps])
+                ->orderBy('stac_t', 'asc')
+                ->value('id');
+
+// fallback ако не го најде поради float
+            if ($pom_post === null) {
+                $pom_post = Raspres::where('id_project', $projectId)
+                    ->where('stac_t', '>=', $stacPo)
+                    ->orderBy('stac_t', 'asc')
+                    ->value('id');
+            }
+
+            $pom_krst = Raspres::where('id_project', $projectId)
+                ->whereBetween('stac_t', [$stacKr - $eps, $stacKr + $eps])
+                ->orderBy('stac_t', 'asc')
+                ->value('id');
+
+// fallback ако не го најде поради float
+            if ($pom_krst === null) {
+                $pom_krst = Raspres::where('id_project', $projectId)
+                    ->where('stac_t', '>=', $stacKr)
+                    ->orderBy('stac_t', 'asc')
+                    ->value('id');
+            }
+
+// ако нема следен распон (последно поле) -> крај = max+1
+            if ($pom_krst === null) {
+                $pom_krst = (int) Raspres::where('id_project', $projectId)->max('id') + 1;
+            }
+
+// ако пак нема pom_post -> нема што да се пресмета
+            if ($pom_post === null) {
+                throw new \RuntimeException("Не можам да најдам pom_post за stacPo={$stacPo} (project={$projectId})");
+            }
+
+// ако pom_krst <= pom_post (може да се случи ако stacKr е исто/помало) -> прескокни
+            if ((int)$pom_krst <= (int)$pom_post) {
+                // тука можеш continue; или throw ако сакаш строго
+                throw new \RuntimeException("Невалиден опсег: pom_post={$pom_post}, pom_krst={$pom_krst} (stacPo={$stacPo}, stacKr={$stacKr})");
+            }
+
+
+// ---- 2) DOS-еквивалент агрегација: FOR id >= pom_post AND id < pom_krst ----
+
             $aggr = Raspres::where('id_project', $projectId)
-                ->where('stac_t', '>=', $stacPo)
-                ->where('stac_t', '<',  $stacKr)
-                ->select([
-                    DB::raw('SUM(POWER(raspon, 3)) as sum_tri'),
-                    DB::raw('SUM( (POW(SQRT(POW(raspon,2) + POW(vr_pro,2)),2)) / NULLIF(raspon,0) ) as sum_ede')
-                ])
+                ->where('id', '>=', (int)$pom_post)
+                ->where('id', '<',  (int)$pom_krst)
+                ->selectRaw('SUM(POWER(raspon, 3)) as sum_tri')
+                ->selectRaw('SUM((POWER(raspon,2) + POWER(vr_pro,2)) / NULLIF(raspon,0)) as sum_ede')
                 ->first();
 
-            $sumTri = (float)($aggr->sum_tri ?? 0);
-            $sumEde = (float)($aggr->sum_ede ?? 0);
+            $sumTri = (float) ($aggr->sum_tri ?? 0.0);
+            $sumEde = (float) ($aggr->sum_ede ?? 0.0);
 
-            $idRas = null;
-            if ($sumTri > 0 && $sumEde > 0) {
-                $idRas = sqrt($sumTri / $sumEde);
-            }
+            $idRas = ($sumTri > 0 && $sumEde > 0) ? sqrt($sumTri / $sumEde) : null;
+
+            $napPro = (float) ($start->nap_pro ?? $project->tensile_stress_cond);
+            $napZaj = (float) ($start->nap_zaj?? $project->tensile_stress_ground);
+            $kndt = (float) ($start->kndt?? $project->kn);
+            $kidt = (float) ($start->kidt?? $project->ki);
+            $priv = (float) ($start->kidt ?? optional($project->windPressure)->title);
+
+
 
             // 7) Запиши ред во ZATPOL
             Zatpol::create([
@@ -951,11 +1068,13 @@ class ProjectsRepositories
                 'stac_po'    => $stacPo, //почетна стационажа на полето
                 'stac_kr'    => $stacKr, //крајна стационажа на полето
                 'pole_dol'   => $poleDol, // должина на поле, разлика помеѓу  stac_po и stac_kr
+
                 'nap_pro'    => $napPro, // се препишува од Project
                 'nap_zaj'    => $napZaj, // се препишува од Project
                 'kndt'       => $kndt, // се препишува од Project
                 'kidt'       => $kidt, // се препишува од Project
                 'priv'       => $priv, // се препишува од Project
+
                 'id_raspon'  => $idRas,
                 // останатите полиња можат да се пополнуваат подоцна (null by default)
             ]);
@@ -1015,6 +1134,8 @@ class ProjectsRepositories
                 $zp->tovpro_1 = $tovpr_1;
                 $zp->tovpro_2 = $tovpr_2;
 
+
+
                 // krit_tempro / krit_raspro
                 $krit_te_p = 0.0;
                 $krit_ra_p = 0.0;
@@ -1065,7 +1186,7 @@ class ProjectsRepositories
                             + ($pro_tem * $pro_mod * ($temp + 20.0))
                             - $nap_p;
 
-                        $napreg[$i] = $this->solveNapregNewton($N_pro, $M, 0.1, 0.001);
+                        $napreg[$i] = $this->solveNapregNewton($N_pro, $M, 0.5, 0.05);
                     }
 
                     // i=8 посебно:
@@ -1078,8 +1199,10 @@ class ProjectsRepositories
                         + ($pro_tem * $pro_mod * ((-5.0) + 20.0))
                         - $nap_p;
 
-                    $napreg[8] = $this->solveNapregNewton($N8, $M8, 0.1, 0.001);
+                    $napreg[8] = $this->solveNapregNewton($N8, $M8, 0.5, 0.05);
+
                 }
+               // dd($napreg[3]);
 
                 // Write napreg*_p fields
                 $zp->napreg1_p = $napreg[1];
@@ -1224,43 +1347,42 @@ class ProjectsRepositories
      * Del = (N/x^2 - x - M) / (2N/x^3 + 1)
      * x = x + Del, додека |Del| > 1e-6
      */
-    private function solveNapregNewton(float $N, float $M, float $x0, float $del0): float
+    private function solveNapregNewton(float $N, float $M, float $x0 = 0.5, float $del0 = 0.05): float
     {
-        $x = max($x0, 1e-9);
+        $x   = max($x0, 1e-9);
         $del = $del0;
 
-        while (abs($del) > 0.000001) {
+        $iter = 0;
+        while (abs($del) > 1e-6 && $iter++ < 200) {
 
             $x2 = $x * $x;
             $x3 = $x2 * $x;
 
-            if ($x2 < 1e-18 || $x3 < 1e-27) {
-                break;
-            }
+            if ($x2 < 1e-18 || $x3 < 1e-27) break;
 
             $num = ($N / $x2) - $x - $M;
             $den = (2.0 * $N / $x3) + 1.0;
 
-            if (abs($den) < 1e-18) {
-                break;
-            }
+            if (abs($den) < 1e-18) break;
 
             $del = $num / $den;
-            $x   = $x + $del;
+            $x  += $del;
 
-            if ($x <= 0) {
-                $x = 1e-9;
-                break;
-            }
+            if ($x <= 0) { $x = 1e-9; break; }
         }
 
         return $x;
+    }
+
+    public function deletegraviras(int $projectId): int
+    {
+        return Gapres::where('id_project', $projectId)->delete();
     }
     public function graviras(int $projectId): int
     {
         return DB::transaction(function () use ($projectId) {
 
-            // 1) Дали има заземјач (DOS: zaj_ja == "---")
+
             $project = Projects::with(['groundWires'])->findOrFail($projectId);
 
             $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
@@ -1268,20 +1390,19 @@ class ProjectsRepositories
                 $hasGround = !empty(optional($project->groundWires)->id);
             }
 
-
-            // 2) ZAP: исчисти GAPRES за проектот
-            Gapres::where('id_project', $projectId)->delete();
-
-
-
-            // 3) Вчитај RASPRES и TRASA сортирано по stac_t
             $raspres = Raspres::where('id_project', $projectId)
                 ->orderBy('stac_t', 'asc')
                 ->get();
 
-            $trasa = Trasa::with(['tower'])
+
+
+            $trasa = Trasa::with(['tower', 'insulator1', 'insulator2', 'trafo'])
                 ->where('id_project', $projectId)
-                ->orderBy('stac_t', 'asc')
+                ->where(function ($q) {
+                    $q->where('id_tower', '>', 0)
+                        ->orWhere('id_trafo', '>', 0);
+                })
+                ->orderBy('stac_t','asc')
                 ->get();
 
             if ($raspres->isEmpty() || $trasa->isEmpty()) {
@@ -1410,6 +1531,8 @@ class ProjectsRepositories
 
                 $raspon_last = (float) ($lastRp->raspon ?? 0.0);
                 $sr_rl_last  = $raspon_last / 2.0;
+                $agol_t   = (float) ($lastT->agol_tr ?? 0.0);
+                $stol_ag1 = (int) (optional($lastT->tower)->angle ?? 0);
 
                 $prev = Gapres::where('id_project', $projectId)->orderBy('id', 'desc')->first();
 
@@ -1442,8 +1565,8 @@ class ProjectsRepositories
                     'kota_pro' => $pomk_p + $vir_p,
                     'kota_zaj' => $pomk_z + $vir_z,
 
-                    'agol_t'   => 0.0,
-                    'stol_ag1' => 0,
+                    'agol_t'   => $agol_t,
+                    'stol_ag1' => $stol_ag1,
 
                     'br_ras'   => $br_st_new . '-' . ($br_st_new + 1),
                 ]);
@@ -1457,6 +1580,181 @@ class ProjectsRepositories
 
 
 
+    public function rastotal(int $projectId): int
+    {
+        return DB::transaction(function () use ($projectId) {
 
+            // =========================
+            // 1) Osparam -> Projects
+            // =========================
+            $project = Projects::with([
+                'conductors',
+                'groundWires',
+                'insulatorChain',
+            ])->findOrFail($projectId);
+
+            // DOS: zaj_ja = Osparam->zaj_tip; IF zaj_ja="---" нема заземјач
+            $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
+
+            // =========================
+            // 2) Земи ги сите затезни полиња (Zatpol)
+            // DOS: GO BOTTOM brop_max=broj_pole, GO TOP brop_min=broj_pole, па врти
+            // Ние ќе идеме по ред со orderBy
+            // =========================
+            $poles = Zatpol::where('id_project', $projectId)
+                ->orderBy('id', 'asc')
+                ->get([
+                    'id',
+                    'stac_po',
+                    'stac_kr',
+                    'tovpro',
+                    'tovpro_1',
+                    'tovzaj',
+                    'tovzaj_1',
+                    'napreg1_p',
+                    'napreg8_p',
+                    'napreg1_z',
+                    'napreg8_z',
+                ]);
+
+            if ($poles->isEmpty()) {
+                return 0;
+            }
+
+            // max id во raspres за "последно поле"
+            $maxRaspId = (int) Raspres::where('id_project', $projectId)->max('id');
+            if ($maxRaspId <= 0) {
+                return 0;
+            }
+
+            // =========================
+            // 3) helper: најди Raspres.id што одговара на stac (float-safe)
+            // DOS: INDEX ON stac_t + SEEK sta_p
+            // Кај нас: најди id за stac со between +/- eps, па fallback на >=
+            // =========================
+            $eps = 0.0001;
+
+            $findRaspIdAtStac = function (float $stac) use ($projectId, $eps): ?int {
+
+                // 1) пробај "квази-еднаквост"
+                $id = Raspres::where('id_project', $projectId)
+                    ->whereBetween('stac_t', [$stac - $eps, $stac + $eps])
+                    ->orderBy('stac_t', 'asc')
+                    ->value('id');
+
+                if ($id !== null) {
+                    return (int) $id;
+                }
+
+                // 2) fallback: првиот распон што почнува на/после stac
+                $id = Raspres::where('id_project', $projectId)
+                    ->where('stac_t', '>=', $stac)
+                    ->orderBy('stac_t', 'asc')
+                    ->value('id');
+
+                return $id !== null ? (int) $id : null;
+            };
+
+            // =========================
+            // 4) Главна логика (DOS REPLACE во Raspres)
+            // =========================
+            $updated = 0;
+
+            foreach ($poles as $pole) {
+
+                $stacPo = (float) ($pole->stac_po ?? 0.0);
+                $stacKr = (float) ($pole->stac_kr ?? 0.0);
+
+                // прескокни ако е лошо поле
+                if ($stacKr <= $stacPo) {
+                    continue;
+                }
+
+                // DOS: pom_post / pom_krst (br_raspon граници)
+                $pom_post = $findRaspIdAtStac($stacPo);
+                $pom_krst = $findRaspIdAtStac($stacKr);
+
+                if ($pom_post === null) {
+                    // нема распон што почнува од stacPo -> нема што да ажурираш
+                    continue;
+                }
+
+                // последно поле -> до крај
+                if ($pom_krst === null) {
+                    $pom_krst = $maxRaspId + 1;
+                }
+
+                if ($pom_krst <= $pom_post) {
+                    continue;
+                }
+
+                // параметри (DOS nap_pr[1], nap_pr[8], nap_zj[1], nap_zj[8] итн.)
+                $napP1 = (float) ($pole->napreg1_p ?? 0.0);
+                $napP8 = (float) ($pole->napreg8_p ?? 0.0);
+                $napZ1 = (float) ($pole->napreg1_z ?? 0.0);
+                $napZ8 = (float) ($pole->napreg8_z ?? 0.0);
+
+                $tovp   = (float) ($pole->tovpro   ?? 0.0);
+                $tovp_1 = (float) ($pole->tovpro_1 ?? 0.0);
+                $tovz   = (float) ($pole->tovzaj   ?? 0.0);
+                $tovz_1 = (float) ($pole->tovzaj_1 ?? 0.0);
+
+                // заштита од делење со нула (да не падне скриптата)
+                $tovp   = ($tovp   == 0.0) ? 1e-12 : $tovp;
+                $tovp_1 = ($tovp_1 == 0.0) ? 1e-12 : $tovp_1;
+                $tovz   = ($tovz   == 0.0) ? 1e-12 : $tovz;
+                $tovz_1 = ($tovz_1 == 0.0) ? 1e-12 : $tovz_1;
+
+                // земи ги распоните што припаѓаат на ова поле
+                // DOS: DO WHILE br_ras < kr_st (по SEEK sta_p)
+                $rows = Raspres::where('id_project', $projectId)
+                    ->where('id', '>=', $pom_post)
+                    ->where('id', '<',  $pom_krst)
+                    ->orderBy('id', 'asc')
+                    ->get(['id', 'raspon', 'vr_pro', 'vr_zaj']);
+
+                foreach ($rows as $r) {
+
+                    $rasp = (float) ($r->raspon ?? 0.0);
+                    if ($rasp == 0.0) {
+                        continue; // избегни делење со нула
+                    }
+
+                    $virp = (float) ($r->vr_pro ?? 0.0);
+                    $virz = (float) ($r->vr_zaj ?? 0.0);
+
+                    // DOS:
+                    // rasp_tot[8]=rasp+(2*nap_pr[8]*ABS(virp))/(rasp * tovp_1)
+                    // rasp_t20   =rasp+(2*nap_pr[1]*ABS(virp))/(rasp * tovp)
+                    $ras_totp = $rasp + (2.0 * $napP8 * abs($virp)) / ($rasp * $tovp_1);
+                    $ras_t20p = $rasp + (2.0 * $napP1 * abs($virp)) / ($rasp * $tovp);
+
+                    if (!$hasGround) {
+                        // DOS: ако zaj_ja="---" тогаш 0
+                        $ras_totz = 0.0;
+                        $ras_t20z = 0.0;
+                    } else {
+                        // DOS:
+                        // rasz_tot[8]=rasp+(2*nap_zj[8]*ABS(virz))/(rasp * tovz_1)
+                        // rasz_t20   =rasp+(2*nap_zj[1]*ABS(virz))/(rasp * tovz)
+                        $ras_totz = $rasp + (2.0 * $napZ8 * abs($virz)) / ($rasp * $tovz_1);
+                        $ras_t20z = $rasp + (2.0 * $napZ1 * abs($virz)) / ($rasp * $tovz);
+                    }
+
+                    // DOS: REPLACE ...
+                    Raspres::where('id', (int)$r->id)->update([
+                        'ras_totp' => $ras_totp,
+                        'ras_t2op' => $ras_t20p,
+                        'ras_totz' => $ras_totz,
+                        'ras_t2oz' => $ras_t20z,
+                    ]);
+
+                    $updated++;
+                }
+            }
+
+            return $updated;
+        });
+    }
 
 }

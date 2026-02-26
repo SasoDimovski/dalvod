@@ -47,9 +47,17 @@
     $id_tower_point = $point->id_tower ?? old('id_tower');
     $tower_tip_point = $point->tower->tip ?? old('id_tower_');
     $id_insulator1_point = $point->id_insulator1 ?? old('insulator1');
-    $insulator1_tip_point = $point->insulator1->tip ?? old('insulator1_');
+    $insulator1_tip_point = $point->insulator1->type ?? old('insulator1_');
     $id_insulator2_point = $point->id_insulator2 ?? old('insulator2');
-    $insulator2_tip_point = $point->insulator2->tip ?? old('insulator2_');
+    $insulator2_tip_point = $point->insulator2->type ?? old('insulator2_');
+
+    $nap_pro_point = $point->nap_pro?? old('nap_pro');
+    $nap_zaj_point = $point->nap_zaj?? old('nap_zaj');
+    $nap_zaj2_point = $point->nap_zaj2 ?? old('nap_zaj2');
+    $kndt_point = $point->kndt?? old('kndt');
+    $kidt_point = $point->kidt?? old('kidt');
+    $priv_point = $point->priv?? old('priv');
+
 
 
 
@@ -76,9 +84,11 @@
     $url_edit = $url . '/edit';
     $url_edit_endpoints = $url . '/edit_endpoints';
     $url_edit_points = $url . '/edit_points';
-    $url_edit_raspres = $url . '/edit_raspres';
-    $url_edit_zatpol = $url . '/edit_zatpol';
-    $url_edit_gapres = $url . '/edit_gapres';
+
+    $url_show_raspres = $url . '/show_raspres';
+    $url_show_zatpol = $url . '/show_zatpol';
+    $url_show_gapres = $url . '/show_gapres';
+    $url_all_tables = $url . '/calculations';
 
 
     $path_upload = 'uploads/projects/';
@@ -292,6 +302,12 @@
 
                                         </div>
                                     </div>
+
+
+
+
+
+
                                     <div class="row">
                                         <div class="col-sm-4">
                                             <?php
@@ -402,22 +418,165 @@
 
                                         </div>
 
-                                        <div class="col-sm-2 d-flex justify-content-end align-items-end">
-                                            @if ($id_point)
-                                            <button type="submit"
-                                                    class="btn btn-submit btn-warning float-right mb-3">
-                                                {{__('projects.edit-points.edit_element')}}
-                                            </button>
-                                                @else
-                                                <button type="submit"
-                                                        class="btn btn-submit btn-success float-right mb-3">
-                                                    {{__('projects.edit-points.add_element')}}
-                                                </button>
-                                                @endif
-                                        </div>
+
+
 
 
                                     </div>
+                                    {{--=========================================================--}}
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $nap_pro_point;
+                                            $input_name = "nap_pro";
+                                            $input_id = "nap_pro";
+                                            $input_desc = __('projects.edit-points.nap_pro');
+                                            $input_desc_long = __('projects.edit-points.nap_pro_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}" title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $nap_zaj_point;
+                                            $input_name = "nap_zaj";
+                                            $input_id = "nap_zaj";
+                                            $input_desc = __('projects.edit-points.nap_zaj');
+                                            $input_desc_long = __('projects.edit-points.nap_zaj_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $nap_zaj2_point;
+                                            $input_name = "nap_zaj2";
+                                            $input_id = "nap_zaj2";
+                                            $input_desc = __('projects.edit-points.nap_zaj2');
+                                            $input_desc_long = __('projects.edit-points.nap_zaj2_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                        <div class="row">
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $kndt_point;
+                                            $input_name = "kndt";
+                                            $input_id = "kndt";
+                                            $input_desc = __('projects.edit-points.kndt');
+                                            $input_desc_long = __('projects.edit-points.kndt_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $kidt_point;
+                                            $input_name = "kidt";
+                                            $input_id = "kidt";
+                                            $input_desc = __('projects.edit-points.kidt');
+                                            $input_desc_long = __('projects.edit-points.kidt_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <?php
+                                            $input_value = $priv_point;
+                                            $input_name = "priv";
+                                            $input_id = "priv";
+                                            $input_desc = __('projects.edit-points.priv');
+                                            $input_desc_long = __('projects.edit-points.priv_des');
+                                            $input_maxlength = 7;
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_mandatory = ''; //*
+                                            $input_style = 'width: 60%;';
+                                            ?>
+                                            <div class="form-group">
+                                                <label for="{{$input_id}}" class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}
+                                                    {{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_id}}" name="{{$input_name}}"
+                                                       style="{{$input_style}}"
+                                                       class="form-control only-decimal" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                            </div>
+                                        </div>
+                                            <div class="col-sm-2 d-flex justify-content-end align-items-end">
+                                                @if ($id_point)
+                                                    <button type="submit"
+                                                            class="btn btn-submit btn-warning float-right mb-3">
+                                                        {{__('projects.edit-points.edit_element')}}
+                                                    </button>
+                                                @else
+                                                    <button type="submit"
+                                                            class="btn btn-submit btn-success float-right mb-3">
+                                                        {{__('projects.edit-points.add_element')}}
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                    </div>
+
+
+
                                     {{--=========================================================--}}
                                 </div>
                             </div>
