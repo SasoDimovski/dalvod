@@ -85,11 +85,17 @@
     $url_edit_endpoints = $url . '/edit_endpoints';
     $url_edit_points = $url . '/edit_points';
 
+    /*======================================================================================*/
     $url_show_raspres = $url . '/show_raspres';
     $url_show_zatpol = $url . '/show_zatpol';
     $url_show_gapres = $url . '/show_gapres';
     $url_all_tables = $url . '/calculations';
-
+    $url_controls = $url . '/controls';
+    $url_situation = $url . '/situation';
+    $url_show_table_forces = $url . '/show_table_forces';
+    $url_show_table_towers = $url . '/show_table_towers';
+    $url_show_table_stringing = $url . '/show_table_stringing';
+    /*======================================================================================*/
 
     $path_upload = 'uploads/projects/';
 
@@ -126,6 +132,7 @@
             <!-- /.container-fluid -->
         </section>
         <!-- / Content Header (Page header) -->
+
         <section class="content">
             <div class="container-fluid">
                 @include('admin._flash-message')
@@ -154,7 +161,7 @@
                     @if($id)
                         @include('Projects::projects.edit-submenu')
                     @endif
-                    <div class="col-sm-12 col-md-12 col-lg-12 col-xll-6">
+                    <div class="col-sm-12 col-md-12 col-lg-12 col-xll-12">
                         <form class="needs-validation" role="form" id="form_edit" name="form_edit"
                               action="{{$url_action_points}}"
                               method="POST" enctype="multipart/form-data" autocomplete="off">
@@ -169,6 +176,7 @@
                             {{csrf_field()}}
                             @method('POST')
                             <div class="card {{ $id_point ? 'border-danger bg-success text-white' : '' }}">
+
 
                                 <div class="card-header">
                                     @if($active==0)
@@ -537,6 +545,8 @@
                                                        maxlength="{{$input_maxlength}}" {{$input_readonly}}>
                                             </div>
                                         </div>
+
+
                                         <div class="col-sm-2">
                                             <?php
                                             $input_value = $priv_point;
@@ -559,6 +569,8 @@
                                                        maxlength="{{$input_maxlength}}" {{$input_readonly}}>
                                             </div>
                                         </div>
+
+
                                             <div class="col-sm-2 d-flex justify-content-end align-items-end">
                                                 @if ($id_point)
                                                     <button type="submit"
@@ -583,7 +595,7 @@
                         </form>
 
                         @php
-                            $trasaPoints = $pointsGR->map(function($row) use ($url_edit_point,$url_show_tower ) {
+                            $trasaPoints = $pointsGR->map(function($row) use ($url_edit_point,$url_show_tower,$query ) {
                                 return [
                                     'x'         => (float) $row->stac_t,
                                     'y'         => (float) $row->kota_t,
@@ -595,7 +607,7 @@
 
 
                                     'tower_id'  => (int) optional($row->tower)->id,   // или ->id_tower (ако ти е така)
-                                    'tower_url' => !empty(optional($row->tower)->id) ? ($url_show_tower . '/' . optional($row->tower)->id) : null,
+                                    'tower_url' => !empty(optional($row->tower)->id) ? ($url_show_tower . '/' . optional($row->tower)->id. '?' .$query) : null,
 
                                     // за наслов во modal (ако сакаш)
                                     'tower_title' => $module->title ?? 'Tower',
@@ -608,7 +620,7 @@
                                     'id' => (int) $point->id,
                                     'x'  => (float) $point->stac_t,
                                     'y'  => (float) $point->kota_t,
-                                    'url'=> $url_edit_point . '/' . $point->id,
+                                    'url'=> $url_edit_point . '/' . $point->id. '?' .$query,
                                 ]
                                 : null;
                         @endphp
@@ -623,97 +635,140 @@
                         </div>
 
                         @if(!$trasa->isEmpty())
-                            <form class="form-horizontal"
-                                  name="form_import"
-                                  id="form_import"
-                                  method="POST"
-                                  action="{{  $url_import_points }}"
-                                  enctype="multipart/form-data"
-                                  accept-charset="UTF-8">
 
-                                @csrf
-
-                                <input type="hidden" id="page" name="page" value="{{ app('request')->input('page') }}">
-                                <input type="hidden" id="url_return" name="url_return" value="{{$url_return_points}}">
-                                <input type="hidden" id="message_error" name="message_error" value="{{ $message_error }}">
-                                <input type="hidden" id="message_success" name="message_success" value="{{ $message_success }}">
-                                <input type="hidden" name="query" value="{{ $query }}">
 
                                 <div class="card card-red card-outline">
                                     <div class="card-header">
-                                        <div class="row d-flex justify-content-between align-items-end">
+                                        <div class="row align-items-end">
 
-                                            <!-- ЛЕВО: Listing -->
-                                            <div class="col-sm-6 col-md-2 col-lg-1 col-xl-1">
-                                                    <?php
-                                                    $name = 'listing';
-                                                    $desc = __('global.listing');
-                                                    $options = [
-                                                        1 => '1',
-                                                        15 => '15',
-                                                        50 => '50',
-                                                        100 => '100',
-                                                        200 => '200',
-                                                        'a' => __('global.all'),
-                                                    ];
-                                                    ?>
-                                                <label class="control-label">{{ $desc }}</label>
-                                                <select id="{{ $name }}" name="{{ $name }}"
-                                                        class="form-control form-control-sm"
-                                                        onchange="changeListingAndSubmit(this.form)">
-                                                    @foreach($options as $value => $label)
-                                                        <option value="{{ $value }}"
-                                                            {{ $listing == $value ? 'selected' : '' }}>
-                                                            {{ $label }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
+                                            <!-- LEFT: Listing -->
+                                            <div class="col-md-1">
+
+                                                <form name="form_search"
+                                                      id="form_search"
+                                                      method="get"
+                                                      action="">
+
+
+
+                                                    <input type="hidden" name="page"
+                                                           value="{{ app('request')->input('page') }}">
+
+
+                                                        <?php
+                                                        $name = 'listing';
+                                                        $desc = __('global.listing');
+                                                        $options = [
+                                                            1 => '1',
+                                                            15 => '15',
+                                                            50 => '50',
+                                                            100 => '100',
+                                                            200 => '200',
+                                                            'a' => __('global.all'),
+                                                        ];
+                                                        ?>
+
+                                                    <label class="control-label mb-1">
+                                                        {{ __('global.listing') }}
+                                                    </label>
+
+                                                    <select name="listing"
+                                                            class="form-control form-control-sm"
+                                                            onchange="changeListingAndSubmit(this.form)">
+                                                        @foreach($options as $value => $label)
+                                                            <option value="{{ $value }}"
+                                                                {{ $listing == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+
+                                                    </select>
+
+                                                </form>
+
                                             </div>
 
-                                            <!-- ДЕСНО: Upload + Import (во еден флекс див) -->
-                                            <div class="col-sm-12 col-md-5 col-lg-4 col-xl-4 d-flex justify-content-end">
 
-                                                <div class="mr-2">
-                                                    <label>{!! __('projects.edit-points.import_excel') !!}</label>
-                                                    <div class="input-group">
-                                                        <div class="custom-file">
-                                                            <input type="file" class="custom-file-input" id="exel" name="exel">
-                                                            <label class="custom-file-label" id="custom-file-label"></label>
+                                            <!-- RIGHT: Upload + Import + Delete -->
+                                            <div class="col-md-8">
+
+                                                <form name="form_import"
+                                                      id="form_import"
+                                                      method="POST"
+                                                      action="{{ $url_import_points }}"
+                                                      enctype="multipart/form-data">
+
+                                                    @csrf
+
+                                                    <input type="hidden" name="page"
+                                                           value="{{ app('request')->input('page') }}">
+
+                                                    <input type="hidden" name="url_return"
+                                                           value="{{ $url_return_points }}">
+
+                                                    <input type="hidden" name="query"
+                                                           value="{{ $query }}">
+
+
+                                                    <div class="d-flex justify-content-end align-items-end">
+
+                                                        <!-- FILE -->
+                                                        <div class="mr-3">
+
+                                                            <label class="mb-1">
+                                                                {{ __('projects.edit-points.import_excel') }}
+                                                            </label>
+
+                                                            <div class="custom-file">
+
+                                                                <input type="file"
+                                                                       class="custom-file-input"
+                                                                       name="exel"
+                                                                       id="exel">
+
+                                                                <label class="custom-file-label">
+                                                                    Choose file
+                                                                </label>
+
+                                                            </div>
+
                                                         </div>
+
+
+                                                        <!-- IMPORT BUTTON -->
+                                                        <div class="mr-2">
+
+                                                            <button type="submit"
+                                                                    class="btn btn-success">
+
+                                                                {{ __('projects.edit-points.import') }}
+
+                                                            </button>
+
+                                                        </div>
+
+
+                                                        <!-- DELETE BUTTON -->
+                                                        <div>
+
+                                                            <a href="#"
+                                                               class="btn btn-danger modal_warning"
+                                                               data-toggle="modal"
+                                                               data-target="#ModalWarning"
+                                                               data-url="{{$url_delete_imported_points.'/'.$id.'?'.$query }}"
+                                                               title="{{__('global.delete_hint')}}">
+
+                                                                <i class="fa fa-trash"></i>
+
+                                                            </a>
+
+                                                        </div>
+
+
                                                     </div>
-                                                </div>
 
-                                                <div class="col-sm-2 d-flex justify-content-end align-items-end">
-                                                    <label>&nbsp;</label>
-                                                    <button type="submit" class="btn btn-success btn-submit">
-                                                        {{ __('projects.edit-points.import') }}
-                                                    </button>
-                                                </div>
-                                                <div class="col-sm-2 d-flex justify-content-end align-items-end">
-                                                    <label>&nbsp;</label>
-                                                    <a href="#"
-                                                       class="btn btn-danger modal_warning"
-                                                       data-toggle="modal"
-                                                       data-target="#ModalWarning"
+                                                </form>
 
-                                                       data-title="{{__('projects.edit-points.delete_warnings')}}"
-                                                       data-url="{{$url_delete_imported_points.'/'.$id.'?'.$query }}"
-                                                       data-content_l="id: {{$id}} "
-                                                       data-content_b="{{__('projects.edit-points.delete_warnings_des')}}"
-                                                       data-content_sub_l="{{__('projects.edit-points.delete_warnings_des_')}}"
-                                                       data-content_sub_b=""
-
-                                                       data-query="{{$query}}"
-                                                       data-url_return="{{$url_return_points}}"
-                                                       data-success="{{__('projects.edit-points.delete_success')}}"
-                                                       data-error="{{__('projects.edit-points.delete_error')}}"
-
-                                                       data-method="DELETE"
-
-                                                       title="{{__('global.delete_hint')}}">
-                                                        <i class="fa fa-trash"></i>
-                                                    </a>
-                                                </div>
                                             </div>
 
                                         </div>
@@ -792,24 +847,6 @@
                                                                     $column_name = 'kota_t';
                                                                     $column_desc = __('projects.edit-points.kota');
                                                                     $column_desc_long = __('projects.edit-points.kota');
-                                                                    $query_sort = request()->query('sort');
-                                                                    $style_acs_desc = match (true) {
-                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
-                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
-                                                                        default => $style_acs_desc = '',
-                                                                    };
-                                                                    ?>
-                                                                <th class="sortable {{$style_acs_desc}}"
-                                                                    style="white-space: nowrap; width: 1px;"
-                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
-                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                                </th>
-                                                                {{-- ========================================================================--}}
-
-                                                                    <?php
-                                                                    $column_name = 'x_t';
-                                                                    $column_desc = __('projects.edit-points.x');
-                                                                    $column_desc_long = __('projects.edit-points.x');
                                                                     $query_sort = request()->query('sort');
                                                                     $style_acs_desc = match (true) {
                                                                         $query_sort == 'asc' && $order == $column_name => 'asc',
@@ -943,7 +980,6 @@
                                                                     <td>{{ $id }}</td>
                                                                     <td>{{ $stac_t }}</td>
                                                                     <td>{{ $kota_t }}</td>
-                                                                    <td>{{ $x_t }}</td>
                                                                     <td>{{ $agol_tr }}</td>
                                                                     <td>{{ $value }}</td>
 {{--                                                                    <td>{{ $ime }}</td>--}}
@@ -1016,7 +1052,7 @@
 
                                 </div>
 
-                            </form>
+
                         @else
                             {{__('global.no_records')}}
                         @endif

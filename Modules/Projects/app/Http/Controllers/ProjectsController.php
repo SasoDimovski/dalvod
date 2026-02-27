@@ -200,6 +200,38 @@ class ProjectsController extends Controller
         return redirect(url($url_return).'?'.$query)
             ->with('success', $message_success);
     }
+
+
+    public function importSituation($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        //dd($id);
+        $url_return = $request->get('url_return');
+        $query      = $request->get('query');
+
+        $return = $this->projectsServices->importSituation($id, $request);
+
+        $message_error   = $return->data['message_error']   ?? $request->get('message_error');
+        $message_success = $return->data['message_success'] ?? $request->get('message_success');
+
+        if ($return->status == 'error') {
+            $errors = [
+                "1" => __('projects.ProjectController.no_exel'),
+                "2" => __('projects.ProjectController.no_valid_exel'),
+                "3" => __('projects.ProjectController.error_on_delete'),
+                "4" => __('projects.ProjectController.error_on_transform_excel'),
+                "5" => __('projects.ProjectController.error_on_insert_in_db'),
+                "6" => __('users.UsersController.error_update_paas_in_users'),
+            ];
+            $errorMessage = $errors[$return->data['id_error']] ?? $message_error;
+            return redirect(url($url_return).'?'.$query)
+                ->with('error', [$errorMessage, $return->method, $return->class]);
+        }
+
+        return redirect(url($url_return).'?'.$query)
+            ->with('success', $message_success);
+    }
+
+
     public function deleteImportedPoints($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
         //dd($id);
@@ -264,5 +296,34 @@ class ProjectsController extends Controller
     {
         $return = $this->projectsServices->calculations($id_project);
         return view('Projects::projects/show-all-tables', $return['data']);
+    }
+    public function controls($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->calculations($id_project);
+        return view('Projects::projects/show-controls', $return['data']);
+    }
+
+    public function situation($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->situation($id_project);
+        return view('Projects::projects/show-situation', $return['data']);
+    }
+
+    public function tableForces($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->tableForces($id_project);
+        return view('Projects::projects/show-table-forces', $return['data']);
+    }
+
+    public function tableTowers($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->tableTowers($id_project);
+        return view('Projects::projects/show-table-towers', $return['data']);
+    }
+
+    public function tableStringing($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        $return = $this->projectsServices->tableStringing($id_project);
+        return view('Projects::projects/show-table-stringing', $return['data']);
     }
 }

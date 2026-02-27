@@ -11,6 +11,7 @@ use App\Models\InsulatorChain;
 use App\Models\Insulators;
 use App\Models\Projects;
 use App\Models\Raspres;
+use App\Models\Situations;
 use App\Models\Towers;
 use App\Models\Trafo;
 use App\Models\Trasa;
@@ -662,6 +663,12 @@ class ProjectsRepositories
     {
         return DB::table('trasa')->insert($rowsToInsert);
     }
+
+    public function importSituations($rowsToInsert): bool
+    {
+        return DB::table('situations')->insert($rowsToInsert);
+    }
+
     public function deleteImportedPoints(int $id_project): bool
     {
         Trasa::where('id_project', $id_project)
@@ -670,9 +677,45 @@ class ProjectsRepositories
 
         return true;
     }
+//====================================================================================================================================================
+    public function _getProjectById(int $id)
+    {
+        return Projects::find($id);
+    }
 
+    /**
+     * Сите "столбни" точки (само каде има id_tower > 0), по stac_t растечки
+     */
+    public function _getTowersByIdProject(int $id_project): \Illuminate\Support\Collection
+    {
+        return Trasa::with(['tower', 'insulator1', 'insulator2'])
+            ->where('id_project', $id_project)
+            ->where('id_tower', '>', 0)
+            ->orderBy('stac_t', 'asc')
+            ->get();
+    }
 
+    /**
+     * Сите распони (меѓу столбовите) по stac_t растечки
+     * ВАЖНО: треба да имаш точно N-1 распони за N столбови во трасата.
+     */
+    public function _getRaspresByIdProject(int $id_project): \Illuminate\Support\Collection
+    {
+        return Raspres::where('id_project', $id_project)
+            ->orderBy('stac_t', 'asc')
+            ->get();
+    }
 
+    /**
+     * Сите затезни полиња (опсези) по stac_po растечки
+     */
+    public function _getZatpolByIdProject(int $id_project): \Illuminate\Support\Collection
+    {
+        return Zatpol::where('id_project', $id_project)
+            ->orderBy('stac_po', 'asc')
+            ->get();
+    }
+//====================================================================================================================================================
     public function getRaspresByIdProject($id_project): \Illuminate\Database\Eloquent\Collection
     {
         return Raspres::with(['project'])
@@ -684,6 +727,13 @@ class ProjectsRepositories
     {
         return Zatpol::with(['project'])
             ->where('zatpol.id_project', $id_project)
+            ->get();
+    }
+
+    public function getSituationByIdProject($id_project): \Illuminate\Database\Eloquent\Collection
+    {
+        return Situations::with(['project'])
+            ->where('id_project', $id_project)
             ->get();
     }
 

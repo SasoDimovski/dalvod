@@ -310,14 +310,186 @@ class ProjectsServices
         $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
         $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
 
+        $project = $this->projectsRepositories->getProjectById($id_project);
+
         return ['data' => [
             'raspres' => $raspres,
             'zatpol' => $zatpol,
             'gapres' => $gapres,
+            'project' => $project,
 
 
         ]];
     }
+
+    public function controls( int $id_project): array
+    {
+
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
+        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
+        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
+
+        $project = $this->projectsRepositories->getProjectById($id_project);
+        return ['data' => [
+            'raspres' => $raspres,
+            'zatpol' => $zatpol,
+            'gapres' => $gapres,
+            'project' => $project,
+        ]];
+    }
+
+    public function situation( int $id_project): array
+    {
+
+        $situation = $this->projectsRepositories->getSituationByIdProject($id_project);
+        $project = $this->projectsRepositories->getProjectById($id_project);
+        return ['data' => [
+            'situation' => $situation,
+            'project' => $project,
+        ]];
+    }
+
+    public function tableForces( int $id_project): array
+    {
+
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
+        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
+        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
+
+        $project = $this->projectsRepositories->getProjectById($id_project);
+        return ['data' => [
+            'raspres' => $raspres,
+            'zatpol' => $zatpol,
+            'gapres' => $gapres,
+            'project' => $project,
+        ]];
+    }
+    public function tableTowers(int $id_project): array
+    {
+        $project = $this->projectsRepositories->_getProjectById($id_project);
+
+        $towers  = $this->projectsRepositories->_getTowersByIdProject($id_project)->values();
+        $spans   = $this->projectsRepositories->_getRaspresByIdProject($id_project)->values();
+        $fields  = $this->projectsRepositories->_getZatpolByIdProject($id_project)->values();
+
+        // 1) Индексирај затезни полиња за брзо барање
+        //    (ова ќе ти даде поле за секој tower)
+        $fieldForTower = function(float $stac) use ($fields) {
+            foreach ($fields as $f) {
+                $po = (float)($f->stac_po ?? 0);
+                $kr = (float)($f->stac_kr ?? $f->stac_kr ?? 0); // кај тебе е stac_kr или stac_kr? провери име
+                // ако во табелата е stac_kr (како на скрин), користи stac_kr:
+                $kr = (float)($f->stac_kr ?? $f->stac_kr ?? $f->stac_kr ?? 0);
+
+                if ($stac >= $po && $stac <= $kr) {
+                    return $f;
+                }
+            }
+            return null;
+        };
+
+        // 2) Креирај редови за табелата
+        $rows = [];
+        $n = $towers->count();
+
+        for ($i = 0; $i < $n; $i++) {
+            $towerRow = $towers[$i];
+
+            $stac = (float)($towerRow->stac_t ?? 0);
+            $agol = (float)($towerRow->agol_tr ?? 0);
+
+            // spans: за N towers, очекуваме N-1 spans
+            // next span = spans[i]  (од tower i до i+1)
+            // prev span = spans[i-1] (од tower i-1 до i)
+            $nextSpanRow = ($i < $n-1) ? ($spans[$i]   ?? null) : null;
+            $prevSpanRow = ($i > 0)   ? ($spans[$i-1] ?? null) : null;
+
+            $hNext = $nextSpanRow ? (float)($nextSpanRow->raspon ?? 0) : 0.0;
+            $hPrev = $prevSpanRow ? (float)($prevSpanRow->raspon ?? 0) : 0.0;
+
+            // Хориз. распон (кај првиот ред има, кај последниот е празно)
+            $horiz = ($i < $n-1) ? $hNext : null;
+
+            // Среден распон
+            if ($i === 0) {
+                $avg = $hNext / 2;
+            } elseif ($i === $n-1) {
+                $avg = $hPrev / 2;
+            } else {
+                $avg = ($hPrev + $hNext) / 2;
+            }
+
+            // Гравитационен (ако ти се веќе пресметани во raspres како dol_pro / dol_zaj)
+            // ЛЕВ = од претходниот распон, ДЕСЕН = од следниот распон
+            $gravLeft  = $prevSpanRow ? (float)($prevSpanRow->dol_pro ?? 0) : 0.0;
+            $gravRight = $nextSpanRow ? (float)($nextSpanRow->dol_pro ?? 0) : 0.0;
+            $gravTotal = $gravLeft + $gravRight;
+
+            // Тип на столб
+            $towerType = optional($towerRow->tower)->type
+                ?? optional($towerRow->tower)->tip
+                ?? '';
+
+            // Тип на изолатор (берерија) како EZ/EZ
+            $iz1 = optional($towerRow->insulator1)->type ?? '';
+            $iz2 = optional($towerRow->insulator2)->type ?? '';
+            $iz  = (trim($iz1) || trim($iz2)) ? (trim($iz1).'/'.trim($iz2)) : '';
+
+            // Затезно поле за овој столб
+            $field = $fieldForTower($stac);
+
+            $rows[] = [
+                'i'          => $i,
+                'stolb_no'   => $i + 1,
+                'stac_t'     => $stac,
+                'tower_type' => $towerType,
+                'izolator'   => $iz,
+                'agol'       => $agol ?: null,
+
+                'horiz'      => $horiz,     // (m)
+                'avg'        => $avg,       // (m)
+
+                'grav_left'  => $gravLeft,
+                'grav_right' => $gravRight,
+                'grav_total' => $gravTotal,
+
+                // од zatpol (климатски/напрегања по поле)
+                'field'      => $field, // цел објект (за rowspans во blade)
+            ];
+        }
+
+        // 3) Групирај редови по затезно поле (по ID или по stac_po)
+        // Ако немаш ID, користи stac_po како key
+        $grouped = collect($rows)->groupBy(function($r) {
+            $f = $r['field'];
+            return $f ? ('F_'.$f->id) : 'F_NONE';
+        })->values();
+
+        return ['data' => [
+            'project'  => $project,
+            'towers'   => $towers,
+            'rows'     => $rows,
+            'grouped'  => $grouped,
+            'fields'   => $fields,
+        ]];
+    }
+
+    public function tableStringing( int $id_project): array
+    {
+
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
+        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
+        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
+
+        $project = $this->projectsRepositories->getProjectById($id_project);
+        return ['data' => [
+            'raspres' => $raspres,
+            'zatpol' => $zatpol,
+            'gapres' => $gapres,
+            'project' => $project,
+        ]];
+    }
+
     public function showRaspres( int $id_project): array
     {
         $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
@@ -374,29 +546,23 @@ class ProjectsServices
             if ($rowIndex === 1) {
                 continue;
             }
-
             // A = stacionaza, B = kota
             $stacionaza = trim((string) ($row['A'] ?? ''));
             $kota       = trim((string) ($row['B'] ?? ''));
-            $x      = trim((string) ($row['C'] ?? ''));
-            $agol      = trim((string) ($row['D'] ?? ''));
-
+            $agol      = trim((string) ($row['C'] ?? ''));
             // ако целиот ред е празен – прескокни
-            if ($stacionaza === '' && $kota === ''&& $x === ''&& $agol === '') {
+            if ($stacionaza === '' && $kota === ''&& $agol === '') {
                 continue;
             }
-
             // замени запирка со точка
             $stacionaza = str_replace(',', '.', $stacionaza);
             $kota       = str_replace(',', '.', $kota);
-            $x       = str_replace(',', '.', $x);
             $agol       = str_replace(',', '.', $agol);
 
             $rowsToInsert[] = [
                 'id_project' => $projectId,
                 'stac_t'     => is_numeric($stacionaza) ? (float) $stacionaza : null,
                 'kota_t'     => is_numeric($kota)       ? (float) $kota       : null,
-                'x_t'     => is_numeric($x)       ? (float) $x       : null,
                 'agol_tr'    => is_numeric($agol)       ? (float) $agol       : null,
                 'imported'   => 1,
                 'id_tower'   => null,
@@ -407,20 +573,83 @@ class ProjectsServices
                 'updated_at' => now(),
             ];
         }
-
-
         if (empty($rowsToInsert)) {
             return new ResponseError($methodName, $this->classPath, ['id_error'=>'4']);
         }
-
         $importPoints = $this->projectsRepositories->importPoints($rowsToInsert);
         if (!$importPoints) {
             return new ResponseError($methodName, $this->classPath, ['id_error'=>'5']);
         }
-
-
         return new ResponseSuccess($methodName, $this->classPath,[]);
     }
+
+    public function importSituation(int $projectId, Request $request): ResponseError|ResponseSuccess
+    {
+
+        $methodName = 'importSituation(int $projectId, Request $request)';
+
+        if (!$request->hasFile('exel')) {
+            return new ResponseError($methodName, $this->classPath, ['id_error'=>'1']);
+        }
+
+        $file = $request->file('exel');
+        if (!$file->isValid()) {
+            return new ResponseError($methodName, $this->classPath, ['id_error'=>'2']);
+        }
+
+
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $rowsToInsert = [];
+
+        $rows = $sheet->toArray(
+            null,   // nullValue
+            false,  // calculateFormulas
+            false,  // formatData
+            true    // returnCellRef (чуваме A,B,C... како keys)
+        );
+
+        foreach ($rows as $rowIndex => $row) {
+            // прескокни header
+            if ($rowIndex === 1) {
+                continue;
+            }
+            // A = stacionaza, B = kota
+            $x= trim((string) ($row['A'] ?? ''));
+            $y      = trim((string) ($row['B'] ?? ''));
+            $z      = trim((string) ($row['C'] ?? ''));
+            // ако целиот ред е празен – прескокни
+            if ($x === '' && $y === ''&& $z === '') {
+                continue;
+            }
+            // замени запирка со точка
+            $x = str_replace(',', '.', $x);
+            $y       = str_replace(',', '.', $y);
+            $z      = str_replace(',', '.', $z);
+
+            $rowsToInsert[] = [
+                'id_project' => $projectId,
+                'x'     => is_numeric($x) ? (float) $x : null,
+                'y'     => is_numeric($y)       ? (float) $y       : null,
+                'z'    => is_numeric($z)       ? (float) $z       : null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        if (empty($rowsToInsert)) {
+            return new ResponseError($methodName, $this->classPath, ['id_error'=>'4']);
+        }
+        $importPoints = $this->projectsRepositories->importSituations($rowsToInsert);
+        if (!$importPoints) {
+            return new ResponseError($methodName, $this->classPath, ['id_error'=>'5']);
+        }
+        return new ResponseSuccess($methodName, $this->classPath,[]);
+    }
+
+
+
+
 
     public function deleteImportedPoints($id): ResponseSuccess|ResponseError
     {

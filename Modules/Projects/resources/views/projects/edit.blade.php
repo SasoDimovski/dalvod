@@ -50,10 +50,17 @@
     $url_edit_endpoints = $url . '/edit_endpoints';
     $url_edit_points = $url . '/edit_points';
 
+    /*======================================================================================*/
     $url_show_raspres = $url . '/show_raspres';
     $url_show_zatpol = $url . '/show_zatpol';
     $url_show_gapres = $url . '/show_gapres';
     $url_all_tables = $url . '/calculations';
+    $url_controls = $url . '/controls';
+    $url_situation = $url . '/situation';
+    $url_show_table_forces = $url . '/show_table_forces';
+    $url_show_table_towers = $url . '/show_table_towers';
+    $url_show_table_stringing = $url . '/show_table_stringing';
+    /*======================================================================================*/
 
     $path_upload = 'uploads/projects/';
 

@@ -56,7 +56,23 @@
     "projects.edit.menu.calculations": "Пресметки",
     "projects.edit.menu.calculations_long": "Пресметки и преглед на податоците од табелите РАСПРЕС, ЗАТПОЛ, ГАПРЕС",
 
+    "projects.edit.menu.controls": "Контроли",
+    "projects.edit.menu.controls_long": "Проказ на контролни точки",
+
+    "projects.edit.menu.situation": "Ситуација",
+    "projects.edit.menu.situation_long": "Ситуација на терен",
+
+    "projects.edit.menu.table_forces": "Табели на сили",
+    "projects.edit.menu.table_forces_long": "Табели на сили на карактеристични столбови",
+
+    "projects.edit.menu.table_towers": "Столбна листа",
+    "projects.edit.menu.table_towers_long": "Столбна листа",
+
+    "projects.edit.menu.table_stringing": "Монтажни табели",
+    "projects.edit.menu.table_stringing_long": "Монтажни табели",
+
     "projects.edit-points.id": "ID",
+    "projects.edit-points.profile": "Профил на траса",
     "projects.edit-points.stacionaza": "Стационажа [m]",
     "projects.edit-points.kota": "Кота [m]",
     "projects.edit-points.x": "X [m]",
