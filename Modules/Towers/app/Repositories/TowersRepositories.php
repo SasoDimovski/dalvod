@@ -8,6 +8,8 @@ use App\Models\ExpirationTime;
 use App\Models\Languages;
 use App\Models\Passwords;
 use App\Models\Towers;
+use App\Models\TowersA;
+use App\Models\TowersType;
 use App\Models\Trasa;
 use App\Models\Voltages;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,13 +21,15 @@ class TowersRepositories
     public function getAllTowers(array $params): LengthAwarePaginator
     {
         $query = Towers::query()
-            ->where('deleted', 0);
+            ->with('towerType')
+            ->where('towers.deleted', 0);
 
         // дефинираме кои полиња се string, а кои бројки
         $columns = [
             'id'   => 'number',
-            'sif'  => 'string',
-            'type'  => 'string',
+            'name'  => 'string',
+            'id_tower_type'  => 'number',
+            'id_tower_a'  => 'number',
             'voltage'  => 'number',
             'angle'   => 'string',
             'mass' => 'string',
@@ -70,6 +74,22 @@ class TowersRepositories
             $sortField = 'voltage';
         }
 
+        if (isset($params['order']) && $params['order'] === 'id_tower_type') {
+
+            $query->leftJoin('towers_type', 'towers.id_tower_type', '=', 'towers_type.id')
+                ->select('towers.*');
+
+            $sortField = 'towers_type.name';
+        }
+
+        if (isset($params['order']) && $params['order'] === 'id_tower_a') {
+
+            $query->leftJoin('towers_a', 'towers.id_tower_a', '=', 'towers_a.id')
+                ->select('towers.*');
+
+            $sortField = 'towers_a.tip';
+        }
+
         $query->orderBy($sortField, $sortDirection);
 
         // ПАГИНАЦИЈА
@@ -88,9 +108,22 @@ class TowersRepositories
             ->where('active', 1)
             ->get();
     }
+
+    public function getAllTowersTypes()
+    {
+        return TowersType::where('deleted', 0)
+            ->where('active', 1)
+            ->get();
+    }
+    public function getAllTowersA(): \Illuminate\Database\Eloquent\Collection
+    {
+        return TowersA::with('towerType')
+            ->orderBy('tip','asc' )->get();
+    }
+
     public function getTowerById($id)
     {
-        $tower = Towers::where('id', '=', $id)->with('createdBy','updatedBy',)->first();
+        $tower = Towers::where('id', '=', $id)->with('createdBy','updatedBy','towerType','towerA')->first();
         if ($tower){
             return $tower;
         }
@@ -103,7 +136,9 @@ class TowersRepositories
 
         if($tower) {
             $tower->sif = $data->sif;
-            $tower->type = $data->type;
+            $tower->name = $data->name;
+            $tower->id_tower_type = $data->id_tower_type;
+            $tower->id_tower_a = $data->id_tower_a;
             $tower->voltage = $data->voltage;
             $tower->angle = $data->angle;
             $tower->mass = $data->mass;
@@ -132,7 +167,9 @@ class TowersRepositories
     {
       $tower= Towers::create([
             'sif' => $TowersDto->sif,
-            'type' => $TowersDto->type,
+            'name' => $TowersDto->name,
+            'id_tower_type' => $TowersDto->id_tower_type,
+            'id_tower_a' => $TowersDto->id_tower_a,
             'voltage' => $TowersDto->voltage,
             'angle' => $TowersDto->angle,
             'mass' => $TowersDto->mass,

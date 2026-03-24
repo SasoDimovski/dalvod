@@ -583,6 +583,142 @@ class ProjectsServices
         return new ResponseSuccess($methodName, $this->classPath,[]);
     }
 
+
+
+ /*   public function importSituation(int $projectId, Request $request): ResponseError|ResponseSuccess
+    {
+        $methodName = 'importTowersA(Request $request)';
+
+        if (!$request->hasFile('exel')) {
+            return new ResponseError($methodName, $this->classPath, ['id_error' => '1']);
+        }
+
+        $file = $request->file('exel');
+        if (!$file->isValid()) {
+            return new ResponseError($methodName, $this->classPath, ['id_error' => '2']);
+        }
+
+        $spreadsheet = IOFactory::load($file->getRealPath());
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $rows = $sheet->toArray(
+            null,
+            false,
+            false,
+            true
+        );
+
+        if (empty($rows) || count($rows) < 2) {
+            return new ResponseError($methodName, $this->classPath, ['id_error' => '4']);
+        }
+
+        // header row
+        $headerRow = $rows[1];
+        $headers = [];
+
+        foreach ($headerRow as $col => $value) {
+            $headers[$col] = strtoupper(trim((string)$value));
+        }
+
+        $rowsToInsert = [];
+
+        foreach ($rows as $rowIndex => $row) {
+            if ($rowIndex === 1) {
+                continue; // header
+            }
+
+            $mapped = [];
+            foreach ($row as $col => $value) {
+                $header = $headers[$col] ?? null;
+                if (!$header) {
+                    continue;
+                }
+                $mapped[$header] = trim((string)$value);
+            }
+
+            // ако редот е празен
+            if (empty(array_filter($mapped, fn($v) => $v !== ''))) {
+                continue;
+            }
+
+            // helper за бројки
+            $num = function ($key) use ($mapped) {
+                $value = str_replace(',', '.', trim((string)($mapped[$key] ?? '')));
+                return is_numeric($value) ? (float)$value : null;
+            };
+
+            $rowsToInsert[] = [
+                'sif'   => $num('STOLN_SIF'),
+                'tip'   => trim((string)($mapped['STOLN_TIP'] ?? '')),
+                'ago'   => $num('STOLN_AGO'),
+                'nap'   => $num('STOLN_NAP'),
+
+                'vxa'   => $num('STOLN_VXA'),
+                'vza'   => $num('STOLN_VZA'),
+                'zxa'   => $num('STOLN_ZXA'),
+                'zza'   => $num('STOLN_ZZA'),
+
+                'vxb'   => $num('STOLN_VXB'),
+                'vzb'   => $num('STOLN_VZB'),
+                'zxb'   => $num('STOLN_ZXB'),
+                'zzb'   => $num('STOLN_ZZB'),
+                'sxb'   => $num('STOLN_SXB'),
+
+                'vxc'   => $num('STOLN_VXC'),
+                'vyc'   => $num('STOLN_VYC'),
+                'vzc'   => $num('STOLN_VZC'),
+                'zxc'   => $num('STOLN_ZXC'),
+                'zyc'   => $num('STOLN_ZYC'),
+                'zzc'   => $num('STOLN_ZZC'),
+                'syc'   => $num('STOLN_SYC'),
+
+                'vxo'   => $num('STOLN_VXO'),
+                'vyo'   => $num('STOLN_VYO'),
+                'vzo'   => $num('STOLN_VZO'),
+                'zxo'   => $num('STOLN_ZXO'),
+                'zyo'   => $num('STOLN_ZYO'),
+                'zzo'   => $num('STOLN_ZZO'),
+
+                'vxa1'  => $num('STOLN_VXA1'),
+                'vya1'  => $num('STOLN_VYA1'),
+                'vza1'  => $num('STOLN_VZA1'),
+
+                'vxb1'  => $num('STOLN_VXB1'),
+                'vzb1'  => $num('STOLN_VZB1'),
+                'zxb1'  => $num('STOLN_ZXB1'),
+                'zzb1'  => $num('STOLN_ZZB1'),
+
+                'zxc2'  => $num('STOLN_ZXC2'),
+                'zyc2'  => $num('STOLN_ZYC2'),
+                'zzc2'  => $num('STOLN_ZZC2'),
+
+                'vxd2'  => $num('STOLN_VXD2'),
+                'vzd2'  => $num('STOLN_VZD2'),
+                'zxd2'  => $num('STOLN_ZXD2'),
+                'zzd2'  => $num('STOLN_ZZD2'),
+
+                'active'     => 1,
+                'deleted'    => 0,
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (empty($rowsToInsert)) {
+            return new ResponseError($methodName, $this->classPath, ['id_error' => '4']);
+        }
+
+        $imported = $this->projectsRepositories->importSituations($rowsToInsert);
+
+        if (!$imported) {
+            return new ResponseError($methodName, $this->classPath, ['id_error' => '5']);
+        }
+
+        return new ResponseSuccess($methodName, $this->classPath, []);
+    }*/
+
     public function importSituation(int $projectId, Request $request): ResponseError|ResponseSuccess
     {
 
@@ -649,8 +785,6 @@ class ProjectsServices
 
 
 
-
-
     public function deleteImportedPoints($id): ResponseSuccess|ResponseError
     {
         $return= $this->projectsRepositories->deleteImportedPoints($id);
@@ -668,10 +802,16 @@ class ProjectsServices
         $id_voltage = $this->projectsRepositories->getProjectById($id)->id_voltage;
         $voltage = $this->projectsRepositories->getVoltageById($id_voltage)->title;
         $towers = $this->projectsRepositories->getAllTowersVoltage($voltage,$params,$id_tower);
-        $voltages = $this->projectsRepositories->getAllVoltages();
+        $voltages = $this->projectsRepositories->getAllVoltagesByVoltage($voltage);
+        $towersTypes= $this->projectsRepositories->getAllTowersTypes();
+        $towerA = $this->projectsRepositories->getAllTowersA();
+
+        //dd($params);
         return ['data' => [
             'towers' => $towers,
             'voltages' => $voltages,
+            'towersTypes' => $towersTypes,
+            'towerA' => $towerA,
         ]];
     }
     public function insulators($id, $params,$idInsulators): array

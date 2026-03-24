@@ -61,7 +61,7 @@ $path_upload = 'uploads/towers/';
                 <div class="row">
 
 
-                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-1">
                         <?php
                         $name = 'id';
                         $desc = __('projects.edit-towers.id');
@@ -81,11 +81,12 @@ $path_upload = 'uploads/towers/';
                                value="{{$value}}"
                                placeholder="{{$desc}}" maxlength="{{$maxlength}}" title="{{$desc_long}}">
                     </div>
-                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+
+                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-1">
                         <?php
-                        $name = 'type';
-                        $desc = __('projects.edit-towers.type');
-                        $desc_long = __('projects.edit-towers.type_des');
+                        $name = 'name1';
+                        $desc = __('projects.edit-towers.name');
+                        $desc_long = __('projects.edit-towers.name_des');
                         $maxlength = 100;
 
                         $value = app('request')->input($name) ? app('request')->input($name) : null;
@@ -93,7 +94,7 @@ $path_upload = 'uploads/towers/';
                         $x = app('request')->input($name) ? ('    x') : null;
                         ?>
                         <label class="control-label" title="{{$desc_long}}">{{$desc}}
-                            <b onclick="deleteSearchFieldAJAX('{{$name}}', this)" style="{{$style}}"
+                            <b onclick="deleteSearchFieldElements('{{$name}}')" style="{{$style}}"
                                title="{{__('global.delete_search_field')}}">{{$x}}</b>
                         </label>
                         <input type="text" id="{{$name}}" name="{{$name}}"
@@ -101,6 +102,36 @@ $path_upload = 'uploads/towers/';
                                value="{{$value}}"
                                placeholder="{{$desc}}" maxlength="{{$maxlength}}" title="{{$desc_long}}">
                     </div>
+
+                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+                        <?php
+                        $name = 'id_tower_type';
+                        $desc = __('projects.edit-towers.id_tower_type');
+                        $desc_long = __('projects.edit-towers.id_tower_type_des');
+                        $maxlength = 100;
+
+                        $value = app('request')->input($name) ? app('request')->input($name) : null;
+                        $style = app('request')->input($name) ? $global_style : null;
+                        $x = app('request')->input($name) ? ('    x') : null;
+                        ?>
+                        <label class="control-label">{{$desc}}
+                            <b onclick="deleteSearchFieldElements('{{$name}}')" style="{{$style}}"
+                               title="{{__('global.delete_search_field')}}">{{$x}}</b>
+                        </label>
+                        <select class="select2bs4"
+                                id="{{$name}}" name="{{$name}}" onchange="dropdownChangeElements()"
+                                style="width: 100%">
+                            @if(count($towersTypes) > 0)
+                                <option value="">&nbsp;</option>
+                                @foreach($towersTypes as $towersTypes_)
+                                    <option
+                                        value="{{$towersTypes_->id}}" {{ ((app('request')->input($name))==$towersTypes_->id)? 'selected' : '' }}>{{$towersTypes_->name}}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+
                     <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
                         <?php
                         $name = 'angle';
@@ -340,9 +371,9 @@ $path_upload = 'uploads/towers/';
                 <div class="row">
                     <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
                         <?php
-                        $name = 'nap';
-                        $desc = __('projects.edit-towers.nap');
-                        $desc_long = __('projects.edit-towers.nap_des');
+                        $name = 'voltage';
+                        $desc = __('projects.edit-towers.voltage');
+                        $desc_long = __('projects.edit-towers.voltage_des');
 
                         $value = app('request')->input($name) ? app('request')->input($name) : null;
                         $style = app('request')->input($name) ? $global_style : null;
@@ -364,6 +395,36 @@ $path_upload = 'uploads/towers/';
                             @endif
                         </select>
                     </div>
+
+                    <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+                        <?php
+                        $name = 'id_tower_a';
+                        $desc = __('projects.edit-towers.id_tower_a');
+                        $desc_long = __('projects.edit-towers.id_tower_a_des');
+                        $maxlength = 100;
+
+                        $value = app('request')->input($name) ? app('request')->input($name) : null;
+                        $style = app('request')->input($name) ? $global_style : null;
+                        $x = app('request')->input($name) ? ('    x') : null;
+                        ?>
+                        <label class="control-label">{{$desc}}
+                            <b onclick="deleteSearchFieldElements('{{$name}}')" style="{{$style}}"
+                               title="{{__('global.delete_search_field')}}">{{$x}}</b>
+                        </label>
+                        <select class="select2bs4"
+                                id="{{$name}}" name="{{$name}}" onchange="dropdownChangeElements()"
+                                style="width: 100%">
+                            @if(count($towerA) > 0)
+                                <option value="">&nbsp;</option>
+                                @foreach($towerA as $towerA_)
+                                    <option
+                                        value="{{$towerA_->id}}" {{ ((app('request')->input($name))==$towerA_->id)? 'selected' : '' }}>{{$towerA_->tip}}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+
                 </div>
                 <div class="row" style="height: 7px"></div>
 
@@ -507,11 +568,44 @@ $path_upload = 'uploads/towers/';
                                     {{-- ========================================================================--}}
                                     <th style="white-space: nowrap; width: 1px;" class="target-cell"></th>
                                     {{-- ========================================================================--}}
+                                        <?php
+                                        $column_name = 'name1';
+                                        $column_desc = __('projects.edit-towers.name');
+                                        $column_desc_long = __('projects.edit-towers.name_des');
+                                        $query_sort = request()->query('sort');
+                                        $style_acs_desc = match (true) {
+                                            $query_sort == 'asc' && $order == $column_name => 'asc',
+                                            $query_sort == 'desc' && $order == $column_name => 'desc',
+                                            default => $style_acs_desc = '',
+                                        };
+                                        ?>
+                                    <th class="sortable {{$style_acs_desc}}"
+                                        onclick="orderByElements('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                    </th>
+
+                                    {{-- ========================================================================--}}
 
                                         <?php
-                                        $column_name = 'type';
-                                        $column_desc = __('projects.edit-towers.type');
-                                        $column_desc_long = __('projects.edit-towers.type_des');
+                                        $column_name = 'id_tower_type';
+                                        $column_desc = __('projects.edit-towers.id_tower_type');
+                                        $column_desc_long = __('projects.edit-towers.id_tower_type_des');
+                                        $query_sort = request()->query('sort');
+                                        $style_acs_desc = match (true) {
+                                            $query_sort == 'asc' && $order == $column_name => 'asc',
+                                            $query_sort == 'desc' && $order == $column_name => 'desc',
+                                            default => $style_acs_desc = '',
+                                        };
+                                        ?>
+                                    <th class="sortable {{$style_acs_desc}}"
+                                        onclick="orderByElements('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                    </th>
+                                    {{-- ========================================================================--}}
+                                        <?php
+                                        $column_name = 'vis';
+                                        $column_desc = __('projects.edit-towers.vis');
+                                        $column_desc_long = __('projects.edit-towers.vis_des');
                                         $query_sort = request()->query('sort');
                                         $style_acs_desc = match (true) {
                                             $query_sort == 'asc' && $order == $column_name => 'asc',
@@ -589,22 +683,7 @@ $path_upload = 'uploads/towers/';
                                         onclick="orderByElements('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
                                         &nbsp;&nbsp;&nbsp;&nbsp;
                                     </th>
-                                    {{-- ========================================================================--}}
-                                        <?php
-                                        $column_name = 'vis';
-                                        $column_desc = __('projects.edit-towers.vis');
-                                        $column_desc_long = __('projects.edit-towers.vis_des');
-                                        $query_sort = request()->query('sort');
-                                        $style_acs_desc = match (true) {
-                                            $query_sort == 'asc' && $order == $column_name => 'asc',
-                                            $query_sort == 'desc' && $order == $column_name => 'desc',
-                                            default => $style_acs_desc = '',
-                                        };
-                                        ?>
-                                    <th class="sortable {{$style_acs_desc}}"
-                                        onclick="orderByElements('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
-                                        &nbsp;&nbsp;&nbsp;&nbsp;
-                                    </th>
+
                                     {{-- ========================================================================--}}
                                         <?php
                                         $column_name = 'vig';
@@ -702,6 +781,23 @@ $path_upload = 'uploads/towers/';
                                         &nbsp;&nbsp;&nbsp;&nbsp;
                                     </th>
                                     {{-- ========================================================================--}}
+
+                                        <?php
+                                        $column_name = 'id_tower_a';
+                                        $column_desc = __('projects.edit-towers.id_tower_a');
+                                        $column_desc_long = __('projects.edit-towers.id_tower_a_des');
+                                        $query_sort = request()->query('sort');
+                                        $style_acs_desc = match (true) {
+                                            $query_sort == 'asc' && $order == $column_name => 'asc',
+                                            $query_sort == 'desc' && $order == $column_name => 'desc',
+                                            default => $style_acs_desc = '',
+                                        };
+                                        ?>
+                                    <th class="sortable {{$style_acs_desc}}"
+                                        onclick="orderByElements('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                    </th>
+                                    {{-- ========================================================================--}}
                                     <th style="white-space: nowrap; width: 1px;"><i class="fas fa-lock"  title="{{__('global.active_status')}}"></i>
                                     </th>
                                     {{-- ========================================================================--}}
@@ -717,18 +813,21 @@ $path_upload = 'uploads/towers/';
                                     <tr @if($tower->active == 0) style="color: #cccccc" @endif @if($tower->id ==  app('request')->input('id_element') ) style="background-color: #ffe187" @endif>
                                         <td>{!! highlightSearch($tower->id, 'id', $global_style_search) !!}</td>
                                         <td  class="target-cell"> </td>
-                                        <td>{!! highlightSearch($tower->type, 'type', $global_style_search) !!}</td>
+                                        <td>{!! highlightSearch($tower->name, 'name1', $global_style_search) !!}</td>
+                                        <td>{!! highlightSearch($tower->towerType->name, 'id_tower_type', $global_style_search) !!}</td>
+                                        <td>{!! highlightSearch($tower->vis, 'vis', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->voltage, 'voltage', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->angle, 'angle', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->mass, 'mass', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->vid, 'vid', $global_style_search) !!}</td>
-                                        <td>{!! highlightSearch($tower->vis, 'vis', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->vig, 'vig', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->mhr, 'mhr', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->dkp, 'dkp', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->dkz, 'dkz', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->rap, 'rap', $global_style_search) !!}</td>
                                         <td>{!! highlightSearch($tower->raz, 'raz', $global_style_search) !!}</td>
+                                        <td>{!! highlightSearch(optional($tower->towerA)->tip , 'id_tower_a', $global_style_search) !!}</td>
+
                                         <td>
                                             @if($tower->active == 0)
                                                 <i class="fas fa-lock"
@@ -778,7 +877,7 @@ $path_upload = 'uploads/towers/';
                                                 @else
                                                     <button type="button"
                                                             class="btn btn-info"
-                                                            onclick="selectElement({{ $tower->id }},'{{ $tower->type }}','{{ app('request')->input('name') }}')">
+                                                            onclick="selectElement({{ $tower->id }},'{{ $tower->name }}','{{ app('request')->input('name') }}')">
                                                         <i class="fas fa-arrow-alt-circle-right"
                                                            title="{{__('projects.edit-towers.select_tower')}}"></i>
                                                     </button>
@@ -850,7 +949,36 @@ $path_upload = 'uploads/towers/';
 </div>
 <!-- /.container-fluid -->
 
+<!-- Select2 -->
+<link rel="stylesheet" href="{{ url('LTE/plugins/select2/css/select2.min.css')}}">
+<link rel="stylesheet" href="{{ url('LTE/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css')}}">
+<style>
+    .target-cell {
+        display: none;
+    }
 
+    @media (max-width: 1400px) {
+        .source-cell {
+            display: none;
+        }
+
+        .target-cell {
+            display: table-cell;
+        }
+    }
+</style>
+
+<!-- Select2 -->
+<script src="{{url('LTE/plugins/select2/js/select2.full.min.js')}}"></script>
+
+<script>
+    $(function () {
+        //Initialize Select2 Elements
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        })
+    })
+</script>
 
 
 

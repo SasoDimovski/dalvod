@@ -45,7 +45,7 @@
     $kota_t_point = $point->kota_t ?? old('kota_t');
     $agol_tr_point = $point->agol_tr ?? old('agol_tr');
     $id_tower_point = $point->id_tower ?? old('id_tower');
-    $tower_tip_point = $point->tower->tip ?? old('id_tower_');
+    $tower_tip_point = $point->tower->name ?? old('id_tower_');
     $id_insulator1_point = $point->id_insulator1 ?? old('insulator1');
     $insulator1_tip_point = $point->insulator1->type ?? old('insulator1_');
     $id_insulator2_point = $point->id_insulator2 ?? old('insulator2');
@@ -294,7 +294,7 @@
                                                            style="{{$input_style}}">
                                                     <!-- BUTTON 1 -->
                                                     <button type="button" class="btn btn-success ml-2 modal90"
-                                                            onclick="  getContentIDCustom('{{ $url_edit_towers.'/'.$id }}?name=id_tower&value='+ (document.getElementById('{{ $input_id_hidden }}').value || ''),'ModalShow','{{ __('projects.edit-endpoints.list_towers') }}',true);">
+                                                            onclick="getContentIDCustom('{{ $url_edit_towers.'/'.$id }}?name=id_tower&value='+ (document.getElementById('{{ $input_id_hidden }}').value || ''),'ModalShow','{{ __('projects.edit-endpoints.list_towers') }}',true);">
                                                         <i class="fa fa-arrow-alt-circle-right"
                                                            title="{{ __('projects.edit-endpoints.chose_tower') }}"></i>
                                                     </button>

@@ -10,7 +10,9 @@
 
 
     $sif = $tower->sif ?? old('sif');
-    $type = $tower->type ?? old('type');
+    $name = $tower->name ?? old('name');
+    $id_tower_type = $tower->id_tower_type  ?? old('id_tower_type');
+    $id_tower_a = $tower->id_tower_a  ?? old('$id_tower_a');
     $voltage = $tower->voltage ?? old('voltage');
     $angle= $tower->angle ?? old('angle');
     $mass = $tower->mass ?? old('mass');
@@ -186,13 +188,35 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-sm-4">
+                                        <div class="col-sm-4">
+                                            <?php
+                                            $input_value = $name;
+                                            $input_name = 'name';
+                                            $input_desc = __('towers.name');
+                                            $input_desc_long = __('towers.name_des');
+                                            $input_maxlength = '20';
+                                            $input_readonly = '';
+                                            $input_css = 'text-red'; //text-red
+                                            $input_mandatory = '*'; //*
+                                            $input_icon = '';
+                                            ?>
+                                            <div class="form-group">
+                                                <i class="fas {{$input_icon}} text-warning "></i>
+                                                <label for="{{$input_name}}"
+                                                       class="{{$input_css}}" title="{{$input_desc_long}}" >{{$input_desc}}{{$input_mandatory}}</label>
+                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                       class="form-control" value="{{$input_value}}"
+                                                       maxlength="{{$input_maxlength}}" {{$input_readonly}}  title="{{$input_desc_long}}" >
+                                            </div>
+                                        </div>
+
+                                            <div class="col-sm-2">
                                                 <?php
-                                                $input_value = $type;
-                                                $input_name = 'type';
-                                                $input_desc = __('towers.type');
-                                                $input_desc_long = __('towers.type_des');
-                                                $input_maxlength = '20';
+
+                                                $input_value = $id_tower_type;
+                                                $input_name = 'id_tower_type';
+                                                $input_desc = __('towers.id_tower_type');
+                                                $input_desc_long = __('towers.id_tower_type_des');
                                                 $input_readonly = '';
                                                 $input_css = 'text-red'; //text-red
                                                 $input_mandatory = '*'; //*
@@ -200,11 +224,21 @@
                                                 ?>
                                                 <div class="form-group">
                                                     <i class="fas {{$input_icon}} text-warning "></i>
-                                                    <label for="{{$input_name}}"
-                                                           class="{{$input_css}}"  title="{{$input_desc_long}}">{{$input_desc}}{{$input_mandatory}}</label>
-                                                    <input type="text" id="{{$input_name}}" name="{{$input_name}}"
-                                                           class="form-control" value="{{$input_value}}"
-                                                           maxlength="{{$input_maxlength}}" {{$input_readonly}}  title="{{$input_desc_long}}">
+                                                    <label class="{{ $input_css }}"   title="{{$input_desc_long}}">{{ $input_desc }}{{$input_mandatory}}</label>
+                                                    <select class="select2bs4"
+                                                            id="{{ $input_name }}" name="{{ $input_name }}"
+                                                            autocomplete="off" {{ $input_readonly }}   title="{{$input_desc_long}}"  style="width: 100%">
+                                                        @if (count($towersType) > 0)
+                                                            <option value="">&nbsp;</option>
+                                                            @foreach ($towersType as $towersType_)
+                                                                <option
+                                                                    value="{{ $towersType_->id }}"
+                                                                    {{ (($input_value)==$towersType_->id) ? 'selected' : '' }}>
+                                                                    {{ $towersType_->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
                                                 </div>
                                             </div>
 
@@ -498,6 +532,39 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <div class="col-sm-4">
+                                            <?php
+
+                                            $input_value = $id_tower_a;
+                                            $input_name = 'id_tower_a';
+                                            $input_desc = __('towers.id_tower_a');
+                                            $input_desc_long = __('towers.id_tower_a_des');
+                                            $input_readonly = '';
+                                            $input_css = 'text-green'; //text-red
+                                            $input_mandatory = ''; //*
+                                            $input_icon = '';
+                                            ?>
+                                            <div class="form-group">
+                                                <i class="fas {{$input_icon}} text-warning "></i>
+                                                <label class="{{ $input_css }}"   title="{{$input_desc_long}}">{{ $input_desc }}{{$input_mandatory}}</label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        autocomplete="off" {{ $input_readonly }}   title="{{$input_desc_long}}"  style="width: 100%">
+                                                    @if (count($towerA) > 0)
+                                                        <option value="">&nbsp;</option>
+                                                        @foreach ($towerA as $towerA_)
+                                                            <option
+                                                                value="{{ $towerA_->id }}"
+                                                                {{ (($input_value)==$towerA_->id) ? 'selected' : '' }}>
+                                                                {{ $towerA_->tip }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     {{--=========================================================--}}
                                     @if($id)

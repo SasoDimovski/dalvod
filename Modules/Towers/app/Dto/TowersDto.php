@@ -8,7 +8,10 @@ use Illuminate\Http\UploadedFile;
 class TowersDto
 {
     public ?int $id;
+    public ?int $id_tower_a;
+    public ?int $id_tower_type;
     public string $sif;
+    public string $name;
     public string $type;
     public ?float $voltage;
     public ?float $angle;
@@ -29,7 +32,10 @@ class TowersDto
         $dto = new self();
 
         $dto->id    = $request->input('id');
+        $dto->id_tower_a   = $request->input('id_tower_a');
+        $dto->id_tower_type   = $request->input('id_tower_type');
         $dto->sif   = (string) $request->input('sif');
+        $dto->name   = (string) $request->input('name');
         $dto->type   = (string) $request->input('type');
         $dto->voltage   = $request->input('voltage')   !== null ? (float) $request->input('voltage')   : null;
         $dto->angle    = $request->input('angle')    !== null ? (float) $request->input('angle')    : null;

@@ -24,9 +24,13 @@ class TowersServices
     {
         $towers = $this->towersRepositories->getAllTowers($params);
         $voltages = $this->towersRepositories->getAllVoltages();
+        $towersTypes= $this->towersRepositories->getAllTowersTypes();
+        $towerA = $this->towersRepositories->getAllTowersA();
         return ['data' => [
             'towers' => $towers,
             'voltages' => $voltages,
+            'towersTypes' => $towersTypes,
+            'towerA' => $towerA,
         ]];
     }
 
@@ -46,11 +50,16 @@ class TowersServices
     public function edit($id): array
     {
 
+        $towersType = $this->towersRepositories->getAllTowersTypes();
+        $towerA = $this->towersRepositories->getAllTowersA();
         $tower = $this->towersRepositories->getTowerById($id);
         $voltages = $this->towersRepositories->getAllVoltages();
+
         return ['data' => [
             'tower' => $tower,
             'voltages' => $voltages,
+            'towersType' => $towersType,
+            'towerA' => $towerA,
         ]];
 
     }

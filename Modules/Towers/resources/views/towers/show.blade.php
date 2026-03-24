@@ -32,7 +32,7 @@ $path_upload = 'uploads/towers/';
                     @endif
 
                     <br>
-                    <span class="bg-gradient-gray" style="margin-top: 3px">  <i class="fas fa-circle text-warning"></i> <strong>{{__('global.id')}}</strong>: {{ $id }}</span>
+                    <span class="bg-gradient-gray" style="margin-top: 3px"  title="{{$tower->sif ?? ''}}">  <i class="fas fa-circle text-warning"></i> <strong>{{__('global.id')}}</strong>: {{ $id }}</span>
                     <span class="bg-gradient-gray" style="margin-top: 3px"><i class="fas fa-clock text-warning"></i> <strong>{{__('global.created_at')}}</strong>: {{ $created_at}}</span>
                     <span class="bg-gradient-gray" style="margin-top: 3px"> <i class="fas fa-clock text-warning "></i> <strong> {{__('global.updated_at')}}</strong>: {{ $updated_at }}</span>
                 </div>
@@ -41,13 +41,15 @@ $path_upload = 'uploads/towers/';
                     <i class="fas fa-list bg-info"></i>
                     <div class="timeline-item">
                         <div class="timeline-header">
-                            <strong>{{__('towers.sif')}}</strong>: {{$tower->sif ?? ''}}
+                            <strong>{{__('towers.name')}}</strong>: {{$tower->name ?? ''}}
                             <hr>
-                            <strong>{{__('towers.type')}}</strong>: {{$tower->type ?? ''}}
+                            <strong>{{__('towers.id_tower_type')}}</strong>: {{$tower->towerType->name ?? ''}}
+                            <hr>
+                            <strong>{{__('towers.id_tower_a')}}</strong>: {{$tower->towerA->tip ?? ''}}
                             <hr>
                             <strong>{{__('towers.voltage')}}</strong>: {{$tower->voltage ?? ''}}
                             <hr>
-                            <strong>{{__('towers.ag')}}</strong>: {{$tower->ag ?? ''}}
+                            <strong>{{__('towers.angle')}}</strong>: {{$tower->angle ?? ''}}
                             <hr>
                             <strong>{{__('towers.mass')}}</strong>: {{$tower->mass ?? ''}}
                             <hr>

@@ -13,6 +13,8 @@ use App\Models\Projects;
 use App\Models\Raspres;
 use App\Models\Situations;
 use App\Models\Towers;
+use App\Models\TowersA;
+use App\Models\TowersType;
 use App\Models\Trafo;
 use App\Models\Trasa;
 use App\Models\Users;
@@ -274,6 +276,13 @@ class ProjectsRepositories
             ->where('active', 1)
             ->get();
     }
+    public function getAllVoltagesByVoltage($voltage)
+    {
+        return Voltages::where('deleted', 0)
+            ->where('active', 1)
+            ->where('title','>=', $voltage)
+            ->get();
+    }
     public function getAllConductors()
     {
         return Conductors::where('deleted', 0)
@@ -523,14 +532,18 @@ class ProjectsRepositories
     {
         // dd($params);
         $query = Towers::query()
-            ->where('deleted', 0)
-            ->where('voltage','>=', $voltage);
+            ->with('towerType')
+            ->with('towerA')
+            ->where('towers.deleted', 0)
+            ->where('towers.voltage','>=', $voltage);
 
 
 
         // дефинираме кои полиња се string, а кои бројки
         $columns = [
             'id'   => 'number',
+            'id_tower_type'  => 'number',
+            'id_tower_a'  => 'number',
             'sif'  => 'string',
             'type'  => 'string',
             'voltage'  => 'number',
@@ -560,7 +573,9 @@ class ProjectsRepositories
                 }
             }
         }
-
+        if (isset($params['name1'])) {
+            $query->where('name', 'like', '%' . $params['name1'] . '%');
+        }
         // ACTIVE / DEACTIVATED филтер (checkbox-и)
         $active      = !empty($params['active']);
         $deactivated = !empty($params['deactivated']);
@@ -573,12 +588,31 @@ class ProjectsRepositories
         // ако се штиклирани и двете – не филтрираме по active
 
         // СОРТИРАЊЕ
-        $sortField     = $params['order'] ?? 'tip';
+        $sortField     = $params['order'] ?? 'id';
         $sortDirection = $params['sort']  ?? 'ASC';
 
         // безбедност – ако ти дојде непостоечко поле, врати се на id
         if (!array_key_exists($sortField, $columns) && $sortField !== 'active') {
-            $sortField = 'voltage';
+            $sortField = 'id';
+        }
+
+        if (isset($params['order'])&& $params['order'] === 'name1') {
+            $sortField = 'name';
+        }
+        if (isset($params['order']) && $params['order'] === 'id_tower_type') {
+
+            $query->leftJoin('towers_type', 'towers.id_tower_type', '=', 'towers_type.id')
+                ->select('towers.*');
+
+            $sortField = 'towers_type.name';
+        }
+
+        if (isset($params['order']) && $params['order'] === 'id_tower_a') {
+
+            $query->leftJoin('towers_a', 'towers.id_tower_a', '=', 'towers_a.id')
+                ->select('towers.*');
+
+            $sortField = 'towers_a.tip';
         }
 
         $query->orderBy($sortField, $sortDirection);
@@ -591,6 +625,19 @@ class ProjectsRepositories
         }
 
         return $query->paginate($listing);
+    }
+
+    public function getAllTowersTypes()
+    {
+        return TowersType::where('deleted', 0)
+            ->where('active', 1)
+            ->get();
+    }
+
+    public function getAllTowersA(): \Illuminate\Database\Eloquent\Collection
+    {
+        return TowersA::with('towerType')
+            ->orderBy('tip','asc' )->get();
     }
     public function getAllInsulatorsVoltage($voltage, array $params, $idInsulators): LengthAwarePaginator
     {
@@ -663,6 +710,12 @@ class ProjectsRepositories
     {
         return DB::table('trasa')->insert($rowsToInsert);
     }
+
+//    public function importSituations($rowsToInsert): bool
+//    {
+//        return DB::table('towers_a')->insert($rowsToInsert);
+//    }
+
 
     public function importSituations($rowsToInsert): bool
     {
@@ -1428,6 +1481,8 @@ class ProjectsRepositories
     {
         return Gapres::where('id_project', $projectId)->delete();
     }
+
+
     public function graviras(int $projectId): int
     {
         return DB::transaction(function () use ($projectId) {
@@ -1439,6 +1494,7 @@ class ProjectsRepositories
             if (!$hasGround) {
                 $hasGround = !empty(optional($project->groundWires)->id);
             }
+
 
             $raspres = Raspres::where('id_project', $projectId)
                 ->orderBy('stac_t', 'asc')
@@ -1460,10 +1516,10 @@ class ProjectsRepositories
             }
 
             // 4) DOS иницијализации
-            $gr_lp  = 0.0;
-            $gr_lpk = 0.0;
-            $gr_lz  = 0.0;
-            $sr_rl  = 0.0;
+            $grr_lpro_temp  = 0.0;
+            $grr_lprk_temp = 0.0;
+            $grr_lzaj_temp  = 0.0;
+            $sr_rasp_temp  = 0.0;
 
             $inserted = 0;
 
@@ -1473,97 +1529,172 @@ class ProjectsRepositories
             for ($i = 0; $i < $n; $i++) {
 
                 $rp = $raspres[$i];
-                $t  = $trasa[$i]; // ✅ директно тековен Trasa ред (без map)
+                $t  = $trasa[$i];
 
+
+                // ============================================================
                 $sta_t   = (float) ($rp->stac_t ?? 0.0);
-                $raspon1 = (float) ($rp->raspon ?? 0.0);
+                $raspon = (float) ($rp->raspon ?? 0.0);
 
                 $ras_tp1  = (float) ($rp->ras_totp ?? 0.0);
-                $ras_tp1k = (float) ($rp->ras_t20p  ?? 0.0); // ако го имаш (инаку 0)
+                $ras_tp1k = (float) ($rp->ras_t2op  ?? 0.0);
                 $ras_tz1  = (float) ($rp->ras_totz ?? 0.0);
 
                 $vir_p1 = (float) ($rp->vr_pro ?? 0.0);
                 $vir_z1 = (float) ($rp->vr_zaj ?? 0.0);
 
-                // ✅ како DOS: agov_t = Trastol->agol_tr ; stol_a = Trastol->stolb_ag
 
                 $agol_t   = (float) ($t->agol_tr ?? 0.0);
                 $stol_ag1 = (int) (optional($t->tower)->angle ?? 0);
 
-                // DOS: sr_rd = raspon1/2 ; sr_rasp = sr_rl + sr_rd
-                $sr_rd   = $raspon1 / 2.0;
-                $sr_rasp = $sr_rl + $sr_rd;
 
-                // левите вредности се од претходниот чекор
-                $left_lpro = $gr_lp;
-                $left_lprk = $gr_lpk;
-                $left_lzaj = $gr_lz;
+               // ============================================================
+                //br_stolb
+                $br_stolb = (int) ($rp->br_raspon ?? ($i + 1));
+               // ============================================================
 
-                // проводник
+                //grr_lpro
+                $grr_lpro = $grr_lpro_temp;
+
                 if ($vir_p1 >= 0) {
-                    $gr_lp  = $ras_tp1  / 2.0;
-                    $gr_lpk = $ras_tp1k / 2.0;
-
-                    $gr_dp  = $raspon1 - ($ras_tp1  / 2.0);
-                    $gr_dpk = $raspon1 - ($ras_tp1k / 2.0);
+                    $grr_lpro_temp  = $ras_tp1  / 2.0;
                 } else {
-                    $gr_lp  = $raspon1 - ($ras_tp1  / 2.0);
-                    $gr_lpk = $raspon1 - ($ras_tp1k / 2.0);
-
-                    $gr_dp  = $ras_tp1  / 2.0;
-                    $gr_dpk = $ras_tp1k / 2.0;
+                    $grr_lpro_temp  = $raspon - ($ras_tp1  / 2.0);
                 }
 
-                // заземјач
+               // ============================================================
+
+                //grr_dpro
+                if ($vir_p1 >= 0) {
+                    $grr_dpro  =  $raspon - ($ras_tp1  / 2.0);
+                } else {
+                    $grr_dpro  = $ras_tp1  / 2.0;
+                }
+
+               // ============================================================
+
+                //$grr_vpro
+                $grr_vpro = $grr_lpro + $grr_dpro;
+
+                // ============================================================
+                //proc_gv
+                // ============================================================
+                //grr_st
+                // ============================================================
+
+                //grr_lprk
+                $grr_lprk = $grr_lprk_temp;
+                if ($vir_p1 >= 0) {
+                    $grr_lprk_temp = $ras_tp1k / 2.0;
+                } else {
+                    $grr_lprk_temp = $raspon - ($ras_tp1k / 2.0);
+                }
+
+                // ============================================================
+
+                //grr_dprk
+                if ($vir_p1 >= 0) {
+                    $grr_dprk  =  $raspon - ($ras_tp1k  / 2.0);
+                } else {
+                    $grr_dprk  = $ras_tp1k  / 2.0;
+                }
+
+                // ============================================================
+
+                //$grr_vprk
+                $grr_vprk = $grr_lprk + $grr_dprk;
+
+
+
+                // ============================================================
+                //proc_gz
+                // ============================================================
+                //elr_zaj1
+                // ============================================================
+
+                // sr_rasp
+                $sr_rasp = $sr_rasp_temp + ($raspon / 2.0);
+
+                // ============================================================
+                //elr_pro1
+                // ============================================================
+                //elr_pro2
+                // ============================================================
+
+                //grr_lzaj
+                $grr_lzaj = $grr_lzaj_temp;
                 if (!$hasGround) {
-                    $gr_lz = 0.0;
-                    $gr_dz = 0.0;
+                    $grr_lzaj_temp = 0.0;
                 } else {
                     if ($vir_z1 >= 0) {
-                        $gr_lz = $ras_tz1 / 2.0;
-                        $gr_dz = $raspon1 - ($ras_tz1 / 2.0);
+                        $grr_lzaj_temp = $ras_tz1 / 2.0;
                     } else {
-                        $gr_lz = $raspon1 - ($ras_tz1 / 2.0);
-                        $gr_dz = $ras_tz1 / 2.0;
+                        $grr_lzaj_temp = $raspon - ($ras_tz1 / 2.0);
                     }
                 }
 
-                $gr_vpro = $left_lpro + $gr_dp;
-                $gr_vprk = $left_lprk + $gr_dpk;
-                $gr_vzaj = $left_lzaj + $gr_dz;
+               // ============================================================
 
-                $br_stolb = (int) ($rp->br_raspon ?? ($i + 1));
+                //grr_dzaj
+                if (!$hasGround) {
+
+                    $grr_dzaj = 0.0;
+                } else {
+                    if ($vir_z1 >= 0) {
+
+                        $grr_dzaj = $raspon - ($ras_tz1 / 2.0);
+                    } else {
+                        $grr_dzaj = $ras_tz1 / 2.0;
+                    }
+                }
+
+                // ============================================================
+
+                //grr_vzaj
+                $grr_vzaj = $grr_lzaj + $grr_dzaj;
+
+                // ============================================================
+
+                //br_ras
                 $br_ras   = $br_stolb . '-' . ($br_stolb + 1);
 
+                // ============================================================
+
                 Gapres::create([
-                    'id_project' => $projectId,
+                    'id_project' => $projectId, // се препишува
                     'br_stolb' => $br_stolb,
-                    'stac_t'   => $sta_t,
-                    'raspon'   => $raspon1,
-                    'grr_lpro' => $left_lpro,
-                    'grr_dpro' => $gr_dp,
-                    'grr_vpro' => $gr_vpro,
-                    'grr_lprk' => $left_lprk,
-                    'grr_dprk' => $gr_dpk,
-                    'grr_vprk' => $gr_vprk,
-                    'grr_lzaj' => $left_lzaj,
-                    'grr_dzaj' => $gr_dz,
-                    'grr_vzaj' => $gr_vzaj,
+                    'stac_t'   => $sta_t, // се препишува
+                    'raspon'   => $raspon, // се препишува
+
+                    'grr_lpro' => $grr_lpro,
+                    'grr_dpro' => $grr_dpro,
+                    'grr_vpro' => $grr_vpro,
+
+                    'grr_lprk' => $grr_lprk,
+                    'grr_dprk' => $grr_dprk,
+                    'grr_vprk' => $grr_vprk,
+
+                    'grr_lzaj' => $grr_lzaj,
+                    'grr_dzaj' => $grr_dzaj,
+                    'grr_vzaj' => $grr_vzaj,
+
                     'sre_ras'  => $sr_rasp,
-                    'kota_pro' => (float) ($rp->kota_pro ?? 0.0),
-                    'kota_zaj' => (float) ($rp->kota_zaj ?? 0.0),
-                    'ras_totp' => $ras_tp1,
-                    'ras_totz' => $ras_tz1,
-                    'agol_t'   => $agol_t,
-                    'stol_ag1' => $stol_ag1,
+                    'kota_pro' => (float) ($rp->kota_pro ?? 0.0),// се препишува
+                    'kota_zaj' => (float) ($rp->kota_zaj ?? 0.0),// се препишува
+                    'ras_totp' => $ras_tp1,// се препишува
+                    'ras_totz' => $ras_tz1,// се препишува
+
+                    'agol_t'   => $agol_t, // се препишува
+                    'stol_ag1' => $stol_ag1, // се препишува
                     'br_ras'   => $br_ras,
                 ]);
 
-                // DOS: sr_rl = raspon1/2
-                $sr_rl = $raspon1 / 2.0;
+
+                $sr_rasp_temp = $raspon / 2.0;
 
                 $inserted++;
             }
+           // ============================================================
 
             // 6) Последен ред како DOS (APPEND BLANK после loop)
             // DOS зема:
@@ -1600,17 +1731,18 @@ class ProjectsRepositories
 
                     'sre_ras'  => $sr_rl_last,
 
-                    'grr_lpro' => $gr_lp,
-                    'grr_lprk' => $gr_lpk,
-                    'grr_lzaj' => $gr_lz,
-
+                    'grr_lpro' => $grr_lpro_temp,
                     'grr_dpro' => 0.0,
-                    'grr_dprk' => 0.0,
-                    'grr_dzaj' => 0.0,
+                    'grr_vpro' => $grr_lpro_temp,
 
-                    'grr_vpro' => $gr_lp,
-                    'grr_vprk' => $gr_lpk,
-                    'grr_vzaj' => $gr_lz,
+
+                    'grr_lprk' => $grr_lprk_temp,
+                    'grr_dprk' => 0.0,
+                    'grr_vprk' => $grr_lprk_temp,
+
+                    'grr_lzaj' => $grr_lzaj_temp,
+                    'grr_dzaj' => 0.0,
+                    'grr_vzaj' => $grr_lzaj_temp,
 
                     'kota_pro' => $pomk_p + $vir_p,
                     'kota_zaj' => $pomk_z + $vir_z,
@@ -1623,11 +1755,74 @@ class ProjectsRepositories
 
                 $inserted++;
             }
-
             return $inserted;
         });
     }
+    public function graviras1(int $projectId): int
+    {
+        $project = Projects::with(['conductor', 'groundWires'])->findOrFail($projectId);
 
+        $num_cond_systems = (int)($project->num_cond_systems ?? 1);
+
+        $cross_section_p = (float)(optional($project->conductor)->cross_section ?? 0);
+
+        $gw = $project->groundWires;
+        if ($gw instanceof \Illuminate\Support\Collection) {
+            $gw = $gw->first();
+        }
+        $cross_section_z = (float)(optional($gw)->cross_section ?? 0);
+
+        $hasGround = $cross_section_z > 0;
+
+        $gapres = Gapres::where('id_project', $projectId)
+            ->orderBy('stac_t', 'asc')
+            ->get();
+
+        $trasa = Trasa::with(['tower', 'insulator1', 'insulator2'])
+            ->where('id_project', $projectId)
+            ->where('id_tower', '>', 0)
+            ->orderBy('stac_t', 'asc')
+            ->get();
+
+        $zatpol = Zatpol::where('id_project', $projectId)
+            ->orderBy('stac_po', 'asc')
+            ->get();
+
+
+        $trasaMap = [];
+        foreach ($trasa as $t) {
+            $key = number_format((float)$t->stac_t, 2, '.', '');
+            $trasaMap[$key] = $t;
+        }
+
+
+        $zatpolArr = $zatpol->values();
+        $zIndex = 0;
+
+        $findZatpol = function (float $stac) use (&$zIndex, $zatpolArr) {
+            $n = $zatpolArr->count();
+
+            while ($zIndex < $n) {
+                $z = $zatpolArr[$zIndex];
+                $po = (float)($z->stac_po ?? 0);
+                $kr = (float)($z->stac_kr ?? 0);
+
+                if ($stac < $po) return null;      // уште не сме влегле во интервал
+                if ($po <= $stac && $stac <= $kr) return $z;
+
+                $zIndex++; // stac е после овој интервал → оди понатаму
+            }
+
+            return null;
+        };
+
+        $updated = 0;
+        foreach ($gapres as $gapres_) {
+
+        }
+
+        return $updated;
+    }
 
 
     public function rastotal(int $projectId): int

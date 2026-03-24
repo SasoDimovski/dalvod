@@ -83,9 +83,9 @@
 
                                 <div class="col-sm-12 col-md-1 col-lg-1 col-xl-1">
                                     <?php
-                                    $name = 'sif';
-                                    $desc = __('towers.sif');
-                                    $desc_long = __('towers.sif_des');
+                                    $name = 'name';
+                                    $desc = __('towers.name');
+                                    $desc_long = __('towers.name_des');
                                     $maxlength = 100;
 
                                     $value = app('request')->input($name) ? app('request')->input($name) : null;
@@ -101,26 +101,35 @@
                                            value="{{$value}}"
                                            placeholder="{{$desc}}" maxlength="{{$maxlength}}" title="{{$desc_long}}">
                                 </div>
+
                                 <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
                                     <?php
-                                    $name = 'type';
-                                    $desc = __('towers.type');
-                                    $desc_long = __('towers.type_des');
+                                    $name = 'id_tower_type';
+                                    $desc = __('towers.id_tower_type');
+                                    $desc_long = __('towers.id_tower_type_des');
                                     $maxlength = 100;
 
                                     $value = app('request')->input($name) ? app('request')->input($name) : null;
                                     $style = app('request')->input($name) ? $global_style : null;
                                     $x = app('request')->input($name) ? ('    x') : null;
                                     ?>
-                                    <label class="control-label" title="{{$desc_long}}">{{$desc}}
+                                    <label class="control-label">{{$desc}}
                                         <b onclick="deleteSearchField('{{$name}}')" style="{{$style}}"
                                            title="{{__('global.delete_search_field')}}">{{$x}}</b>
                                     </label>
-                                    <input type="text" id="{{$name}}" name="{{$name}}"
-                                           class="form-control form-control-sm"
-                                           value="{{$value}}"
-                                           placeholder="{{$desc}}" maxlength="{{$maxlength}}" title="{{$desc_long}}">
+                                    <select class="select2bs4"
+                                            id="{{$name}}" name="{{$name}}" onchange="this.form.submit()"
+                                            style="width: 100%">
+                                        @if(count($towersTypes) > 0)
+                                            <option value="">&nbsp;</option>
+                                            @foreach($towersTypes as $towersTypes_)
+                                                <option
+                                                    value="{{$towersTypes_->id}}" {{ ((app('request')->input($name))==$towersTypes_->id)? 'selected' : '' }}>{{$towersTypes_->name}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
                                 </div>
+
                                 <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
                                     <?php
                                     $name = 'angle';
@@ -178,9 +187,9 @@
                                     $x = app('request')->input($name) ? ('    x') : null;
                                     ?>
                                     <label class="control-label" title="{{$desc_long}}">{{ $desc }}
-                                        <b onclick="deleteSearchFieldAJAX('{{$name}}', this)" style="{{$style}}"
+                                        <b onclick="deleteSearchField('{{$name}}', this)" style="{{$style}}"
                                            title="{{__('global.delete_search_field')}}">{{$x}}</b></label>
-                                    <select id="{{ $name }}" name="{{ $name }}" class="form-control form-control-sm" onchange="ajaxFilterChange(this)" title="{{$desc_long}}">
+                                    <select id="{{ $name }}" name="{{ $name }}" class="form-control form-control-sm" onchange="this.form.submit()" title="{{$desc_long}}">
                                         @foreach($options as $value => $label)
                                             <option value="{{ $value }}"
                                                 {{ app('request')->input($name)  == $value ? 'selected' : '' }}>
@@ -385,6 +394,36 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
+                                    <?php
+                                    $name = 'id_tower_a';
+                                    $desc = __('towers.id_tower_a');
+                                    $desc_long = __('towers.id_tower_a_des');
+                                    $maxlength = 100;
+
+                                    $value = app('request')->input($name) ? app('request')->input($name) : null;
+                                    $style = app('request')->input($name) ? $global_style : null;
+                                    $x = app('request')->input($name) ? ('    x') : null;
+                                    ?>
+                                    <label class="control-label">{{$desc}}
+                                        <b onclick="deleteSearchField('{{$name}}')" style="{{$style}}"
+                                           title="{{__('global.delete_search_field')}}">{{$x}}</b>
+                                    </label>
+                                    <select class="select2bs4"
+                                            id="{{$name}}" name="{{$name}}" onchange="this.form.submit()"
+                                            style="width: 100%"  title="{{$desc_long}}">
+                                        @if(count($towerA) > 0)
+                                            <option value="">&nbsp;</option>
+                                            @foreach($towerA as $towerA_)
+                                                <option
+                                                    value="{{$towerA_->id}}" {{ ((app('request')->input($name))==$towerA_->id)? 'selected' : '' }}>{{$towerA_->tip}}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+
+
+
 
                             </div>
 
@@ -524,6 +563,25 @@
                                                 <th style="white-space: nowrap; width: 1px;" class="target-cell"></th>
                                                 {{-- ========================================================================--}}
                                                     <?php
+                                                    $column_name = 'name';
+                                                    $column_desc = __('towers.name');
+                                                    $column_desc_long = __('towers.name_des');
+                                                    $query_sort = request()->query('sort');
+                                                    $style_acs_desc = match (true) {
+                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                        default => $style_acs_desc = '',
+                                                    };
+                                                    ?>
+                                                <th class="sortable {{$style_acs_desc}}"
+                                                    style="white-space: nowrap; width: 1px;"
+                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                </th>
+                                                {{-- ========================================================================--}}
+                                                <th style="white-space: nowrap; width: 1px;" class="target-cell"></th>
+                                                {{-- ========================================================================--}}
+               {{--                                     <?php
                                                     $column_name = 'sif';
                                                     $column_desc = __('towers.sif');
                                                     $column_desc_long = __('towers.sif_des');
@@ -538,13 +596,30 @@
                                                     style="white-space: nowrap; width: 1px;"
                                                     onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
                                                     &nbsp;&nbsp;&nbsp;&nbsp;
-                                                </th>
+                                                </th>--}}
                                                 {{-- ========================================================================--}}
 
                                                     <?php
-                                                    $column_name = 'type';
-                                                    $column_desc = __('towers.type');
-                                                    $column_desc_long = __('towers.type_des');
+                                                    $column_name = 'id_tower_type';
+                                                    $column_desc = __('towers.id_tower_type');
+                                                    $column_desc_long = __('towers.id_tower_type_des');
+                                                    $query_sort = request()->query('sort');
+                                                    $style_acs_desc = match (true) {
+                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                        default => $style_acs_desc = '',
+                                                    };
+                                                    ?>
+                                                <th class="sortable {{$style_acs_desc}}"
+                                                    style="white-space: nowrap; width: 1px;"
+                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                </th>
+                                                {{-- ========================================================================--}}
+                                                    <?php
+                                                    $column_name = 'vis';
+                                                    $column_desc = __('towers.vis');
+                                                    $column_desc_long = __('towers.vis_des');
                                                     $query_sort = request()->query('sort');
                                                     $style_acs_desc = match (true) {
                                                         $query_sort == 'asc' && $order == $column_name => 'asc',
@@ -623,22 +698,7 @@
                                                     onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
                                                     &nbsp;&nbsp;&nbsp;&nbsp;
                                                 </th>
-                                                {{-- ========================================================================--}}
-                                                    <?php
-                                                    $column_name = 'vis';
-                                                    $column_desc = __('towers.vis');
-                                                    $column_desc_long = __('towers.vis_des');
-                                                    $query_sort = request()->query('sort');
-                                                    $style_acs_desc = match (true) {
-                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
-                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
-                                                        default => $style_acs_desc = '',
-                                                    };
-                                                    ?>
-                                                <th class="sortable {{$style_acs_desc}}"
-                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;
-                                                </th>
+
                                                 {{-- ========================================================================--}}
                                                     <?php
                                                     $column_name = 'vig';
@@ -736,6 +796,24 @@
                                                     &nbsp;&nbsp;&nbsp;&nbsp;
                                                 </th>
                                                 {{-- ========================================================================--}}
+
+                                                    <?php
+                                                    $column_name = 'id_tower_a';
+                                                    $column_desc = __('towers.id_tower_a');
+                                                    $column_desc_long = __('towers.id_tower_a_des');
+                                                    $query_sort = request()->query('sort');
+                                                    $style_acs_desc = match (true) {
+                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                        default => $style_acs_desc = '',
+                                                    };
+                                                    ?>
+                                                <th class="sortable {{$style_acs_desc}}"
+                                                    style="white-space: nowrap; width: 1px;"
+                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                </th>
+                                                {{-- ========================================================================--}}
                                                 <th style="white-space: nowrap; width: 1px;"><i class="fas fa-lock"  title="{{__('global.active_status')}}"></i>
                                                 </th>
                                                 {{-- ========================================================================--}}
@@ -749,12 +827,15 @@
                                             @foreach($towers as $tower)
 
                                                 <tr @if($tower->active == 0) style="color: #cccccc" @endif>
-                                                    <td>{!! highlightSearch($tower->id, 'id', $global_style_search) !!}</td>
+                                                    <td title="{!! $tower->sif !!}">{!! highlightSearch($tower->id, 'id', $global_style_search) !!}</td>
                                                     <td  class="target-cell"> </td>
-                                                    <td>{!! highlightSearch($tower->sif, 'sif', $global_style_search) !!}</td>
-                                                    <td>{!! highlightSearch($tower->type, 'type', $global_style_search) !!}</td>
+                                                    <td>{!! highlightSearch($tower->name, 'name', $global_style_search) !!}</td>
+{{--                                                    <td>{!! highlightSearch($tower->sif, 'sif', $global_style_search) !!}</td>--}}
+
+                                                    <td>{!! highlightSearch($tower->towerType->name, 'id_tower_type', $global_style_search) !!}</td>
+                                                    <td>{!! highlightSearch($tower->vis, 'vis', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->voltage, 'voltage', $global_style_search) !!}</td>
-                                                    <td>{!! highlightSearch($tower->ag, 'ag', $global_style_search) !!}</td>
+                                                    <td>{!! highlightSearch($tower->angle, 'ag', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->mass, 'mass', $global_style_search) !!}
 {{--                                                        @if($tower->comment)--}}
 {{--                                                            &nbsp;<i class="fas fa-comment text-warning" title="{{ __('towers.comment')}}: {{$tower->comment}}"></i>--}}
@@ -763,13 +844,14 @@
                                                     </td>
 
                                                     <td>{!! highlightSearch($tower->vid, 'vid', $global_style_search) !!}</td>
-                                                    <td>{!! highlightSearch($tower->vis, 'vis', $global_style_search) !!}</td>
+
                                                     <td>{!! highlightSearch($tower->vig, 'vig', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->mhr, 'mhr', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->dkp, 'dkp', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->dkz, 'dkz', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->rap, 'rap', $global_style_search) !!}</td>
                                                     <td>{!! highlightSearch($tower->raz, 'raz', $global_style_search) !!}</td>
+                                                    <td>{{ optional($tower->towerA)->tip }}</td>
                                                     <td>
                                                         @if($tower->active == 0)
                                                             <i class="fas fa-lock"

@@ -16,8 +16,9 @@ class TowersUpdateRequest extends FormRequest
     {
 
         return [
-            'type' => 'required',
+            'id_tower_type' => 'required',
             'voltage' => 'required',
+            'name' => 'required',
 //            'ag' => 'required',
 //            'mass' => 'required',
 //            'vid' => 'required',
@@ -34,8 +35,9 @@ class TowersUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'type.required' => __('global.required', ['name' => __('towers.type')]),
+            'id_tower_type.required' => __('global.required', ['name' => __('towers.id_tower_type')]),
             'voltage.required' => __('global.required', ['name' => __('towers.voltage')]),
+            'name.required' => __('global.required', ['name' => __('towers.name')]),
 //            'ag.required' => __('global.required', ['name' => __('towers.ag')]),
 //            'mass.required' => __('global.required', ['name' => __('towers.mass')]),
 //            'vid.required' => __('global.required', ['name' => __('towers.vid')]),

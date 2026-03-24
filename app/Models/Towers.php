@@ -10,6 +10,8 @@ class Towers extends Model
     use HasFactory;
     protected $table = "towers";
     protected $fillable = [
+        'id_tower_a',
+        'id_tower_type',
         'sif',
         'type',
         'voltage',
@@ -29,6 +31,17 @@ class Towers extends Model
         'created_by',
         'updated_by',
     ];
+
+    public function towerType(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(TowersType::class, 'id_tower_type', 'id');
+    }
+
+    public function towerA(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(TowersA::class, 'id_tower_a', 'id');
+    }
+
     public function trasa(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Trasa::class, 'id_tower');
