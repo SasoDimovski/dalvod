@@ -40,7 +40,9 @@
 
     $url_return_situation = $url . '/situation/' . $id;
     $url_import_situation = $url . '/import_situation/' . $id;
-    $url_delete_situation = $url . '/delete_situation/' ;
+    $url_import_situation_p = $url . '/import_situation_p/' . $id;
+    $url_delete_situation = $url . '/delete_imported_situation' ;
+    $url_delete_situation_p = $url . '/delete_imported_situation_p' ;
 
     /*======================================================================================*/
     $url_edit = $url . '/edit';
@@ -147,75 +149,173 @@
 
                             </div>
                             <!-- /.card-header -->
+                            <div class="card-header">
 
-                            <div class="card-body scrollmenu">
-                                <div class="row">
-                                    <div class="col-12">
+                                <div class="row align-items-end">
 
-                                        <form class="needs-validation"
-                                              method="POST"
-                                              action="{{ $url_import_situation }}"
-                                              enctype="multipart/form-data">
-
+                                    <!-- LEFT: Listing -->
+                                    <div class="col-md-6">
+                                        <form name="form_import" id="form_import" method="POST" action="{{ $url_import_situation }}" enctype="multipart/form-data">
                                             @csrf
 
                                             <input type="hidden" name="page" value="{{ app('request')->input('page') }}">
                                             <input type="hidden" name="url_return" value="{{ $url_return_situation }}">
                                             <input type="hidden" name="query" value="{{ $query }}">
 
-                                            <div class="form-row align-items-end">
-
-                                                <!-- LABEL -->
-                                                <div class="col-auto">
-                                                    <label class="mb-1">
-                                                        {{ __('projects.edit-points.import_excel') }}
-                                                    </label>
-                                                </div>
+                                            <div class="d-flex align-items-end">
 
                                                 <!-- FILE -->
-                                                <div class="col-md-5">
+                                                <div class="mr-3">
+                                                    <label class="mb-1">{{ __('projects.show-situation.import_excel') }}</label>
                                                     <div class="custom-file">
-                                                        <input type="file"
-                                                               class="custom-file-input"
-                                                               name="exel"
-                                                               id="exel">
-
-                                                        <label class="custom-file-label"
-                                                               for="exel">
-                                                            Choose file
-                                                        </label>
+                                                        <input type="file" class="custom-file-input" name="exel" id="exel"
+                                                               onchange="checkImportFile(this,
+                                                                               '{{ __('projects.show-situation.import_error') }}',
+                                                                               '{{ __('projects.show-situation.import_error_notification') }}',
+                                                                               '{{ __('projects.show-situation.import_error_big_file') }}',
+                                                                               5
+                                                                           )"
+                                                        >
+                                                        <label class="custom-file-label">Choose file</label>
                                                     </div>
                                                 </div>
 
-                                                <!-- IMPORT -->
-                                                <div class="col-auto">
+
+                                                <!-- IMPORT BUTTON -->
+                                                <div class="mr-2">
                                                     <button type="submit"
-                                                            class="btn btn-success">
-                                                        {{ __('projects.edit-points.import') }}
-                                                    </button>
+                                                            id="importBtn"
+                                                            class="btn btn-success"
+                                                            disabled>{{ __('projects.show-situation.import') }}</button>
                                                 </div>
 
-                                                <!-- DELETE -->
-                                                <div class="col-auto">
-                                                    <a href="#"
-                                                       class="btn btn-danger modal_warning"
-                                                       data-toggle="modal"
-                                                       data-target="#ModalWarning"
-                                                       data-url="{{ $url_delete_situation.'/'.$id.'?'.$query }}">
-                                                        <i class="fa fa-trash"></i>
-                                                    </a>
-                                                </div>
+                                                @if ($checkImportSituation)
+                                                    <!-- DELETE BUTTON -->
+                                                    <div>
+                                                        <a href="#" class="btn btn-danger modal_warning"
+                                                           data-toggle="modal"
+                                                           data-target="#ModalWarning"
+
+                                                           data-title="{{__('projects.edit-points.delete_warnings')}}"
+                                                           data-url="{{$url_delete_situation.'/'.$id.'?'.$query }}"
+
+                                                           data-content_l="{{__('projects.edit-points.delete_warnings_des')}}, "
+                                                           data-content_b=" "
+                                                           data-content_sub_l="{{__('projects.edit-points.delete_warnings_des_')}}"
+                                                           data-content_sub_b=""
+
+                                                           data-query="{{$query}}"
+                                                           data-url_return="{{$url_return_situation}}"
+                                                           data-success="{{__('global.delete_success')}}"
+                                                           data-error="{{__('global.delete_error')}}"
+
+                                                           data-method="DELETE"
+
+                                                           title="{{__('projects.edit-points.delete_imported_points')}}">
+                                                            <i class="fa fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                @endif
 
                                             </div>
 
-                                        </form>
 
+                                        </form>
                                     </div>
+
+
+                                    <!-- RIGHT: Upload + Import + Delete -->
+                                    <div class="col-md-6">
+                                        <form name="form_import_p" id="form_import_p" method="POST" action="{{ $url_import_situation_p }}" enctype="multipart/form-data">
+                                            @csrf
+
+                                            <input type="hidden" name="page" value="{{ app('request')->input('page') }}">
+                                            <input type="hidden" name="url_return" value="{{ $url_return_situation }}">
+                                            <input type="hidden" name="query" value="{{ $query }}">
+
+                                            <div class="d-flex align-items-end">
+
+                                                <!-- FILE -->
+                                                <div class="mr-3">
+                                                    <label class="mb-1">{{ __('projects.show-situation.import_parcels') }}</label>
+                                                    <div class="custom-file">
+                                                        <input type="file" class="custom-file-input" name="parcels" id="parcels"
+                                                               onchange="checkImportFile(this,
+                                                                               '{{ __('projects.show-situation.import_error') }}',
+                                                                               '{{ __('projects.show-situation.import_error_notification') }}',
+                                                                               '{{ __('projects.show-situation.import_error_big_file') }}',
+                                                                               5
+                                                                           )"
+                                                        >
+                                                        <label class="custom-file-label">Choose file</label>
+                                                    </div>
+                                                </div>
+
+
+                                                <!-- IMPORT BUTTON -->
+                                                <div class="mr-2">
+                                                    <button type="submit"
+                                                            id="importBtn_p"
+                                                            class="btn btn-success"
+                                                            disabled>{{ __('projects.show-situation.import') }}</button>
+                                                </div>
+
+                                                @if ($checkImportSituationP)
+                                                    <!-- DELETE BUTTON -->
+                                                    <div>
+                                                        <a href="#" class="btn btn-danger modal_warning"
+                                                           data-toggle="modal"
+                                                           data-target="#ModalWarning"
+
+                                                           data-title="{{__('projects.edit-points.delete_warnings')}}"
+                                                           data-url="{{$url_delete_situation_p.'/'.$id.'?'.$query }}"
+
+                                                           data-content_l="{{__('projects.edit-points.delete_warnings_des')}}, "
+                                                           data-content_b=" "
+                                                           data-content_sub_l="{{__('projects.edit-points.delete_warnings_des_')}}"
+                                                           data-content_sub_b=""
+
+                                                           data-query="{{$query}}"
+                                                           data-url_return="{{$url_return_situation}}"
+                                                           data-success="{{__('global.delete_success')}}"
+                                                           data-error="{{__('global.delete_error')}}"
+
+                                                           data-method="DELETE"
+
+                                                           title="{{__('projects.edit-points.delete_imported_points')}}">
+                                                            <i class="fa fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                @endif
+
+                                            </div>
+
+
+                                        </form>
+                                    </div>
+
                                 </div>
+
+                            </div>
+
+
+
+                            <div class="card-body scrollmenu">
+
+
                                 <div class="row">
                                     <div class="col-12">
                                         @php
                                             $planPoints = $situation->values()->map(function($row) {
+                                                return [
+                                                    'x' => (float) ($row->x ?? 0),
+                                                    'y' => (float) ($row->y ?? 0),
+                                                    'z' => (float) ($row->z ?? 0),
+                                                    'id'=> (int)   ($row->id ?? 0),
+                                                ];
+                                            });
+
+                                            $parcelPoints = $situationP->values()->map(function($row) {
                                                 return [
                                                     'x' => (float) ($row->x ?? 0),
                                                     'y' => (float) ($row->y ?? 0),
@@ -273,16 +373,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const pts = @json($planPoints);
-        if (!pts || !pts.length) return;
 
-        const xVals = pts.map(p => Number(p.x));
-        const yVals = pts.map(p => Number(p.y));
+        const pts = @json($planPoints);
+        const parcels = @json($parcelPoints);
+
+        if ((!pts || !pts.length) && (!parcels || !parcels.length)) return;
+
+        const allPoints = [...(pts || []), ...(parcels || [])];
+
+        const xVals = allPoints.map(p => Number(p.x));
+        const yVals = allPoints.map(p => Number(p.y));
 
         const xMin = Math.min(...xVals), xMax = Math.max(...xVals);
         const yMin = Math.min(...yVals), yMax = Math.max(...yVals);
 
-        // мал padding за да не “лепи” до раб
         const padX = (xMax - xMin) * 0.05 || 1;
         const padY = (yMax - yMin) * 0.05 || 1;
 
@@ -291,18 +395,28 @@
         window.planChart = new Chart(ctx, {
             type: 'scatter',
             data: {
-                datasets: [{
-                    label: 'Геодетски точки (X,Y)',
-                    data: pts,
-
-                    showLine: false,   // ✅ ОВА го исклучува поврзувањето
-
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 1)',
-
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                }]
+                datasets: [
+                    {
+                        label: 'Situation точки',
+                        data: pts,
+                        showLine: false,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    },
+                    {
+                        label: 'Парцели',
+                        data: parcels,
+                        showLine: true,
+                        fill: false,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        lineTension: 0,
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -311,9 +425,17 @@
                 scales: {
                     xAxes: [{
                         type: 'linear',
+                        ticks: {
+                            min: xMin - padX,
+                            max: xMax + padX
+                        },
                         scaleLabel: { display: true, labelString: 'X (m)' }
                     }],
                     yAxes: [{
+                        ticks: {
+                            min: yMin - padY,
+                            max: yMax + padY
+                        },
                         scaleLabel: { display: true, labelString: 'Y (m)' }
                     }]
                 },
@@ -321,13 +443,40 @@
                 tooltips: {
                     callbacks: {
                         label: function (t, data) {
-                            const p = data.datasets[t.datasetIndex].data[t.index];
-                            return `ID:${p.id}  X:${p.x.toFixed(2)}  Y:${p.y.toFixed(2)}  Z:${p.z.toFixed(3)}`;
+                            const ds = data.datasets[t.datasetIndex];
+                            const p = ds.data[t.index];
+                            return `${ds.label} | ID:${p.id}  X:${p.x.toFixed(2)}  Y:${p.y.toFixed(2)}  Z:${p.z.toFixed(3)}`;
+                        }
+                    }
+                },
+
+                // 🔥 ZOOM + PAN
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                            speed: 10
+                        },
+                        zoom: {
+                            enabled: true,
+                            mode: 'xy',
+                            speed: 0.1,
+                            threshold: 2,
+                            sensitivity: 3
                         }
                     }
                 }
             }
         });
+
+        // 🔥 DOUBLE CLICK = RESET ZOOM
+        document.getElementById('planChart').ondblclick = function () {
+            if (window.planChart) {
+                window.planChart.resetZoom();
+            }
+        };
+
     });
 </script>
 

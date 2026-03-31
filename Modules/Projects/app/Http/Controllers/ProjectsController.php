@@ -5,11 +5,14 @@ namespace Modules\Projects\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use Maatwebsite\Excel\Facades\Excel;
 use Modules\Projects\Dto\ProjectsDto;
+use Modules\Projects\Exports\ReportsExportExcelTowers;
 use Modules\Projects\Http\Requests\ProjectsStorePointsRequest;
 use Modules\Projects\Http\Requests\ProjectsStoreRequest;
 use Modules\Projects\Http\Requests\ProjectsUpdateRequest;
 use Modules\Projects\Services\ProjectsServices;
+use Modules\Reports\Exports\ReportsExportExcelGroup;
 
 class ProjectsController extends Controller
 {
@@ -86,7 +89,23 @@ class ProjectsController extends Controller
         }
         return redirect(url($url_return).'?'.$query)->with('success', $message_success);
     }
+    public function copy($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
 
+        $url_return= $request->get('url_return_war') ;
+        $query= $request->get('query_war') ;
+        $message_error= $request->get('error_war') ;
+        $message_success= $request->get('success_war') ;
+
+        //dd($url_return);
+
+        $return = $this->projectsServices->copyProject($id);
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
 
     public function editEndPoints($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
@@ -190,7 +209,8 @@ class ProjectsController extends Controller
                 "3" => __('projects.ProjectController.error_on_delete'),
                 "4" => __('projects.ProjectController.error_on_transform_excel'),
                 "5" => __('projects.ProjectController.error_on_insert_in_db'),
-                "6" => __('users.UsersController.error_update_paas_in_users'),
+                "6" => __('projects.ProjectController.error_exist_imported_points'),
+
             ];
             $errorMessage = $errors[$return->data['id_error']] ?? $message_error;
             return redirect(url($url_return).'?'.$query)
@@ -231,6 +251,35 @@ class ProjectsController extends Controller
             ->with('success', $message_success);
     }
 
+    public function importSituationP($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        //dd($id);
+        $url_return = $request->get('url_return');
+        $query      = $request->get('query');
+
+        $return = $this->projectsServices->importSituationP($id, $request);
+
+        $message_error   = $return->data['message_error']   ?? $request->get('message_error');
+        $message_success = $return->data['message_success'] ?? $request->get('message_success');
+
+        if ($return->status == 'error') {
+            $errors = [
+                "1" => __('projects.ProjectController.no_exel'),
+                "2" => __('projects.ProjectController.no_valid_exel'),
+                "3" => __('projects.ProjectController.error_on_delete'),
+                "4" => __('projects.ProjectController.error_on_transform_excel'),
+                "5" => __('projects.ProjectController.error_on_insert_in_db'),
+                "6" => __('users.UsersController.error_update_paas_in_users'),
+            ];
+            $errorMessage = $errors[$return->data['id_error']] ?? $message_error;
+            return redirect(url($url_return).'?'.$query)
+                ->with('error', [$errorMessage, $return->method, $return->class]);
+        }
+
+        return redirect(url($url_return).'?'.$query)
+            ->with('success', $message_success);
+    }
+
 
     public function deleteImportedPoints($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
@@ -241,6 +290,39 @@ class ProjectsController extends Controller
         $message_success= $request->get('success_war') ;
 
         $return = $this->projectsServices->deleteImportedPoints($id);
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
+
+    public function deleteImportedSituation($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+
+        $url_return= $request->get('url_return_war') ;
+        $query= $request->get('query_war') ;
+        $message_error= $request->get('error_war') ;
+        $message_success= $request->get('success_war') ;
+        //dd($url_return);
+
+        $return = $this->projectsServices->deleteImportedSituation($id);
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
+    public function deleteImportedSituationP($lang, $id_module, $id, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+
+        $url_return= $request->get('url_return_war') ;
+        $query= $request->get('query_war') ;
+        $message_error= $request->get('error_war') ;
+        $message_success= $request->get('success_war') ;
+        //dd($url_return);
+
+        $return = $this->projectsServices->deleteImportedSituationP($id);
 
         if($return->status=='error'){
             return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
@@ -294,9 +376,29 @@ class ProjectsController extends Controller
 
     public function calculations($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
+
         $return = $this->projectsServices->calculations($id_project);
         return view('Projects::projects/show-all-tables', $return['data']);
     }
+
+    public function calculate($lang, $id_module, $id_project, Request $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    {
+        //dd($id_project);
+        $url_return= $request->get('url_return') ;
+        $query= $request->get('query') ;
+
+        $return = $this->projectsServices->calculate($id_project );
+
+        $message_error= $return->data['message_error'] ?? $request->get('message_error') ;
+        $message_success=$return->data['message_success'] ?? $request->get('message_success') ;
+
+        if($return->status=='error'){
+            return redirect(url($url_return).'?'.$query)->with('error', [$message_error, $return->method, $return->class]);
+        }
+        return redirect(url($url_return).'?'.$query)->with('success', $message_success);
+    }
+
+
     public function controls($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
         $return = $this->projectsServices->calculations($id_project);
@@ -326,4 +428,17 @@ class ProjectsController extends Controller
         $return = $this->projectsServices->tableStringing($id_project);
         return view('Projects::projects/show-table-stringing', $return['data']);
     }
+
+    public function exportExcelTowers($lang, $id_module, $id_project, Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+       // dd($id_project);
+        ini_set('memory_limit', '-1');
+        set_time_limit(300);
+
+        $records = $this->projectsServices->exportExcelTowers((int)$id_project);
+        $title = date('Ymd_His');
+
+        return Excel::download(new ReportsExportExcelTowers($records), $title . '_towers_report.xlsx');
+    }
+
 }

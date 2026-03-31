@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Situations extends Model
+class SituationsP extends Model
 {
     use HasFactory;
-    protected $table = "situations";
+    protected $table = "situations_p";
     protected $fillable = [
         'id_project',
         'x',

@@ -168,7 +168,7 @@
                                         @if($trasa_->id_trafo)
                                        {{--=========================================================================--}}
                                             <div class="row header-strip">
-                                                <div class="col-sm-3">
+                                                <div class="col-sm-6">
 
                                                     @if ($loop->iteration == 1)
                                                         {{ __('projects.edit-endpoints.first') }}:
@@ -222,7 +222,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-3">
@@ -243,7 +244,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-3">
@@ -264,7 +266,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
 
@@ -289,7 +292,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
 
@@ -311,7 +315,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
 
@@ -333,7 +338,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
                                             </div>
@@ -432,7 +438,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-3">
@@ -453,7 +460,8 @@
                                                         <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                                style="{{$input_style}}"
                                                                class="form-control" value="{{$input_value}}"
-                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}>
+                                                               maxlength="{{$input_maxlength}}" {{$input_readonly}}
+                                                               oninput="validateNumberInput(this)">
                                                     </div>
                                                 </div>
 
@@ -466,7 +474,7 @@
                                                         $input_name_hidden  = "trasa[{$trasa_->id}][id_tower]";
                                                         $input_id_hidden  = "trasa{$trasa_->id}_id_tower";
 
-                                                        $input_value = $trasa_->tower ? $trasa_->tower->type : '';
+                                                        $input_value = $trasa_->tower ? $trasa_->tower->name : '';
                                                         $input_name = "trasa[{$trasa_->id}][id_tower_]";
                                                         $input_id  = "trasa{$trasa_->id}_id_tower_";
 
@@ -652,7 +660,33 @@
         border-radius: 4px; /* мал radius */
     }
 </style>
+<script>
+
+</script>
+@section('additional_js')
 
 
+    <script>
 
+        function validateNumberInput(input) {
+// дозволи само бројки и максимум една точка
+            let value = input.value.replace(/[^0-9.]/g, '');
 
+// дозволи само една точка
+            let parts = value.split('.');
+            if (parts.length > 4) {
+                value = parts[0] + '.' + parts[1];
+            }
+
+// ограничување: 3 цели + 2 децимали
+            if (parts[0].length > 10) {
+                parts[0] = parts[0].slice(0, 10);
+            }
+            if (parts[1] && parts[1].length > 4) {
+                parts[1] = parts[1].slice(0, 4);
+            }
+
+            input.value = parts.join('.');
+        }
+    </script>
+@endsection

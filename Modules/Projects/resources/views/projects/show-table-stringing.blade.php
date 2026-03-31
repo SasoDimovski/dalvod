@@ -97,7 +97,9 @@
     $url_show_table_stringing = $url . '/show_table_stringing';
     /*======================================================================================*/
 
+
     $path_upload = 'uploads/projects/';
+    $url_export_excel = $url .'/export-excel-towers/'. $id;;;
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
     $message_success = (isset($id)) ? __('global.update_success') : __('global.save_success');
@@ -192,17 +194,188 @@
                                     {{--=========================================================--}}
 
 
-                                    <div class="col-sm-7 col-md-6  col-lg-5 col-xl-4">
-                                       Во изработка
+                                    <div class="col-sm-12">
+
+                                        @if(count($zatpol) > 0)
+
+                                            <div class="row">
+                                                <div class="col-sm-12 scrollmenu">
+
+                                                    <div class="col-sm-12  scrollmenu">
+
+
+
+                                                            @foreach($zatpol as $zatpol_)
+
+
+                                                            {{-- =============================== --}}
+                                                            {{-- 1. HEADER / SUMMARY --}}
+                                                            {{-- =============================== --}}
+                                                            <div class="card card-primary mb-3">
+                                                                <div class="card-header">
+                                                                    <h3 class="card-title">Монтажна табела за затезно поле бр.</h3>
+                                                                </div>
+
+
+                                                                <div class="card-body">
+
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-bordered table-sm text-center mb-0">
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <th class="text-left">Спроводник:</th>
+                                                                                <th></th>
+                                                                            </tr>
+
+
+
+                                                                            <tr>
+                                                                                <th class="text-left">Макс. напрегање:</th>
+                                                                                <td></td>
+                                                                            </tr>
+
+                                                                            <tr>
+                                                                                <th class="text-left">Коеф. КНДТ:</th>
+                                                                                <td></td>
+                                                                            </tr>
+
+
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+
+
+
+                                                                </div>
+
+
+
+                                                            </div>
+
+
+                                                            {{-- =============================== --}}
+                                                            {{-- 2. MATRIX TABLE --}}
+                                                            {{-- =============================== --}}
+                                                            <div class="card card-outline card-primary mb-3">
+                                                                <div class="card-header">
+                                                                    <h3 class="card-title">Општи монтажни параметри</h3>
+                                                                </div>
+
+                                                                <div class="card-body p-0">
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-bordered table-sm text-center mb-0">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th class="text-left">Параметар</th>
+                                                                                <th>-20</th>
+                                                                                <th>-10</th>
+                                                                                <th>0</th>
+                                                                                <th>10</th>
+                                                                                <th>20</th>
+                                                                                <th>30</th>
+                                                                                <th>40</th>
+                                                                                <th>-5+dt</th>
+                                                                            </tr>
+                                                                            </thead>
+
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <th class="text-left">Температура</th>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                            </tr>
+
+                                                                            <tr>
+                                                                                <th class="text-left">Напрегање</th>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                            </tr>
+
+                                                                            <tr>
+                                                                                <th class="text-left">Сила на затег.</th>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                            </tr>
+
+                                                                            <tr>
+                                                                                <th class="text-left">Провес</th>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                                <td></td><td></td><td></td><td></td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            {{-- =============================== --}}
+                                                            {{-- 3. SPANS TABLE --}}
+                                                            {{-- =============================== --}}
+                                                            <div class="card card-outline card-secondary mb-4">
+                                                                <div class="card-header">
+                                                                    <h3 class="card-title">Провеси во распоните</h3>
+                                                                </div>
+
+                                                                <div class="card-body p-0">
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-bordered table-sm text-center mb-0">
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th>Распон бр.</th>
+                                                                                <th>Распон [m]</th>
+                                                                                <th>В.р. [m]</th>
+
+                                                                                <th>-20</th>
+                                                                                <th>-10</th>
+                                                                                <th>0</th>
+                                                                                <th>10</th>
+                                                                                <th>20</th>
+                                                                                <th>30</th>
+                                                                                <th>40</th>
+                                                                                <th>-5+dt</th>
+                                                                            </tr>
+                                                                            </thead>
+
+                                                                            <tbody>
+                                                                            <tr>
+                                                                                <td colspan="11" class="text-center text-muted">
+                                                                                    Нема податоци
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            @endforeach
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        @else
+                                            {{__('global.no_records')}}
+                                        @endif
+
                                     </div>
 
 
                                 </div>
-
-
-
+                                <div class="row">
+                                    <a class="btn btn-default btn-sm float-right"
+                                       href="{{$url_export_excel}}"
+                                       title="{{__('global.export_excel')}}"><i
+                                            class="fa fa-print"></i> {{__('global.export_excel')}}
+                                    </a>
+                                </div>
                                 {{--=========================================================--}}
                             </div>
+
                         </div>
 
 

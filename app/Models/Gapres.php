@@ -13,6 +13,7 @@ class Gapres extends Model
         'id_project',
         'br_stolb',
         'stac_t',
+        'id_trasa',
         'raspon',
         'grr_lpro',
         'grr_dpro',

@@ -11,6 +11,7 @@ class Raspres extends Model
     protected $table = "raspres";
     protected $fillable = [
         'id_project',
+        'id_trasa',
         'stac_t',
         'kota_t',
         'raspon',

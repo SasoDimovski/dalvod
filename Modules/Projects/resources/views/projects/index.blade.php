@@ -19,6 +19,7 @@
     $url_edit_points = url($url_base.'/edit_endpoints/');
     $url_show = url($url_base.'/show/');
     $url_delete = url($url_base.'/delete/');
+    $url_copy = url($url_base.'/copy/');
 
 
     ?>
@@ -407,7 +408,28 @@
 {{--                                                                <i class="fas fa-eye"--}}
 {{--                                                                   title="{{__('global.show_hint')}}"></i></button>--}}
                                                             {{-------------------------------------------------------------------------------------------------------}}
+                                                            <a href="#" class="btn btn-outline-info modal_warning"
+                                                               data-toggle="modal"
+                                                               data-target="#ModalWarning"
 
+                                                               data-title="{{__('projects.index.copy')}}"
+                                                               data-url="{{$url_copy.'/'.$project->id.'?'.$query }}"
+
+                                                               data-content_l="id: {{$project->id}}, "
+                                                               data-content_b="{{ $project->title}}, "
+                                                               data-content_sub_l="{{ $project->id_voltage}}"
+                                                               data-content_sub_b=""
+
+                                                               data-query="{{$query}}"
+                                                               data-url_return="{{$url}}"
+                                                               data-success="{{__('projects.index.copy_success')}}"
+                                                               data-error="{{__('projects.index.copy_error')}}"
+
+                                                               data-method="COPY"
+
+                                                               title="{{__('projects.index.hint')}}">
+                                                                <i class="fa fa-copy"></i>
+                                                            </a>
                                                                 {{-------------------------------------------------------------------------------------------------------}}
                                                                 <a href="{{$url_edit.'/'.$project->id.'?'.$query }}"
                                                                    class="btn btn-success"><i

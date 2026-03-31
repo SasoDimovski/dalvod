@@ -207,11 +207,93 @@ function checkImage(object, message_title, message_type, message_size, size, war
     }
     obj.readAsDataURL(object.files[0]);
 }
+function checkImportFile(object, message_title, message_type, message_size, size) {
 
+    const btn1 = document.getElementById('importBtn');
+    const btn2 = document.getElementById('importBtn_p');
+
+    if (!object.files || !object.files[0]) {
+        resetImportInput(object);
+        return false;
+    }
+
+    let file = object.files[0];
+    let fileSize = file.size / 1024 / 1024;
+    let filename = file.name;
+    let fileext = filename.split('.').pop().toLowerCase();
+
+    // ========================
+    // TYPE CHECK
+    // ========================
+    if (!['xls', 'xlsx', 'csv'].includes(fileext)) {
+
+        document.getElementById('title_res').innerHTML = message_title;
+        document.getElementById('content_res_l').innerHTML = message_type;
+
+        $('#ModalRestriction').modal('show');
+
+        resetImportInput(object);
+
+        if (btn1) btn1.disabled = true;
+        if (btn2) btn2.disabled = true;
+
+        return false;
+    }
+
+    // ========================
+    // SIZE CHECK
+    // ========================
+    if (fileSize > size) {
+
+        document.getElementById('title_res').innerHTML = message_title;
+        document.getElementById('content_res_l').innerHTML =
+            message_size + ' <br> Actual size: <strong>' + fileSize.toFixed(2) + '</strong> MB';
+
+        $('#ModalRestriction').modal('show');
+
+        resetImportInput(object);
+
+        if (btn1) btn1.disabled = true;
+        if (btn2) btn2.disabled = true;
+
+        return false;
+    }
+
+    // ========================
+    // VALID FILE
+    // ========================
+    let label = object.nextElementSibling;
+    if (label) {
+        label.innerText = filename;
+    }
+
+    if (btn1) btn1.disabled = false;
+    if (btn2) btn2.disabled = false;
+
+    return true;
+}
+
+function resetImportInput(object) {
+    const btn = document.getElementById('importBtn');
+    const label = object.nextElementSibling;
+
+    // reset input
+    object.value = '';
+
+    // reset label
+    if (label) {
+        label.innerText = 'Choose file';
+    }
+
+    // disable button
+    if (btn) {
+        btn.disabled = true;
+    }
+}
 function getContentID(url, modal, title) {
     console.log("Generated URL:", url);
 
-    alert(url);
+   // alert(url);
 
     // Отвори го modal-от
     $('#' + modal).modal({

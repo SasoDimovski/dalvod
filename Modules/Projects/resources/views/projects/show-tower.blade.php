@@ -41,9 +41,12 @@ $path_upload = 'uploads/towers/';
                     <i class="fas fa-list bg-info"></i>
                     <div class="timeline-item">
                         <div class="timeline-header">
-                            <strong>{{__('projects.edit-towers.sif')}}</strong>: {{$tower->sif ?? ''}}
+
+                            <strong>{{__('projects.edit-towers.name')}}</strong>: {{$tower->name ?? ''}}
                             <hr>
-                            <strong>{{__('projects.edit-towers.type')}}</strong>: {{$tower->type ?? ''}}
+                            <strong>{{__('projects.edit-towers.id_tower_type')}}</strong>: {{$tower->towerType->name ?? ''}}
+                            <hr>
+                            <strong>{{__('projects.edit-towers.id_tower_a')}}</strong>: {{$tower->towerA->tip ?? ''}}
                             <hr>
                             <strong>{{__('projects.edit-towers.voltage')}}</strong>: {{$tower->voltage ?? ''}}
                             <hr>
@@ -67,6 +70,9 @@ $path_upload = 'uploads/towers/';
                             <hr>
                             <strong>{{__('projects.edit-towers.raz')}}</strong>: {{$tower->raz ?? ''}}
                             <hr>
+
+
+
                         </div>
                     </div>
                 </div>

@@ -46,6 +46,7 @@
     $agol_tr_point = $point->agol_tr ?? old('agol_tr');
     $id_tower_point = $point->id_tower ?? old('id_tower');
     $tower_tip_point = $point->tower->name ?? old('id_tower_');
+    $id_trafo_point = $point->id_trafo ?? old('id_trafo');
     $id_insulator1_point = $point->id_insulator1 ?? old('insulator1');
     $insulator1_tip_point = $point->insulator1->type ?? old('insulator1_');
     $id_insulator2_point = $point->id_insulator2 ?? old('insulator2');
@@ -68,9 +69,10 @@
     $url_action_points = !empty($id_point) ? $url_update_points : $url_store_points;
 
     $url_delete_points = $url . '/delete_points';
-    $url_delete_imported_points = $url . '/delete_imported_points';
     $url_return_points = $url . '/edit_points/' . $id;
+
     $url_import_points = $url . '/import_points/' . $id;
+    $url_delete_imported_points = $url . '/delete_imported_points';
 
     $url_edit_point = $url . '/edit_point/' . $id;;
 
@@ -171,6 +173,7 @@
                             <input type="hidden" id="url_return" name="url_return" value="{{$url_return_points}}">
                             <input type="hidden" id="message_error" name="message_error" value="{{ $message_error }}">
                             <input type="hidden" id="message_success" name="message_success" value="{{ $message_success }}">
+                            <input type="hidden" id="query" name="query" value="{{$query}}">
 
 
                             {{csrf_field()}}
@@ -200,6 +203,7 @@
                                             $input_name = 'stac_t';
                                             $input_id = 'stac_t';
                                             $input_desc = __('projects.edit-points.stacionaza');
+                                            $input_desc_long = __('projects.edit-points.stacionaza_des');
                                             $input_maxlength = 7;
                                             $input_readonly = '';
                                             $input_css = 'text-red';
@@ -207,7 +211,7 @@
                                             $input_style = 'width: 80%;';
                                             ?>
                                             <div class="form-group">
-                                                <label for="{{$input_id}}" class="{{$input_css}}">{{$input_desc}}
+                                                <label for="{{$input_id}}" class="{{$input_css}}" title="{{$input_desc_long}}">{{$input_desc}}
                                                     {{$input_mandatory}}</label>
                                                 <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                        style="{{$input_style}}"
@@ -221,6 +225,7 @@
                                             $input_name = 'kota_t';
                                             $input_id = 'kota_t';
                                             $input_desc = __('projects.edit-points.kota');
+                                            $input_desc_long = __('projects.edit-points.kota_des');
                                             $input_maxlength = 7;
                                             $input_readonly = '';
                                             $input_css = 'text-red';
@@ -228,7 +233,7 @@
                                             $input_style = 'width: 80%;';
                                             ?>
                                             <div class="form-group">
-                                                <label for="{{$input_id}}" class="{{$input_css}}">{{$input_desc}}
+                                                <label for="{{$input_id}}" class="{{$input_css}}" title="{{$input_desc_long}}">{{$input_desc}}
                                                     {{$input_mandatory}}</label>
                                                 <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                        style="{{$input_style}}"
@@ -242,6 +247,7 @@
                                             $input_name = "agol_tr";
                                             $input_id = "agol_tr";
                                             $input_desc = __('projects.edit-points.agol');
+                                            $input_desc_long = __('projects.edit-points.agol_des');
                                             $input_maxlength = 7;
                                             $input_readonly = '';
                                             $input_css = '';
@@ -249,7 +255,7 @@
                                             $input_style = 'width: 80%;';
                                             ?>
                                             <div class="form-group">
-                                                <label for="{{$input_id}}" class="{{$input_css}}">{{$input_desc}}
+                                                <label for="{{$input_id}}" class="{{$input_css}}" title="{{$input_desc_long}}">{{$input_desc}}
                                                     {{$input_mandatory}}</label>
                                                 <input type="text" id="{{$input_id}}" name="{{$input_name}}"
                                                        style="{{$input_style}}"
@@ -258,7 +264,7 @@
                                             </div>
                                         </div>
 
-
+                                        @if(!$id_trafo_point)
                                         <div class="col-sm-4">
                                             <?php
                                             $input_value = $tower_tip_point;
@@ -270,6 +276,7 @@
                                             $input_id_hidden = "id_tower";
 
                                             $input_desc = __('projects.edit-points.tower');
+                                                $input_desc_long = __('projects.edit-points.tower_des');
                                             $input_readonly = 'readonly';
                                             $input_css = '';
                                             $input_mandatory = ''; //*
@@ -277,7 +284,7 @@
                                             <div class="form-group">
 
                                                 <label
-                                                    class="{{ $input_css }}">{{ $input_desc }} {{$input_mandatory}}</label>
+                                                    class="{{ $input_css }}" title="{{$input_desc_long}}">{{ $input_desc }} {{$input_mandatory}}</label>
                                                 <div class="d-flex align-items-center">
                                                     <!-- INPUT -->
                                                     <input type="hidden"
@@ -309,6 +316,8 @@
                                             </div>
 
                                         </div>
+                                        @endif
+
                                     </div>
 
 
@@ -330,6 +339,7 @@
 
 
                                             $input_desc = __('projects.edit-points.insulator1');
+                                            $input_desc_long = __('projects.edit-points.insulator1_des');
                                             $input_readonly = 'readonly';
                                             $input_css = '';
                                             $input_mandatory = ''; //*
@@ -338,7 +348,7 @@
                                             <div class="form-group">
 
                                                 <label
-                                                    class="{{ $input_css }}">{{ $input_desc }} {{$input_mandatory}}</label>
+                                                    class="{{ $input_css }}"  title="{{$input_desc_long}}">{{ $input_desc }} {{$input_mandatory}}</label>
                                                 <div class="d-flex align-items-center">
                                                     <!-- INPUT -->
                                                     <input type="hidden"
@@ -370,7 +380,7 @@
                                             </div>
 
                                         </div>
-
+                                        @if(!$id_trafo_point)
 
                                         <div class="col-sm-4">
                                             <?php
@@ -385,6 +395,7 @@
 
 
                                             $input_desc = __('projects.edit-points.insulator2');
+                                            $input_desc_long = __('projects.edit-points.insulator2_des');
                                             $input_readonly = 'readonly';
                                             $input_css = '';
                                             $input_mandatory = ''; //*
@@ -393,7 +404,7 @@
                                             <div class="form-group">
 
                                                 <label
-                                                    class="{{ $input_css }}">{{ $input_desc }} {{$input_mandatory}}</label>
+                                                    class="{{ $input_css }}"   title="{{$input_desc_long}}">{{ $input_desc }} {{$input_mandatory}}</label>
                                                 <div class="d-flex align-items-center">
                                                     <!-- INPUT -->
                                                     <input type="hidden"
@@ -425,7 +436,7 @@
                                             </div>
 
                                         </div>
-
+                                        @endif
 
 
 
@@ -634,144 +645,178 @@
                             </div>
                         </div>
 
-                        @if(!$trasa->isEmpty())
+
 
 
                                 <div class="card card-red card-outline">
                                     <div class="card-header">
+
                                         <div class="row align-items-end">
 
                                             <!-- LEFT: Listing -->
-                                            <div class="col-md-1">
-
-                                                <form name="form_search"
-                                                      id="form_search"
-                                                      method="get"
-                                                      action="">
+                                            <div class="col-md-4">
+                                                <form name="form_search" id="form_search" method="get" action="">
+                                                    <input type="hidden" name="page" value="{{ app('request')->input('page') }}">
 
 
 
-                                                    <input type="hidden" name="page"
-                                                           value="{{ app('request')->input('page') }}">
+                                                    <div class="d-flex">
+
+                                                        <!-- LISTING -->
+                                                        <div class="mr-3" style="width: 25%;">
+                                                                <?php
+                                                                $options = [
+                                                                    1 => '1',
+                                                                    15 => '15',
+                                                                    50 => '50',
+                                                                    100 => '100',
+                                                                    200 => '200',
+                                                                    'a' => __('global.all'),
+                                                                ];
+                                                                ?>
+
+                                                            <label class="control-label mb-1">{{ __('global.listing') }}</label>
+                                                            <select name="listing"
+                                                                    class="form-control form-control-sm"
+                                                                    onchange="changeListingAndSubmit(this.form)">
+                                                                @foreach($options as $value => $label)
+                                                                    <option value="{{ $value }}"
+                                                                        {{ $listing == $value ? 'selected' : '' }}>
+                                                                        {{ $label }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <!-- NEW DROPDOWN -->
+                                                        <div  class="mr-3" style="width: 25%;">
+                                                            <label class="control-label mb-1">{{ __('projects.edit-points.search_objects') }}</label>
+                                                            <select name="objects"
+                                                                    class="form-control form-control-sm"
+                                                                    onchange="this.form.submit()">
+
+                                                                <option value="">--</option>
+
+                                                                <option value="1" {{ request('objects') == '1' ? 'selected' : '' }}>
+                                                                    {{ __('projects.edit-points.search_objects_list') }}
+                                                                </option>
 
 
-                                                        <?php
-                                                        $name = 'listing';
-                                                        $desc = __('global.listing');
-                                                        $options = [
-                                                            1 => '1',
-                                                            15 => '15',
-                                                            50 => '50',
-                                                            100 => '100',
-                                                            200 => '200',
-                                                            'a' => __('global.all'),
-                                                        ];
-                                                        ?>
+                                                            </select>
+                                                        </div>
 
-                                                    <label class="control-label mb-1">
-                                                        {{ __('global.listing') }}
-                                                    </label>
+                                                        <div  class="mr-3" style="width: 25%;">
+                                                            <label class="control-label mb-1">{{ __('projects.edit-points.search_angle') }}</label>
+                                                            <select name="angle"
+                                                                    class="form-control form-control-sm"
+                                                                    onchange="this.form.submit()">
 
-                                                    <select name="listing"
-                                                            class="form-control form-control-sm"
-                                                            onchange="changeListingAndSubmit(this.form)">
-                                                        @foreach($options as $value => $label)
-                                                            <option value="{{ $value }}"
-                                                                {{ $listing == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
+                                                                <option value="">--</option>
 
-                                                    </select>
+                                                                <option value="1" {{ request('angle') == '1' ? 'selected' : '' }}>
+                                                                    {{ __('projects.edit-points.search_angle_list') }}
+                                                                </option>
+
+
+                                                            </select>
+                                                        </div>
+
+                                                        <div  class="mr-3" style="width: 25%;">
+                                                            <label class="control-label mb-1">{{ __('projects.edit-points.search_endpoints') }}</label>
+                                                            <select name="endpoints"
+                                                                    class="form-control form-control-sm"
+                                                                    onchange="this.form.submit()">
+
+                                                                <option value="">--</option>
+
+                                                                <option value="1" {{ request('endpoints') == '1' ? 'selected' : '' }}>
+                                                                    {{ __('projects.edit-points.search_endpoints_list') }}
+                                                                </option>
+
+
+                                                            </select>
+                                                        </div>
+
+                                                    </div>
+
 
                                                 </form>
-
                                             </div>
 
 
                                             <!-- RIGHT: Upload + Import + Delete -->
                                             <div class="col-md-8">
-
-                                                <form name="form_import"
-                                                      id="form_import"
-                                                      method="POST"
-                                                      action="{{ $url_import_points }}"
-                                                      enctype="multipart/form-data">
-
+                                                <form name="form_import" id="form_import" method="POST" action="{{ $url_import_points }}" enctype="multipart/form-data">
                                                     @csrf
 
-                                                    <input type="hidden" name="page"
-                                                           value="{{ app('request')->input('page') }}">
-
-                                                    <input type="hidden" name="url_return"
-                                                           value="{{ $url_return_points }}">
-
-                                                    <input type="hidden" name="query"
-                                                           value="{{ $query }}">
-
+                                                    <input type="hidden" name="page" value="{{ app('request')->input('page') }}">
+                                                    <input type="hidden" name="url_return" value="{{ $url_return_points }}">
+                                                    <input type="hidden" name="query" value="{{ $query }}">
 
                                                     <div class="d-flex justify-content-end align-items-end">
 
                                                         <!-- FILE -->
                                                         <div class="mr-3">
-
-                                                            <label class="mb-1">
-                                                                {{ __('projects.edit-points.import_excel') }}
-                                                            </label>
-
+                                                            <label class="mb-1">{{ __('projects.edit-points.import_excel') }}</label>
                                                             <div class="custom-file">
-
-                                                                <input type="file"
-                                                                       class="custom-file-input"
-                                                                       name="exel"
-                                                                       id="exel">
-
-                                                                <label class="custom-file-label">
-                                                                    Choose file
-                                                                </label>
-
+                                                                <input type="file" class="custom-file-input" name="exel" id="exel"
+                                                                       onchange="checkImportFile(this,
+                                                                               '{{ __('projects.edit-points.import_error') }}',
+                                                                               '{{ __('projects.edit-points.import_error_notification') }}',
+                                                                               '{{ __('projects.edit-points.import_error_big_file') }}',
+                                                                               5
+                                                                           )"
+                                                                >
+                                                                <label class="custom-file-label">Choose file</label>
                                                             </div>
-
                                                         </div>
 
 
                                                         <!-- IMPORT BUTTON -->
                                                         <div class="mr-2">
-
                                                             <button type="submit"
-                                                                    class="btn btn-success">
-
-                                                                {{ __('projects.edit-points.import') }}
-
-                                                            </button>
-
+                                                                    id="importBtn"
+                                                                    class="btn btn-success"
+                                                                    disabled>{{ __('projects.edit-points.import') }}</button>
                                                         </div>
 
-
+                                                        @if ($checkImportPoints)
                                                         <!-- DELETE BUTTON -->
                                                         <div>
-
-                                                            <a href="#"
-                                                               class="btn btn-danger modal_warning"
+                                                            <a href="#" class="btn btn-danger modal_warning"
                                                                data-toggle="modal"
                                                                data-target="#ModalWarning"
+
+                                                               data-title="{{__('projects.edit-points.delete_warnings')}}"
                                                                data-url="{{$url_delete_imported_points.'/'.$id.'?'.$query }}"
-                                                               title="{{__('global.delete_hint')}}">
 
+                                                               data-content_l="{{__('projects.edit-points.delete_warnings_des')}}, "
+                                                               data-content_b=" "
+                                                               data-content_sub_l="{{__('projects.edit-points.delete_warnings_des_')}}"
+                                                               data-content_sub_b=""
+
+                                                               data-query="{{$query}}"
+                                                               data-url_return="{{$url_edit_points.'/'.$id}}"
+                                                               data-success="{{__('global.delete_success')}}"
+                                                               data-error="{{__('global.delete_error')}}"
+
+                                                               data-method="DELETE"
+
+                                                               title="{{__('projects.edit-points.delete_imported_points')}}">
                                                                 <i class="fa fa-trash"></i>
-
                                                             </a>
-
                                                         </div>
-
+                                                        @endif
 
                                                     </div>
 
-                                                </form>
 
+                                                </form>
                                             </div>
 
                                         </div>
+
+
                                     </div>
 
                                     <div class="card-body scrollmenu">
@@ -896,8 +941,8 @@
                                                                 {{-- ========================================================================--}}
                                                                     <?php
                                                                     $column_name = 'id_insulator1';
-                                                                    $column_desc = __('projects.edit-points.insulator1');
-                                                                    $column_desc_long = __('projects.edit-points.insulator1');
+                                                                    $column_desc = __('projects.edit-points.insulator1_short');
+                                                                    $column_desc_long = __('projects.edit-points.insulator1_des');
                                                                     $query_sort = request()->query('sort');
                                                                     $style_acs_desc = match (true) {
                                                                         $query_sort == 'asc' && $order == $column_name => 'asc',
@@ -912,8 +957,120 @@
                                                                 {{-- ========================================================================--}}
                                                                     <?php
                                                                     $column_name = 'id_insulator2';
-                                                                    $column_desc = __('projects.edit-points.insulator2');
-                                                                    $column_desc_long = __('projects.edit-points.insulator2');
+                                                                    $column_desc = __('projects.edit-points.insulator2_short');
+                                                                    $column_desc_long = __('projects.edit-points.insulator2_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'nap_pro';
+                                                                    $column_desc = __('projects.edit-points.nap_pro_short');
+                                                                    $column_desc_long = __('projects.edit-points.nap_pro_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'nap_zaj';
+                                                                    $column_desc = __('projects.edit-points.nap_zaj_short');
+                                                                    $column_desc_long = __('projects.edit-points.nap_zaj_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'nap_zaj2';
+                                                                    $column_desc = __('projects.edit-points.nap_zaj2_short');
+                                                                    $column_desc_long = __('projects.edit-points.nap_zaj2_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'kndt';
+                                                                    $column_desc = __('projects.edit-points.kndt');
+                                                                    $column_desc_long = __('projects.edit-points.kndt_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'kidt';
+                                                                    $column_desc = __('projects.edit-points.kidt');
+                                                                    $column_desc_long = __('projects.edit-points.kidt_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'priv';
+                                                                    $column_desc = __('projects.edit-points.priv_short');
+                                                                    $column_desc_long = __('projects.edit-points.priv_des');
+                                                                    $query_sort = request()->query('sort');
+                                                                    $style_acs_desc = match (true) {
+                                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                                        default => $style_acs_desc = '',
+                                                                    };
+                                                                    ?>
+                                                                <th class="sortable {{$style_acs_desc}}"
+                                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')" title="{{$column_desc_long}}">{{$column_desc}}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </th>
+                                                                {{-- ========================================================================--}}
+                                                                    <?php
+                                                                    $column_name = 'imported';
+                                                                    $column_desc = __('projects.edit-points.imported');
+                                                                    $column_desc_long = __('projects.edit-points.imported');
                                                                     $query_sort = request()->query('sort');
                                                                     $style_acs_desc = match (true) {
                                                                         $query_sort == 'asc' && $order == $column_name => 'asc',
@@ -940,8 +1097,15 @@
                                                                     $id = $trasa_->id ?? '';
                                                                     $stac_t = $trasa_->stac_t ?? '';
                                                                     $kota_t = $trasa_->kota_t ?? '';
-                                                                    $x_t = $trasa_->x_t ?? '';
+
                                                                     $agol_tr = $trasa_->agol_tr ?? '';
+                                                                    $nap_pro = $trasa_->nap_pro ?? '';
+                                                                    $nap_zaj = $trasa_->nap_zaj ?? '';
+                                                                    $nap_zaj2 = $trasa_->nap_zaj2 ?? '';
+                                                                    $kndt = $trasa_->kndt ?? '';
+                                                                    $kidt= $trasa_->kidt ?? '';
+                                                                    $priv= $trasa_->priv ?? '';
+                                                                    $imported = $trasa_->imported  ?? '';
 
                                                                     $id_tower = $trasa_->tower->id_tower ?? '';
                                                                     $tower_tip = $trasa_->tower->type ?? '';
@@ -963,11 +1127,23 @@
                                                                     $idTrafo = $trasa_->id_trafo ?? null;
 
                                                                     if ($idTrafo) {
-                                                                        // ако постои trafo → користи го
-                                                                        $value = $trasa_->trafo->ime ?? '';
+
+                                                                        $value = optional($trasa_->trafo)->ime.' ('.__('projects.edit-points.trafo').')';
+
                                                                     } else {
-                                                                        // ако нема trafo → прикажи tower tip
-                                                                        $value = $trasa_->tower->type ?? '';
+
+                                                                        $tower = $trasa_->tower;
+
+                                                                        if ($tower) {
+                                                                            $value = '
+                                                                                <a href="javascript:void(0)"
+                                                                                   onclick="getContentID(\''.$url_show_tower.'/'.optional($tower)->id.'\',\'ModalShow\',\''.__('projects.edit-points.tower').'\')">
+                                                                                    '.(optional($tower)->type ?? '').'
+                                                                                </a>
+                                                                            ';
+                                                                        } else {
+                                                                            $value = '';
+                                                                        }
                                                                     }
                                                                     ?>
 
@@ -981,22 +1157,29 @@
                                                                     <td>{{ $stac_t }}</td>
                                                                     <td>{{ $kota_t }}</td>
                                                                     <td>{{ $agol_tr }}</td>
-                                                                    <td>{{ $value }}</td>
+                                                                    <td>{!!   $value !!}</td>
 {{--                                                                    <td>{{ $ime }}</td>--}}
                                                                     <td>{{ $insulator1_tip }}</td>
                                                                     <td>{{ $insulator2_tip }}</td>
+                                                                    <td>{{ $nap_pro }}</td>
+                                                                    <td>{{ $nap_zaj }}</td>
+                                                                    <td>{{ $nap_zaj2 }}</td>
+                                                                    <td>{{ $kndt }}</td>
+                                                                    <td>{{ $kidt }}</td>
+                                                                    <td>{{ $priv }}</td>
+                                                                    <td>{{ $imported }}</td>
                                                                     <td  class="source-cell">
                                                                         <div class="btn-group btn-group-sm">
 
 
 
 
-                                                                            @if(!in_array($id, $firstTwoIds))
-                                                                                <a href="{{$url_edit_point.'/'.$trasa_->id }}"
-                                                                                   class="btn btn-success"><i
-                                                                                        class="fa fa-edit"
-                                                                                        title="{{__('global.edit_hint')}}"></i></a>
 
+                                                                            <a href="{{ $url_edit_point.'/'.$trasa_->id . ($query ? '?'.$query : '') }}"
+                                                                               class="btn btn-success">
+                                                                                <i class="fa fa-edit" title="{{ __('global.edit_hint') }}"></i>
+                                                                            </a>
+                                                                                @if(!in_array($id, $firstTwoIds))
                                                                                 <a href="#"
                                                                                    class="btn btn-danger modal_warning"
                                                                                    data-toggle="modal"
@@ -1053,9 +1236,7 @@
                                 </div>
 
 
-                        @else
-                            {{__('global.no_records')}}
-                        @endif
+
 
 
                     </div>
@@ -1094,6 +1275,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
 <script>
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const input = document.getElementById('exel');
+
+        input.addEventListener('change', function () {
+            let fileName = this.files[0]?.name;
+
+            if (fileName) {
+                this.nextElementSibling.innerText = fileName;
+            }
+        });
+
+    });
+
 
     document.addEventListener("input", function (e) {
         if (e.target.classList.contains("only-decimal")) {

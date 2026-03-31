@@ -97,7 +97,9 @@
     $url_show_table_stringing = $url . '/show_table_stringing';
     /*======================================================================================*/
 
+
     $path_upload = 'uploads/projects/';
+    $url_export_excel = $url .'/export-excel-towers/'. $id;;;
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
     $message_success = (isset($id)) ? __('global.update_success') : __('global.save_success');
@@ -194,110 +196,61 @@
 
                                     <div class="col-sm-12">
 
-                                        @if(!$towers->isEmpty())
+                                        @if(count($trasa) > 0)
 
                                             <div class="row">
-                                                <div class="col-sm-12  scrollmenu">
+                                                <div class="col-sm-12 scrollmenu">
 
-                                                    <table class="table table-bordered table-sm" style="width:100%; border-collapse:collapse;">
+                                                    <table id="example2" class="table_grid">
                                                         <thead>
                                                         <tr>
-                                                            <th rowspan="2">Број на<br>зат. поле</th>
-                                                            <th rowspan="2">Број на<br>столб</th>
-                                                            <th rowspan="2">Стационажа<br>(m)</th>
-                                                            <th rowspan="2">Тип на столб</th>
-                                                            <th rowspan="2">Тип на изолатор<br>(берерија)</th>
-                                                            <th rowspan="2">Агол на траса<br>(°)</th>
+                                                                <th class="text-center" style="white-space: nowrap; width: 1px;" title="{{__('projects.ReportsExportExcelTowers.zp_des')}}">{{__('projects.ReportsExportExcelTowers.zp')}}</th>
+                                                                <th class="text-center" style="white-space: nowrap; width: 1px;" title="{{__('projects.ReportsExportExcelTowers.towers_des')}}">{{__('projects.ReportsExportExcelTowers.towers')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.stac_des')}}">{{__('projects.ReportsExportExcelTowers.stac')}}</th>
+                                                                <th class="text-center" style="white-space: nowrap; width: 1px;" title="{{__('projects.ReportsExportExcelTowers.tower_des')}}">{{__('projects.ReportsExportExcelTowers.tower')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.insulator_des')}}">{{__('projects.ReportsExportExcelTowers.insulator')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.angle_des')}}">{{__('projects.ReportsExportExcelTowers.angle')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.hr_des')}}">{{__('projects.ReportsExportExcelTowers.hr')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.sr_des')}}">{{__('projects.ReportsExportExcelTowers.sr')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.glr_des')}}">{{__('projects.ReportsExportExcelTowers.glr')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.gdr_des')}}">{{__('projects.ReportsExportExcelTowers.gdr')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.gvr_des')}}">{{__('projects.ReportsExportExcelTowers.gvr')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.dzp_des')}}">{{__('projects.ReportsExportExcelTowers.dzp')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.ns_des')}}">{{__('projects.ReportsExportExcelTowers.ns')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.nzj_des')}}">{{__('projects.ReportsExportExcelTowers.nzj')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.kndt_des')}}">{{__('projects.ReportsExportExcelTowers.kndt')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.kidt_des')}}">{{__('projects.ReportsExportExcelTowers.kidt')}}</th>
+                                                                <th class="text-center" title="{{__('projects.ReportsExportExcelTowers.pv_des')}}">{{__('projects.ReportsExportExcelTowers.pv')}}</th>
 
-                                                            <th colspan="2">Карактеристични распони</th>
-
-                                                            <th colspan="3">Гравитационен распон</th>
-
-                                                            <th rowspan="2">Должина<br>на зат. поле<br>(m)</th>
-
-                                                            <th colspan="4">Климатски услови</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>Хориз.<br>распон<br>(m)</th>
-                                                            <th>Сред.<br>распон<br>(m)</th>
-
-                                                            <th>Лев<br>(m)</th>
-                                                            <th>Десен<br>(m)</th>
-                                                            <th>Вкупен<br>(m)</th>
-
-                                                            <th>Напрегање<br>спров.<br>(daN/mm2)</th>
-                                                            <th>Напрегање<br>з.ј.<br>(daN/mm2)</th>
-                                                            <th>КНДТ</th>
-                                                            <th>КИДТ</th>
                                                         </tr>
                                                         </thead>
 
                                                         <tbody>
-                                                        @php $fieldIndex = 0; @endphp
-
-                                                        @foreach($grouped as $g)
-                                                            @php
-                                                                $fieldIndex++;
-                                                                $rowspan = $g->count();
-
-                                                                // field објектот е ист за сите во групата (земи од првиот ред)
-                                                                $field = $g->first()['field'];
-
-                                                                $poleDol = $field ? (float)($field->pole_dol ?? 0) : null;
-                                                                $napPro  = $field ? (float)($field->nap_pro ?? 0) : null;
-                                                                $napZaj  = $field ? (float)($field->nap_zaj ?? 0) : null;
-                                                                $kndt    = $field ? (float)($field->kndt ?? 0) : null;
-                                                                $kidt    = $field ? (float)($field->kidt ?? 0) : null;
-                                                            @endphp
-
-                                                            @foreach($g as $idx => $r)
-                                                                <tr>
-                                                                    {{-- ГРУПНИ КОЛОНИ (само на првиот ред од групата) --}}
-                                                                    @if($idx === 0)
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:center;">
-                                                                            {{ $fieldIndex }}
-                                                                        </td>
-                                                                    @endif
-
-                                                                    <td style="text-align:center;">{{ $r['stolb_no'] }}</td>
-                                                                    <td style="text-align:right;">{{ number_format($r['stac_t'], 2, '.', '') }}</td>
-                                                                    <td>{{ $r['tower_type'] }}</td>
-                                                                    <td>{{ $r['izolator'] }}</td>
-                                                                    <td style="text-align:center;">
-                                                                        {{ $r['agol'] !== null ? number_format($r['agol'], 0) : '' }}
-                                                                    </td>
-
-                                                                    <td style="text-align:right;">
-                                                                        {{ $r['horiz'] !== null ? number_format($r['horiz'], 2, '.', '') : '' }}
-                                                                    </td>
-                                                                    <td style="text-align:right;">{{ number_format($r['avg'], 2, '.', '') }}</td>
-
-                                                                    <td style="text-align:right;">{{ number_format($r['grav_left'], 2, '.', '') }}</td>
-                                                                    <td style="text-align:right;">{{ number_format($r['grav_right'], 2, '.', '') }}</td>
-                                                                    <td style="text-align:right;">{{ number_format($r['grav_total'], 2, '.', '') }}</td>
-
-                                                                    @if($idx === 0)
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:right;">
-                                                                            {{ $poleDol !== null ? number_format($poleDol, 2, '.', '') : '' }}
-                                                                        </td>
-
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:right;">
-                                                                            {{ $napPro !== null ? number_format($napPro, 2, '.', '') : '' }}
-                                                                        </td>
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:right;">
-                                                                            {{ $napZaj !== null ? number_format($napZaj, 2, '.', '') : '' }}
-                                                                        </td>
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:right;">
-                                                                            {{ $kndt !== null ? number_format($kndt, 2, '.', '') : '' }}
-                                                                        </td>
-                                                                        <td rowspan="{{ $rowspan }}" style="vertical-align:middle; text-align:right;">
-                                                                            {{ $kidt !== null ? number_format($kidt, 2, '.', '') : '' }}
-                                                                        </td>
-                                                                    @endif
-                                                                </tr>
-                                                            @endforeach
+                                                        @foreach($trasa as $row)
+                                                            <tr>
+                                                                <td class="text-center">{{ $row['zp'] ?? '' }}</td>
+                                                                <td class="text-center">{{ $row['stolb_no'] }}</td>
+                                                                <td class="text-center">{{ $row['stac_t'] }}</td>
+                                                                <td class="text-center">{{ $row['tower_name'] }}</td>
+                                                                <td class="text-center">{{ $row['izolator'] }}</td>
+                                                                <td class="text-center">{{ $row['agol'] }}</td>
+                                                                <td class="text-center">{{ $row['horiz'] ? number_format($row['horiz'],2) : 0 }}</td>
+                                                                <td class="text-center">{{ $row['avg'] ? number_format($row['avg'],2) : '' }}</td>
+                                                                <td class="text-center">{{ number_format($row['left'],2) }}</td>
+                                                                <td class="text-center">{{ number_format($row['right'],2) }}</td>
+                                                                <td class="text-center">{{ number_format($row['total'],2) }}</td>
+                                                                <td class="text-center">{{ $row['pole_dol'] ? number_format($row['pole_dol'],2) : '' }}</td>
+                                                                <td class="text-center">{{ $row['nap_pro'] ? number_format($row['nap_pro'],2) : '' }}</td>
+                                                                <td class="text-center">{{ $row['nap_zaj'] ? number_format($row['nap_zaj'],2) : '' }}</td>
+                                                                <td class="text-center">{{ $row['kndt'] ? number_format($row['kndt'],2) : '' }}</td>
+                                                                <td class="text-center">{{ $row['kidt'] ? number_format($row['kidt'],2) : '' }}</td>
+                                                                <td class="text-center">{{ $row['priv'] ? number_format($row['priv'],2) : '' }}</td>
+                                                            </tr>
                                                         @endforeach
+
                                                         </tbody>
+
+
                                                     </table>
                                                 </div>
                                             </div>
@@ -311,11 +264,16 @@
 
 
                                 </div>
-
-
-
+                                <div class="row">
+                                <a class="btn btn-default btn-sm float-right"
+                                   href="{{$url_export_excel}}"
+                                   title="{{__('global.export_excel')}}"><i
+                                        class="fa fa-print"></i> {{__('global.export_excel')}}
+                                </a>
+                                </div>
                                 {{--=========================================================--}}
                             </div>
+
                         </div>
 
 

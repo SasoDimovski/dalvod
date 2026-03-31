@@ -119,6 +119,7 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                             Route::get('create', [ProjectsController::class, 'create']);
                             Route::match(['get','post','put'],'store', [ProjectsController::class, 'store']);
                             Route::match(['get','post','put'],'delete/{id}', [ProjectsController::class, 'destroy']);
+                            Route::match(['get','post','put'],'copy/{id}', [ProjectsController::class, 'copy']);
 
                             Route::get('edit_endpoints/{id}', [ProjectsController::class, 'editEndPoints']);
                             Route::put('update_endpoints/{id}', [ProjectsController::class, 'updateEndPoints']);
@@ -137,9 +138,15 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                             Route::get('show_gapres/{id}', [ProjectsController::class, 'showGapres']);
 
                             Route::get('calculations/{id}', [ProjectsController::class, 'calculations']);
+                            Route::get('calculate/{id}', [ProjectsController::class, 'calculate']);
                             Route::get('controls/{id}', [ProjectsController::class, 'controls']);
                             Route::get('situation/{id}', [ProjectsController::class, 'situation']);
+
                             Route::match(['get','post'],'import_situation/{id}', [ProjectsController::class, 'importSituation']);
+                            Route::match(['get','post','delete'],'delete_imported_situation/{id}', [ProjectsController::class, 'deleteImportedSituation']);
+
+                            Route::match(['get','post'],'import_situation_p/{id}', [ProjectsController::class, 'importSituationP']);
+                            Route::match(['get','post','delete'],'delete_imported_situation_p/{id}', [ProjectsController::class, 'deleteImportedSituationP']);
 
                             Route::get('show_table_forces/{id}', [ProjectsController::class, 'tableForces']);
                             Route::get('show_table_towers/{id}', [ProjectsController::class, 'tableTowers']);
@@ -150,6 +157,10 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
 
                             Route::match(['get','post'],'towers/{id}', [ProjectsController::class, 'towers']);
                             Route::match(['get','post'],'insulators/{id}', [ProjectsController::class, 'insulators']);
+
+                            Route::match(['get','post'],'export-excel-towers/{id}', [ProjectsController::class, 'exportExcelTowers']);
+
+
 
                         });
                     //.MODULE PROJECTS

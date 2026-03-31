@@ -72,7 +72,9 @@
     $url_return_points = $url . '/edit_points/' . $id;
     $url_import_points = $url . '/import_points/' . $id;
 
-    $url_edit_point = $url . '/edit_point/' . $id;;
+    $url_edit_point = $url . '/edit_point/' . $id;
+
+    $url_calculate = $url . '/calculate/' . $id;;
 
     $url_edit_towers = $url . '/towers';
     $url_edit_insulators = $url . '/insulators';
@@ -172,18 +174,46 @@
                                     <div class="card card">
 
                                         <div class="card-header">
+                                            <div class="row">
 
-                                            @if($active==0)
-                                                &nbsp;<i class="fas fa-lock text-danger"
-                                                         title="{{__('global.deactivated')}}"></i>
-                                            @endif
-                                            <h3 class="card-title">  @if(isset($id)&&!empty($id))
-                                                    <b>{{$title}}</b>, id: {{$id}}
-                                                @else
-                                                    {{__('global.new_record')}}
-                                                @endif</h3>&nbsp;&nbsp;
+                                                <div class="col-sm-7 col-md-6  col-lg-5 col-xl-4">
+                                                    @if($active==0)
+                                                        &nbsp;<i class="fas fa-lock text-danger"
+                                                                 title="{{__('global.deactivated')}}"></i>
+                                                    @endif
+                                                    <h3 class="card-title">  @if(isset($id)&&!empty($id))
+                                                            <b>{{$title}}</b>, id: {{$id}}
+                                                        @else
+                                                            {{__('global.new_record')}}
+                                                        @endif</h3>&nbsp;&nbsp;
+                                                </div>
 
 
+
+
+                                                <div class="col-sm-7 col-md-6 col-lg-5 col-xl-4">
+                                                    <form id="form_calculations" method="GET" action="{{$url_calculate}}">
+                                                        @csrf
+
+                                                        <input type="hidden" name="id" value="{{$id}}">
+                                                        <input type="hidden" name="url_return" value="{{$url_all_tables. '/' . $id}}">
+                                                        <input type="hidden" name="message_error" value="{{ $message_error }}">
+                                                        <input type="hidden" name="message_success" value="{{ $message_success }}">
+                                                        <input type="hidden" name="query" value="{{ $query ?? '' }}">
+
+                                                        <button type="submit"
+                                                                class="btn btn-sm {{ (int)$isCalculate === 1 ? 'btn-success' : 'btn-danger' }}">
+                                                            пресметај
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+
+
+
+
+
+                                        </div>
                                         </div>
                                         <!-- /.card-header -->
 
@@ -205,12 +235,13 @@
                                                             <tr>
                                                                 <th class="text-center"
                                                                     style="white-space: nowrap; width: 1px;"></th>
-                                                                <th class="text-center"
-                                                                    style="white-space: nowrap; width: 1px;">id
-                                                                </th>
-                                                                <th class="text-center"
-                                                                    style="white-space: nowrap; width: 1px;">id_project
-                                                                </th>
+{{--                                                                <th class="text-center"--}}
+{{--                                                                    style="white-space: nowrap; width: 1px;">id--}}
+{{--                                                                </th>--}}
+{{--                                                                <th class="text-center"--}}
+{{--                                                                    style="white-space: nowrap; width: 1px;">id_project--}}
+{{--                                                                </th>--}}
+                                                                <th class="text-center" style="white-space: nowrap; width: 1px;">id_trasa</th>
                                                                 <th class="text-center">stac_t</th>
                                                                 <th class="text-center"
                                                                     style="white-space: nowrap; width: 1px;">kota_t
@@ -232,14 +263,15 @@
 
                                                             <tbody>
                                                                 <?php
-                                                                $n = 0;
+                                                                $n = 1;
                                                                 ?>
                                                             @foreach($raspres as $raspres_)
 
                                                                     <?php
-                                                                    $n = $n + 1;
+
                                                                     $id = $raspres_->id ?? '';
                                                                     $id_project = $raspres_->id_project ?? '';
+                                                                    $id_trasa = $raspres_->id_trasa ?? '';
                                                                     $stac_t = $raspres_->stac_t ?? '';
                                                                     $kota_t = $raspres_->kota_t ?? '';
                                                                     $raspon = $raspres_->raspon ?? '';
@@ -256,9 +288,10 @@
                                                                     ?>
 
                                                                 <tr>
-                                                                    <td class="text-center">{{$n}}</td>
-                                                                    <td class="text-center">{{$id}}</td>
-                                                                    <td class="text-center">{{$id_project}}</td>
+                                                                    <td class="text-center"  title="{{$id}}">{{$n}}</td>
+{{--                                                                    <td class="text-center">{{$id}}</td>--}}
+{{--                                                                    <td class="text-center">{{$id_project}}</td>--}}
+                                                                    <td class="text-center">{{$id_trasa}}</td>
                                                                     <td class="text-center">{{$stac_t}}</td>
                                                                     <td class="text-center">{{$kota_t}}</td>
                                                                     <td class="text-center">{{$raspon}}</td>
@@ -266,15 +299,18 @@
                                                                     <td class="text-center">{{$vr_zaj}}</td>
                                                                     <td class="text-center">{{$kota_pro}}</td>
                                                                     <td class="text-center">{{$kota_zaj}}</td>
-                                                                    <td class="text-center">{{$ras_totp}}</td>
-                                                                    <td class="text-center">{{$ras_t2op}}</td>
-                                                                    <td class="text-center">{{$ras_totz}}</td>
-                                                                    <td class="text-center">{{$ras_t2oz}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_totp}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_t2op}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_totz}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_t2oz}}</td>
                                                                     <td class="text-center">{{$dol_pro}}</td>
                                                                     <td class="text-center">{{$dol_zaj}}</td>
 
 
                                                                 </tr>
+                                                                        <?php
+                                                                        $n = $n + 1;
+                                                                        ?>
                                                             @endforeach
 
                                                             </tbody>
@@ -301,12 +337,14 @@
                                                             <tr>
                                                                 <th class="text-center"
                                                                     style="white-space: nowrap; width: 1px;"></th>
-                                                                <th class="text-center">id</th>
-                                                                <th class="text-center">id_project</th>
+{{--                                                                <th class="text-center">id</th>--}}
+{{--                                                                <th class="text-center">id_project</th>--}}
                                                                 <th class="text-center">po_stolb</th>
                                                                 <th class="text-center">kr_stolb</th>
                                                                 <th class="text-center">stac_po</th>
+                                                                <th class="text-center">id_trasa_po</th>
                                                                 <th class="text-center">stac_kr</th>
+                                                                <th class="text-center">id_trasa_kr</th>
                                                                 <th class="text-center">pole_dol</th>
                                                                 <th class="text-center">nap_pro</th>
                                                                 <th class="text-center">nap_zaj</th>
@@ -356,8 +394,10 @@
                                                                     $id_project = $zatpol_->id_project ?? '';
                                                                     $po_stolb = $zatpol_->po_stolb ?? '';
                                                                     $stac_po = $zatpol_->stac_po ?? '';
+                                                                    $id_trasa_po = $zatpol_->id_trasa_po ?? '';
                                                                     $kr_stolb = $zatpol_->kr_stolb ?? '';
                                                                     $stac_kr = $zatpol_->stac_kr ?? '';
+                                                                    $id_trasa_kr = $zatpol_->id_trasa_kr ?? '';
                                                                     $pole_dol = $zatpol_->pole_dol ?? '';
                                                                     $nap_pro = $zatpol_->nap_pro ?? '';
                                                                     $nap_zaj = $zatpol_->nap_zaj ?? '';
@@ -395,13 +435,15 @@
 
                                                                 <tr>
 
-                                                                    <td class="text-center">{{$n}}</td>
-                                                                    <td class="text-center">{{$id}}</td>
-                                                                    <td class="text-center">{{$id_project}}</td>
+                                                                    <td class="text-center" title="{{$id}}">{{$n}}</td>
+{{--                                                                    <td class="text-center">{{$id}}</td>--}}
+{{--                                                                    <td class="text-center">{{$id_project}}</td>--}}
                                                                     <td class="text-center">{{$po_stolb}}</td>
                                                                     <td class="text-center">{{$kr_stolb}}</td>
                                                                     <td class="text-center">{{$stac_po}}</td>
+                                                                    <td class="text-center">{{$id_trasa_po}}</td>
                                                                     <td class="text-center">{{$stac_kr}}</td>
+                                                                    <td class="text-center">{{$id_trasa_kr}}</td>
                                                                     <td class="text-center">{{$pole_dol}}</td>
                                                                     <td class="text-center">{{$nap_pro}}</td>
                                                                     <td class="text-center">{{$nap_zaj}}</td>
@@ -409,35 +451,36 @@
                                                                     <td class="text-center">{{$kidt}}</td>
                                                                     <td class="text-center">{{$priv}}</td>
                                                                     <td class="text-center">{{$id_raspon}}</td>
-                                                                    <td class="text-center">{{$tovpro}}</td>
-                                                                    <td class="text-center">{{$tovpro_1}}</td>
-                                                                    <td class="text-center">{{$tovpro_2}}</td>
-                                                                    <td class="text-center">{{$napreg1_p}}</td>
-                                                                    <td class="text-center">{{$napreg2_p}}</td>
-                                                                    <td class="text-center">{{$napreg3_p}}</td>
-                                                                    <td class="text-center">{{$napreg4_p}}</td>
-                                                                    <td class="text-center">{{$napreg5_p}}</td>
-                                                                    <td class="text-center">{{$napreg6_p}}</td>
-                                                                    <td class="text-center">{{$napreg7_p}}</td>
-                                                                    <td class="text-center">{{$napreg8_p}}</td>
-                                                                    <td class="text-center">{{$krit_te_p}}</td>
-                                                                    <td class="text-center">{{$krit_ra_p}}</td>
-                                                                    <td class="text-center">{{$tovzaj}}</td>
-                                                                    <td class="text-center">{{$tovzaj_1}}</td>
-                                                                    <td class="text-center">{{$tovzaj_2}}</td>
-                                                                    <td class="text-center">{{$napreg1_z}}</td>
-                                                                    <td class="text-center">{{$napreg2_z}}</td>
-                                                                    <td class="text-center">{{$napreg3_z}}</td>
-                                                                    <td class="text-center">{{$napreg4_z}}</td>
-                                                                    <td class="text-center">{{$napreg5_z}}</td>
-                                                                    <td class="text-center">{{$napreg6_z}}</td>
-                                                                    <td class="text-center">{{$napreg7_z}}</td>
-                                                                    <td class="text-center">{{$napreg8_z}}</td>
-                                                                    <td class="text-center">{{$krit_te_z}}</td>
-                                                                    <td class="text-center">{{$krit_ra_z}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$tovpro}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovpro_1}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovpro_2}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg1_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg2_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg3_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg4_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg5_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg6_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg7_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg8_p}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$krit_te_p}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$krit_ra_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovzaj}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovzaj_1}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovzaj_2}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg1_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg2_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg3_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg4_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg5_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg6_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg7_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg8_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$krit_te_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">{{$krit_ra_z}}</td>
 
 
                                                                 </tr>
+
                                                             @endforeach
 
                                                             </tbody>
@@ -461,10 +504,11 @@
                                                             <table id="example2" class="table_grid">
                                                                 <thead>
                                                                 <tr>
-                                                                    <th class="text-center">id</th>
-                                                                    <th class="text-center">id_project</th>
+{{--                                                                    <th class="text-center">id</th>--}}
+{{--                                                                    <th class="text-center">id_project</th>--}}
                                                                     <th class="text-center">br_stolb</th>
                                                                     <th class="text-center">stac_t</th>
+                                                                    <th class="text-center">id_trasa</th>
                                                                     <th class="text-center">raspon</th>
                                                                     <th class="text-center">grr_lpro</th>
                                                                     <th class="text-center">grr_dpro</th>
@@ -502,8 +546,10 @@
                                                                         <?php
                                                                         $id = $gapres_->id ?? '';
                                                                         $id_project = $gapres_->id_project ?? '';
+
                                                                         $br_stolb = $gapres_->br_stolb ?? '';
                                                                         $stac_t = $gapres_->stac_t ?? '';
+                                                                        $id_trasa = $gapres_->id_trasa ?? '';
                                                                         $raspon = $gapres_->raspon ?? '';
                                                                         $grr_lpro = $gapres_->grr_lpro ?? '';
                                                                         $grr_dpro = $gapres_->grr_dpro ?? '';
@@ -534,30 +580,31 @@
                                                                         ?>
 
                                                                     <tr>
-                                                                        <td class="text-center">{{$id}}</td>
-                                                                        <td class="text-center">{{$id_project}}</td>
-                                                                        <td class="text-center">{{$br_stolb}}</td>
+{{--                                                                        <td class="text-center">{{$id}}</td>--}}
+{{--                                                                        <td class="text-center">{{$id_project}}</td>--}}
+                                                                        <td class="text-center"  title="{{$id}}">{{$br_stolb}}</td>
                                                                         <td class="text-center">{{$stac_t}}</td>
+                                                                        <td class="text-center">{{$id_trasa}}</td>
                                                                         <td class="text-center">{{$raspon	}}</td>
                                                                         <td class="text-center">{{$grr_lpro}}</td>
                                                                         <td class="text-center">{{$grr_dpro}}</td>
                                                                         <td class="text-center">{{$grr_vpro}}</td>
-                                                                        <td class="text-center">{{$proc_gv}}</td>
-                                                                        <td class="text-center">{{$grr_st}}</td>
+                                                                        <td class="text-center" style="background-color: #ffe187">{{$proc_gv}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffe187">{{$grr_st}}</td>
                                                                         <td class="text-center">{{$grr_lprk}}</td>
                                                                         <td class="text-center">{{$grr_dprk}}</td>
                                                                         <td class="text-center">{{$grr_vprk}}</td>
-                                                                        <td class="text-center">{{$elr_pro1}}</td>
-                                                                        <td class="text-center">{{$elr_pro2}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_pro1}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_pro2}}</td>
                                                                         <td class="text-center">{{$sre_ras}}</td>
-                                                                        <td class="text-center">{{$proc_sr}}</td>
-                                                                        <td class="text-center">{{$s_ra_st}}</td>
+                                                                        <td class="text-center"   style="background-color: #ddffd9">{{$proc_sr}}</td>
+                                                                        <td class="text-center"   style="background-color: #ddffd9">{{$s_ra_st}}</td>
                                                                         <td class="text-center">{{$grr_lzaj}}</td>
                                                                         <td class="text-center">{{$grr_dzaj}}</td>
                                                                         <td class="text-center">{{$grr_vzaj}}</td>
-                                                                        <td class="text-center">{{$proc_gz}}</td>
-                                                                        <td class="text-center">{{$elr_zaj1}}</td>
-                                                                        <td class="text-center">{{$elr_zaj2}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffe187">{{$proc_gz}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj1}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj2}}</td>
                                                                         <td class="text-center">{{$kota_pro}}</td>
                                                                         <td class="text-center">{{$kota_zaj}}</td>
                                                                         <td class="text-center">{{$ras_totp}}</td>
@@ -568,6 +615,9 @@
 
 
                                                                     </tr>
+                                                                            <?php
+
+                                                                            ?>
                                                                 @endforeach
 
                                                                 </tbody>

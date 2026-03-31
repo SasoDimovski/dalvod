@@ -31,6 +31,7 @@ class Projects extends Model
         'num_cond_systems',
         'num_cond_bundle',
         'num_ground_wires',
+        'calculation',
         'active',
         'deleted',
         'created_by',
@@ -42,6 +43,7 @@ class Projects extends Model
     {
         return $this->belongsTo(Voltages::class, 'id_voltage');
     }
+
     public function conductors(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Conductors::class, 'id_conductor');
