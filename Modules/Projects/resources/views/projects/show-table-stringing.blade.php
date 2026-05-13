@@ -99,7 +99,7 @@
 
 
     $path_upload = 'uploads/projects/';
-    $url_export_excel = $url .'/export-excel-towers/'. $id;;;
+    $url_export_excel = $url .'/export-excel-stringing/'. $id;;;
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
     $message_success = (isset($id)) ? __('global.update_success') : __('global.save_success');
@@ -190,182 +190,291 @@
                             <!-- /.card-header -->
 
                             <div class="card-body scrollmenu">
+
+
                                 <div class="row">
                                     {{--=========================================================--}}
 
 
-                                    <div class="col-sm-12">
+                                    <div class="col-sm-6">
 
-                                        @if(count($zatpol) > 0)
+                                        @if(count($data) > 0)
 
-                                            <div class="row">
-                                                <div class="col-sm-12 scrollmenu">
+                                                    @foreach($data as $data_)
+                                                        <button class="btn btn-success">  <b>{{ __('projects.ReportsExportExcelStringing.mon_conductor') }}</b>, {{ __('projects.ReportsExportExcelStringing.mon_tab') }} <b>{{ $data_['number']}}</b></button>
+                                                        <div class="card card-danger mb-3">
 
-                                                    <div class="col-sm-12  scrollmenu">
-
-
-
-                                                            @foreach($zatpol as $zatpol_)
-
-
-                                                            {{-- =============================== --}}
-                                                            {{-- 1. HEADER / SUMMARY --}}
-                                                            {{-- =============================== --}}
-                                                            <div class="card card-primary mb-3">
-                                                                <div class="card-header">
-                                                                    <h3 class="card-title">Монтажна табела за затезно поле бр.</h3>
-                                                                </div>
+{{--                                                            <div class="card-header">--}}
+{{--                                                                <h3 class="card-title">--}}
+{{--                                                                    {{ __('projects.ReportsExportExcelStringing.mon_tab') }} {{ $data_['number']}}--}}
+{{--                                                                </h3>--}}
+{{--                                                            </div>--}}
 
 
-                                                                <div class="card-body">
+                                                            <div class="card-body">
 
-                                                                    <div class="table-responsive">
-                                                                        <table class="table table-bordered table-sm text-center mb-0">
-                                                                            <tbody>
-                                                                            <tr>
-                                                                                <th class="text-left">Спроводник:</th>
-                                                                                <th></th>
-                                                                            </tr>
+                                                                <div class="row">
+                                                                    <div class="col-sm-12 scrollmenu">
+                                                                        <div class="row">
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.sp_des')}}">{{__('projects.ReportsExportExcelStringing.sp')}}: <b
+                                                                                    class="text-danger">{{ $data_['summary']['conductor'] ?? '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.ns_des')}}">{{__('projects.ReportsExportExcelStringing.ns')}}: <b
+                                                                                    class="text-danger">{{ isset($data_['summary']['nap_pro']) ? number_format((float)$data_['summary']['nap_pro'], 2, '.', '') : '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.kndt_des')}}">{{__('projects.ReportsExportExcelStringing.kndt')}}:  <b
+                                                                                    class="text-danger">{{ isset($data_['summary']['kndt']) ? number_format((float)$data_['summary']['kndt'], 2, '.', '') : '' }}</b></span>
+                                                                        </div>
 
+                                                                        <div class="row">
+                                                                            <table class="table_grid">
 
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.temp_des')}}">{{__('projects.ReportsExportExcelStringing.temp')}}</td>
+                                                                                    @foreach($data_['matrix']['temps'] as $t)
+                                                                                        <td class="text-center"
+                                                                                            style="background: #ffe187; color:black;">
+                                                                                            {{ $t }}
+                                                                                        </td>
+                                                                                    @endforeach
 
-                                                                            <tr>
-                                                                                <th class="text-left">Макс. напрегање:</th>
-                                                                                <td></td>
-                                                                            </tr>
+                                                                                </tr>
 
-                                                                            <tr>
-                                                                                <th class="text-left">Коеф. КНДТ:</th>
-                                                                                <td></td>
-                                                                            </tr>
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.np_des')}}">{{__('projects.ReportsExportExcelStringing.np')}}</td>
+                                                                                    @foreach($data_['matrix']['napreg_p'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ isset($t) ? number_format((float)$t, 2, '.', '') : '' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
 
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.np_sz')}}">{{__('projects.ReportsExportExcelStringing.sz')}}</td>
+                                                                                    @foreach($data_['matrix']['sila_zateg'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ isset($t) ? number_format((float)$t, 2, '.', '') : '' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.pir_sz')}}">{{__('projects.ReportsExportExcelStringing.pir')}}</td>
+                                                                                    @foreach($data_['matrix']['proves_idr'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ $t }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
 
-                                                                            </tbody>
-                                                                        </table>
+                                                                        </div>
+
+                                                                        @foreach($data_['spans'] ?? [] as $span)
+
+                                                                            <div class="row">
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.rb_des')}}">{{__('projects.ReportsExportExcelStringing.rb')}}: <b
+                                                                                        class="text-danger">{{ $span['raspon_br'] ?? '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.rs_des')}}">{{__('projects.ReportsExportExcelStringing.rs')}}: <b
+                                                                                        class="text-danger">{{ isset($span['raspon']) ? number_format((float)$span['raspon'], 2, '.', '') : '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.vr_des')}}">{{__('projects.ReportsExportExcelStringing.vr')}}:  <b
+                                                                                        class="text-danger">{{ isset($span['vr']) ? number_format((float)$span['vr'], 2, '.', '') : '' }}</b></span>
+                                                                            </div>
+                                                                            <div class="row">
+                                                                                <table class="table_grid">
+                                                                                    <tr>
+                                                                                        <td class="text-center"
+                                                                                            style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                            title="{{ __('projects.ReportsExportExcelStringing.temp_des') }}">{{ __('projects.ReportsExportExcelStringing.temp') }}</td>
+                                                                                        @foreach($data_['matrix']['temps'] as $t)
+                                                                                            <td class="text-center"
+                                                                                                style="background: #ffe187; color:black;">
+                                                                                                {{ $t }}
+                                                                                            </td>
+                                                                                        @endforeach
+                                                                                    </tr>
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td class="text-center"
+                                                                                            style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                            title="{{ __('projects.ReportsExportExcelStringing.pvr_des') }}">{{ __('projects.ReportsExportExcelStringing.pvr') }}</td>
+                                                                                        @foreach($span['provesi'] ?? [] as $p)
+                                                                                            <td class="text-center">{{ $p ?? '' }}</td>
+                                                                                        @endforeach
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        @endforeach
+
                                                                     </div>
 
 
-
-                                                                </div>
-
-
-
-                                                            </div>
-
-
-                                                            {{-- =============================== --}}
-                                                            {{-- 2. MATRIX TABLE --}}
-                                                            {{-- =============================== --}}
-                                                            <div class="card card-outline card-primary mb-3">
-                                                                <div class="card-header">
-                                                                    <h3 class="card-title">Општи монтажни параметри</h3>
-                                                                </div>
-
-                                                                <div class="card-body p-0">
-                                                                    <div class="table-responsive">
-                                                                        <table class="table table-bordered table-sm text-center mb-0">
-                                                                            <thead>
-                                                                            <tr>
-                                                                                <th class="text-left">Параметар</th>
-                                                                                <th>-20</th>
-                                                                                <th>-10</th>
-                                                                                <th>0</th>
-                                                                                <th>10</th>
-                                                                                <th>20</th>
-                                                                                <th>30</th>
-                                                                                <th>40</th>
-                                                                                <th>-5+dt</th>
-                                                                            </tr>
-                                                                            </thead>
-
-                                                                            <tbody>
-                                                                            <tr>
-                                                                                <th class="text-left">Температура</th>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                            </tr>
-
-                                                                            <tr>
-                                                                                <th class="text-left">Напрегање</th>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                            </tr>
-
-                                                                            <tr>
-                                                                                <th class="text-left">Сила на затег.</th>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                            </tr>
-
-                                                                            <tr>
-                                                                                <th class="text-left">Провес</th>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                                <td></td><td></td><td></td><td></td>
-                                                                            </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-
-                                                            {{-- =============================== --}}
-                                                            {{-- 3. SPANS TABLE --}}
-                                                            {{-- =============================== --}}
-                                                            <div class="card card-outline card-secondary mb-4">
-                                                                <div class="card-header">
-                                                                    <h3 class="card-title">Провеси во распоните</h3>
-                                                                </div>
-
-                                                                <div class="card-body p-0">
-                                                                    <div class="table-responsive">
-                                                                        <table class="table table-bordered table-sm text-center mb-0">
-                                                                            <thead>
-                                                                            <tr>
-                                                                                <th>Распон бр.</th>
-                                                                                <th>Распон [m]</th>
-                                                                                <th>В.р. [m]</th>
-
-                                                                                <th>-20</th>
-                                                                                <th>-10</th>
-                                                                                <th>0</th>
-                                                                                <th>10</th>
-                                                                                <th>20</th>
-                                                                                <th>30</th>
-                                                                                <th>40</th>
-                                                                                <th>-5+dt</th>
-                                                                            </tr>
-                                                                            </thead>
-
-                                                                            <tbody>
-                                                                            <tr>
-                                                                                <td colspan="11" class="text-center text-muted">
-                                                                                    Нема податоци
-                                                                                </td>
-                                                                            </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
                                                                 </div>
                                                             </div>
 
 
-                                                            @endforeach
+                                                        </div>
+
+                                                    @endforeach
+                                        @else
+                                            {{__('global.no_records')}}
+                                        @endif
 
 
-                                                    </div>
-                                                </div>
-                                            </div>
+
+                                        @if(count($data) > 0)
+                                                    @foreach($data as $data_)
+                                                        <button class="btn btn-danger">  <b>{{ __('projects.ReportsExportExcelStringing.mon_zaj') }}</b>, {{ __('projects.ReportsExportExcelStringing.mon_tab') }} <b>{{ $data_['number']}}</b></button>
+                                                        <div class="card card-danger mb-3">
+
+                                                            {{--                                                            <div class="card-header">--}}
+                                                            {{--                                                                <h3 class="card-title">--}}
+                                                            {{--                                                                    {{ __('projects.ReportsExportExcelStringing.mon_tab') }} {{ $data_['number']}}--}}
+                                                            {{--                                                                </h3>--}}
+                                                            {{--                                                            </div>--}}
 
 
+                                                            <div class="card-body">
+
+                                                                <div class="row">
+                                                                    <div class="col-sm-12 scrollmenu">
+                                                                        <div class="row">
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.zaj_des')}}">{{__('projects.ReportsExportExcelStringing.zaj')}}: <b
+                                                                                    class="text-danger">{{ $data_['summary_zj']['conductor'] ?? '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.ns_des')}}">{{__('projects.ReportsExportExcelStringing.ns')}}: <b
+                                                                                    class="text-danger">{{ isset($data_['summary_zj']['nap_zaj']) ? number_format((float)$data_['summary']['nap_zaj'], 2, '.', '') : '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                            <span
+                                                                                title="{{__('projects.ReportsExportExcelStringing.kndt_des')}}">{{__('projects.ReportsExportExcelStringing.kndt')}}:  <b
+                                                                                    class="text-danger">{{ isset($data_['summary_zj']['kndt']) ? number_format((float)$data_['summary']['kndt'], 2, '.', '') : '' }}</b></span>
+                                                                        </div>
+
+                                                                        <div class="row">
+                                                                            <table class="table_grid">
+
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.temp_des')}}">{{__('projects.ReportsExportExcelStringing.temp')}}</td>
+                                                                                    @foreach($data_['matrix_zj']['temps'] as $t)
+                                                                                        <td class="text-center"
+                                                                                            style="background: #ffe187; color:black;">
+                                                                                            {{ $t }}
+                                                                                        </td>
+                                                                                    @endforeach
+
+                                                                                </tr>
+
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.np_des')}}">{{__('projects.ReportsExportExcelStringing.np')}}</td>
+                                                                                    @foreach($data_['matrix_zj']['napreg_z'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ isset($t) ? number_format((float)$t, 2, '.', '') : '' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.np_sz')}}">{{__('projects.ReportsExportExcelStringing.sz')}}</td>
+                                                                                    @foreach($data_['matrix_zj']['sila_zateg'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ isset($t) ? number_format((float)$t, 2, '.', '') : '' }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="text-right"
+                                                                                        style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                        title="{{__('projects.ReportsExportExcelStringing.pir_sz')}}">{{__('projects.ReportsExportExcelStringing.pir')}}</td>
+                                                                                    @foreach($data_['matrix_zj']['proves_idr'] as $t)
+                                                                                        <td class="text-center">
+                                                                                            {{ $t }}
+                                                                                        </td>
+                                                                                    @endforeach
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+
+                                                                        </div>
+
+                                                                        @foreach($data_['spans_zj'] ?? [] as $span)
+
+                                                                            <div class="row">
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.rb_des')}}">{{__('projects.ReportsExportExcelStringing.rb')}}: <b
+                                                                                        class="text-danger">{{ $span['raspon_br'] ?? '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.rs_des')}}">{{__('projects.ReportsExportExcelStringing.rs')}}: <b
+                                                                                        class="text-danger">{{ isset($span['raspon']) ? number_format((float)$span['raspon'], 2, '.', '') : '' }}</b></span>&nbsp&nbsp&nbsp&nbsp
+                                                                                <span
+                                                                                    title="{{__('projects.ReportsExportExcelStringing.vr_des')}}">{{__('projects.ReportsExportExcelStringing.vr')}}:  <b
+                                                                                        class="text-danger">{{ isset($span['vr']) ? number_format((float)$span['vr'], 2, '.', '') : '' }}</b></span>
+                                                                            </div>
+                                                                            <div class="row">
+                                                                                <table class="table_grid">
+                                                                                    <tr>
+                                                                                        <td class="text-center"
+                                                                                            style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                            title="{{ __('projects.ReportsExportExcelStringing.temp_des') }}">{{ __('projects.ReportsExportExcelStringing.temp') }}</td>
+                                                                                        @foreach($data_['matrix']['temps'] as $t)
+                                                                                            <td class="text-center"
+                                                                                                style="background: #ffe187; color:black;">
+                                                                                                {{ $t }}
+                                                                                            </td>
+                                                                                        @endforeach
+                                                                                    </tr>
+                                                                                    <tbody>
+                                                                                    <tr>
+                                                                                        <td class="text-center"
+                                                                                            style="white-space: nowrap; width: 1px;background: #ffe187; color:black;"
+                                                                                            title="{{ __('projects.ReportsExportExcelStringing.pvr_des') }}">{{ __('projects.ReportsExportExcelStringing.pvr') }}</td>
+                                                                                        @foreach($span['provesi'] ?? [] as $p)
+                                                                                            <td class="text-center">{{ $p ?? '' }}</td>
+                                                                                        @endforeach
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        @endforeach
+
+                                                                    </div>
+
+
+                                                                </div>
+                                                            </div>
+
+
+                                                        </div>
+
+                                                    @endforeach
                                         @else
                                             {{__('global.no_records')}}
                                         @endif
 
                                     </div>
 
-
                                 </div>
+
                                 <div class="row">
                                     <a class="btn btn-default btn-sm float-right"
                                        href="{{$url_export_excel}}"

@@ -27,6 +27,11 @@ class Trasa extends Model
         'priv',
     ];
 
+    public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        // foreign key во raspres = id_project, owner key во projects = id
+        return $this->belongsTo(Projects::class, 'id_project', 'id');
+    }
     public function trafo(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Trafo::class, 'id_trafo');

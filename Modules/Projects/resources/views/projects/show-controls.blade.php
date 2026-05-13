@@ -74,6 +74,8 @@
 
     $url_edit_point = $url . '/edit_point/' . $id;;
 
+    $url_calculate = $url . '/calculate/' . $id;;
+
     $url_edit_towers = $url . '/towers';
     $url_edit_insulators = $url . '/insulators';
 
@@ -172,18 +174,39 @@
                         <div class="card card">
 
                             <div class="card-header">
+                                <div class="row">
+                                    <div class="col-sm-7 col-md-6  col-lg-5 col-xl-4">
 
-                                @if($active==0)
-                                    &nbsp;<i class="fas fa-lock text-danger"
-                                             title="{{__('global.deactivated')}}"></i>
-                                @endif
-                                <h3 class="card-title">  @if(isset($id)&&!empty($id))
-                                        <b>{{$title}}</b>, id: {{$id}}
-                                    @else
-                                        {{__('global.new_record')}}
-                                    @endif</h3>&nbsp;&nbsp;
+                                    @if($active==0)
+                                        &nbsp;<i class="fas fa-lock text-danger"
+                                                 title="{{__('global.deactivated')}}"></i>
+                                    @endif
+                                    <h3 class="card-title">  @if(isset($id)&&!empty($id))
+                                            <b>{{$title}}</b>, id: {{$id}}
+                                        @else
+                                            {{__('global.new_record')}}
+                                        @endif</h3>&nbsp;&nbsp;
+                                    </div>
 
 
+                                        <div class="col-sm-7 col-md-6 col-lg-5 col-xl-4">
+                                            <form id="form_calculations" method="GET" action="{{$url_calculate}}">
+                                                @csrf
+
+                                                <input type="hidden" name="id" value="{{$id}}">
+                                                <input type="hidden" name="url_return" value="{{$url_controls. '/' . $id}}">
+                                                <input type="hidden" name="message_error" value="{{ $message_error }}">
+                                                <input type="hidden" name="message_success" value="{{ $message_success }}">
+                                                <input type="hidden" name="query" value="{{ $query ?? '' }}">
+
+                                                <button type="submit"
+                                                        class="btn btn-sm {{ (int)$isCalculate === 1 ? 'btn-success' : 'btn-danger' }}">
+                                                    пресметај
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                </div>
                             </div>
                             <!-- /.card-header -->
 
@@ -192,8 +215,156 @@
                                     {{--=========================================================--}}
 
 
-                                    <div class="col-sm-7 col-md-6  col-lg-5 col-xl-4">
-                                       Во изработка
+                                    <div class="col-sm-8">
+
+
+                                            <button class="btn btn-success">  <b>{{ __('projects.show-controls.kongras') }}</b></button>
+                                            <div class="card card-danger mb-3">
+                                                <div class="card-body">
+
+
+                                                    @if(($kongras['count'] ?? 0) > 0)
+
+
+
+                                                    <div class="row">
+                                                        <span style="color: #a71d2a">{{__('projects.show-controls.kongras_no')}}</span>
+                                                    </div>
+
+                                                    <div class="row scrollmenu">
+
+                                                        <table class="table_grid">
+
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center">{{__('projects.show-controls.raspon')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_start_des')}}">{{__('projects.show-controls.tower_name_start')}}</th>
+                                                                <th class="text-center"  title="{{__('projects.show-controls.stac_start')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_start')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_end_des')}}">{{__('projects.show-controls.tower_name_end')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.stac_end')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_end')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+
+                                                                <th class="text-center">{{__('projects.show-controls.kongras_proc_gv')}}</th>
+                                                                <th class="text-center">{{__('projects.show-controls.kongras_grr_vprk')}}</th>
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($kongras['items'] as $item)
+                                                                <tr>
+
+                                                                        <td class="text-center">{{ $item['raspon_br'] ?? '' }}</td>
+
+
+                                                                        <td class="text-center"   style="background-color: #ddffd9">{{ $item['start']['tower_name'] ?? '' }}</td>
+                                                                        <td class="text-center"  style="background-color: #ddffd9">{{ number_format((float)($item['start']['stac_t'] ?? 0), 2, '.', '') }}</td>
+                                                                        <td class="text-center"  style="background-color: #ddffd9">{{ $item['start']['id_trasa'] ?? '' }}</td>
+
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{ $item['end']['tower_name'] ?? '' }}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{ number_format((float)($item['end']['stac_t'] ?? 0), 2, '.', '') }}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{ $item['end']['id_trasa'] ?? '' }}</td>
+
+                                                                        <td class="text-center">{{ number_format((float)($item['proc_gv'] ?? 0), 2, '.', '') }}</td>
+                                                                        <td class="text-center">{{ number_format((float)($item['grr_vprk'] ?? 0), 2, '.', '') }}</td>
+
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+
+                                                    </div>
+
+                                                    @else
+                                                        <div class="row">
+                                                        <span
+                                                            style="color: #00A000">{{__('projects.show-controls.kongras_ok')}}</span>
+                                                        </div>
+                                                    @endif
+
+
+                                                </div>
+                                            </div>
+
+
+                                        <button class="btn btn-success">  <b>{{ __('projects.show-controls.konelras') }}</b></button>
+                                        <div class="card card-danger mb-3">
+                                            <div class="card-body">
+
+
+                                                @if(($konelras['count'] ?? 0) > 0)
+
+
+
+                                                    <div class="row">
+                                                        <span style="color: #a71d2a">{{__('projects.show-controls.konelras_no')}}</span>
+                                                    </div>
+
+                                                    <div class="row scrollmenu">
+
+                                                        <table class="table_grid">
+
+                                                            <thead>
+                                                            <tr>
+
+                                                                <th class="text-center">{{__('projects.show-controls.raspon')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_start_des')}}">{{__('projects.show-controls.tower_name_start')}}</th>
+                                                                <th class="text-center"  title="{{__('projects.show-controls.stac_start')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_start')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_end_des')}}">{{__('projects.show-controls.tower_name_end')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.stac_end')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_end')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+
+                                                                <th class="text-center">{{__('projects.show-controls.konelras_raspon')}}</th>
+                                                                <th class="text-center">{{__('projects.show-controls.konelras_el_raspro')}}</th>
+                                                                <th class="text-center">{{__('projects.show-controls.konelras_el_raszaj')}}</th>
+
+
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($konelras['items'] as $item)
+                                                                <tr>
+                                                                    <td class="text-center">{{ $item['raspon_br'] ?? '' }}</td>
+
+
+                                                                    <td class="text-center"   style="background-color: #ddffd9">{{ $item['start']['tower_name'] ?? '' }}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{ number_format((float)($item['start']['stac_t'] ?? 0), 2, '.', '') }}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{ $item['start']['id_trasa'] ?? '' }}</td>
+
+                                                                    <td class="text-center"  style="background-color: #ffafaf">{{ $item['end']['tower_name'] ?? '' }}</td>
+                                                                    <td class="text-center"  style="background-color: #ffafaf">{{ number_format((float)($item['end']['stac_t'] ?? 0), 2, '.', '') }}</td>
+                                                                    <td class="text-center"  style="background-color: #ffafaf">{{ $item['end']['id_trasa'] ?? '' }}</td>
+
+                                                                    <td class="text-center">{{ number_format((float)$item['raspon'], 2, '.', '') }}</td>
+                                                                    <td class="text-center">{{ number_format((float)$item['el_raspro'], 2, '.', '') }}</td>
+                                                                    <td class="text-center">{{ number_format((float)$item['el_raszaj'], 2, '.', '') }}</td>
+
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+
+                                                    </div>
+
+                                                @else
+                                                    <div class="row">
+                                                        <span
+                                                            style="color: #00A000">{{__('projects.show-controls.konelras_ok')}}</span>
+                                                    </div>
+                                                @endif
+
+
+                                            </div>
+                                        </div>
+
                                     </div>
 
 

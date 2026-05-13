@@ -47,7 +47,11 @@ class Gapres extends Model
         // foreign key во raspres = id_project, owner key во projects = id
         return $this->belongsTo(Projects::class, 'id_project', 'id');
     }
-
+    public function trasa(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        // foreign key во raspres = id_project, owner key во projects = id
+        return $this->belongsTo(Trasa::class, 'id_trasa', 'id');
+    }
     protected $casts = [
         'stac_t'=>'float',
         'raspon'=>'float',

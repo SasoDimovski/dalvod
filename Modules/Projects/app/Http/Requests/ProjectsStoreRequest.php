@@ -3,6 +3,7 @@
 namespace Modules\Projects\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
 
 class ProjectsStoreRequest extends FormRequest
 {
@@ -40,7 +41,7 @@ class ProjectsStoreRequest extends FormRequest
 
         return [
             'title.required' => __('global.required', ['name' => __('projects.title')]),
-            'id_voltage.required' => __('global.required', ['name' => __('projects.title')]),
+            'id_voltage.required' => __('global.required', ['name' => __('projects.id_voltage')]),
             'id_starting_point.required' => __('global.required', ['name' => __('projects.id_starting_point')]),
             'id_ending_point.required' => __('global.required', ['name' => __('projects.id_ending_point')]),
             'id_conductor.required' => __('global.required', ['name' => __('projects.id_conductor')]),
@@ -48,7 +49,7 @@ class ProjectsStoreRequest extends FormRequest
             'id_ground_wires.required' => __('global.required', ['name' => __('projects.id_ground_wires')]),
             'tensile_stress_ground.required' => __('global.required', ['name' => __('projects.tensile_stress_ground')]),
             'kn.required' => __('global.required', ['name' => __('projects.kn')]),
-            'ki.required' => __('global.required', ['name' => __('projects.kn')]),
+            'ki.required' => __('global.required', ['name' => __('projects.ki')]),
             'id_wind_pressure.required' => __('global.required', ['name' => __('projects.id_wind_pressure')]),
             'id_insulator_chain.required' => __('global.required', ['name' => __('projects.id_insulator_chain')]),
             'num_cond_systems.required' => __('global.required', ['name' => __('projects.num_cond_systems')]),
@@ -58,4 +59,14 @@ class ProjectsStoreRequest extends FormRequest
 
         ];
     }
+
+
+//    protected function failedValidation(Validator $validator)
+//    {
+//        dd([
+//            'method' => $this->method(),
+//            'input' => $this->all(),
+//            'errors' => $validator->errors()->toArray(),
+//        ]);
+//    }
 }

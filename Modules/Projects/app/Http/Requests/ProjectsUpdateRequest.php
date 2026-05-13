@@ -46,7 +46,7 @@ class ProjectsUpdateRequest extends FormRequest
             'id_ground_wires.required' => __('global.required', ['name' => __('projects.id_ground_wires')]),
             'tensile_stress_ground.required' => __('global.required', ['name' => __('projects.tensile_stress_ground')]),
             'kn.required' => __('global.required', ['name' => __('projects.kn')]),
-            'ki.required' => __('global.required', ['name' => __('projects.kn')]),
+            'ki.required' => __('global.required', ['name' => __('projects.ki')]),
             'id_wind_pressure.required' => __('global.required', ['name' => __('projects.id_wind_pressure')]),
             'id_insulator_chain.required' => __('global.required', ['name' => __('projects.id_insulator_chain')]),
             'num_cond_systems.required' => __('global.required', ['name' => __('projects.num_cond_systems')]),

@@ -262,6 +262,38 @@
 
 
 
+    "projects.show-controls.raspon" : "Распон број",
+    "projects.show-controls.tower_name_start" : "Почетен столб",
+    "projects.show-controls.tower_name_start_des" : "Почетен столб на распон",
+    "projects.show-controls.tower_name_end" : "Краен столб",
+    "projects.show-controls.tower_name_end_des" : "Краен столб на распон",
+    "projects.show-controls.stac" : "Стационажа",
+    "projects.show-controls.stac_start" : "Стационажа на почетен столб на распон",
+    "projects.show-controls.stac_end" : "Стационажа на краен столб на распон",
+    "projects.show-controls.id_trasa" : "ID траса",
+    "projects.show-controls.id_trasa_start" : "ID траса на почетен столб на распон",
+    "projects.show-controls.id_trasa_end" : "ID траса на краен столб на распон",
+
+
+
+    "projects.show-controls.kongras" : "Контрола на гравитациони распони",
+    "projects.show-controls.kongras_ok" : "Гравитационите распони се во дозволени граници!",
+    "projects.show-controls.kongras_no" : "Има гравитациони распони со недозволени големини!",
+
+    "projects.show-controls.kongras_proc_gv" : "Процент на гравитационен распон [%]",
+    "projects.show-controls.kongras_grr_vprk" : "Вертикална разлика во распонот [m]",
+
+    "projects.show-controls.konelras" : "Контрола на електрични распони распони",
+    "projects.show-controls.konelras_ok" : "Електричните распони се во дозволени граници!",
+    "projects.show-controls.konelras_no" : "Има електрични распони со недозволени големини!",
+
+    "projects.show-controls.konelras_raspon" : "Распон [m]",
+    "projects.show-controls.konelras_el_raspro" : "Електричен распон на спроводник",
+    "projects.show-controls.konelras_el_raszaj" : "Електричен распон на заштитно јаже",
+
+    "projects.show-controls.konsrras" : "Контрола на средни и тотални распони",
+
+
     "CONTROLLER": "//////////////////////////////////////////",
     "projects.ProjectController.no_exel": "Не постои Excel датотека",
     "projects.ProjectController.no_valid_exel": "Не е валидна Excel датотеката",
@@ -317,6 +349,33 @@
     "projects.ReportsExportExcelTowers.kidt"  : "КИДТ",
     "projects.ReportsExportExcelTowers.kidt_des"  : "Коеф. на исклучително затегнување до дозволено",
     "projects.ReportsExportExcelTowers.pv"  : "Притисок на ветер (Pv[daN/mm²])",
-    "projects.ReportsExportExcelTowers.pv_des"  : "Притисок на ветер (Pv[daN/mm²])"
+    "projects.ReportsExportExcelTowers.pv_des"  : "Притисок на ветер (Pv[daN/mm²])",
 
+    "projects.ReportsExportExcelStringing.mon_conductor"  : "СПРОВОДНИК",
+    "projects.ReportsExportExcelStringing.mon_zaj"  : "ЗАШТИТНО ЈАЖЕ",
+    "projects.ReportsExportExcelStringing.mon_tab"  : "затезно поле број:",
+    "projects.ReportsExportExcelStringing.zaj"  : "Заштитно јаже",
+    "projects.ReportsExportExcelStringing.zaj_des"  : "Заштитно јаже",
+    "projects.ReportsExportExcelStringing.sp"  : "Спроводник",
+    "projects.ReportsExportExcelStringing.sp_des"  : "Спроводник",
+    "projects.ReportsExportExcelStringing.ns"  : "Максимално работно напрегање [daN/mm2]",
+    "projects.ReportsExportExcelStringing.ns_des"  : "Максимално работно напрегање [daN/mm2]",
+    "projects.ReportsExportExcelStringing.kndt"  : "КНДТ",
+    "projects.ReportsExportExcelStringing.kndt_des"  : "Коеф. на нормално затегнување до дозволено",
+    "projects.ReportsExportExcelStringing.temp"  : "Температура [°C]:",
+    "projects.ReportsExportExcelStringing.temp_des"  : "Температура [°C]:",
+    "projects.ReportsExportExcelStringing.np"  : "Напрегање [daN/mm2]:",
+    "projects.ReportsExportExcelStringing.np_des"  : "Максимално работно напрегање [daN/mm2]:",
+    "projects.ReportsExportExcelStringing.sz"  : "Сила на затегнување [daN]:",
+    "projects.ReportsExportExcelStringing.sz_des"  : "Сила на затегнување [daN]:",
+    "projects.ReportsExportExcelStringing.pir"  : "Провес во идеална рамнина [cm]:",
+    "projects.ReportsExportExcelStringing.pir_des"  : "Провес во идеална рамнина [cm]:",
+    "projects.ReportsExportExcelStringing.rb"  : "Распон број",
+    "projects.ReportsExportExcelStringing.rb_des"  : "Распон број",
+    "projects.ReportsExportExcelStringing.rs"  : "Распон [m]",
+    "projects.ReportsExportExcelStringing.rs_des"  : "Распон [m]",
+    "projects.ReportsExportExcelStringing.vr"  : "В. р. [m]",
+    "projects.ReportsExportExcelStringing.vr_des"  : "В. р. [m]",
+    "projects.ReportsExportExcelStringing.pvr"  : "Провеси во распоните [m]",
+    "projects.ReportsExportExcelStringing.pvr_des"  : "Провеси во распоните [m]"
 }

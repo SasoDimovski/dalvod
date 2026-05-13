@@ -117,7 +117,7 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                             Route::get('edit/{id}', [ProjectsController::class, 'edit']);
                             Route::put('update/{id}', [ProjectsController::class, 'update']);
                             Route::get('create', [ProjectsController::class, 'create']);
-                            Route::match(['get','post','put'],'store', [ProjectsController::class, 'store']);
+                            Route::post('store', [ProjectsController::class, 'store']);
                             Route::match(['get','post','put'],'delete/{id}', [ProjectsController::class, 'destroy']);
                             Route::match(['get','post','put'],'copy/{id}', [ProjectsController::class, 'copy']);
 
@@ -159,6 +159,7 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
                             Route::match(['get','post'],'insulators/{id}', [ProjectsController::class, 'insulators']);
 
                             Route::match(['get','post'],'export-excel-towers/{id}', [ProjectsController::class, 'exportExcelTowers']);
+                            Route::match(['get','post'],'export-excel-stringing/{id}', [ProjectsController::class, 'exportExcelStringing']);
 
 
 

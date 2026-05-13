@@ -232,6 +232,7 @@ class Raspres
                 \App\Models\Raspres::create([
                     'id_project' => $projectId,
                     'id_trasa' => $p1->id,
+                    'raspon_br' => $i+1,
                     'stac_t'     => $stac_t1,           // како во DOS: ставаш stac_t на првата точка
                     'kota_t'     => $kota_t1,
                     'raspon'     => $raspon,

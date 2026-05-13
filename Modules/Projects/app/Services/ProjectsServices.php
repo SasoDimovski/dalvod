@@ -6,6 +6,7 @@ use App\Services\Responses\ResponseError;
 use App\Services\Responses\ResponseSuccess;
 use Illuminate\Http\Request;
 use Modules\Projects\Dto\ProjectsDto;
+use Modules\Projects\Repositories\Controls;
 use Modules\Projects\Repositories\Elpres;
 use Modules\Projects\Repositories\Graviras;
 use Modules\Projects\Repositories\Grvrast;
@@ -21,7 +22,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class ProjectsServices
 {
     protected ?string $classPath;
-    public function __construct(public ProjectsRepositories $projectsRepositories, public Raspres $raspres , public Zatpol $zatpol, public Napreg $napreg, public Rastotal $rastotal, public Grvrast $grvrast, public Srerast $srerast, public Graviras $graviras, public Elpres $elpres)
+    public function __construct(public ProjectsRepositories $projectsRepositories, public Raspres $raspres , public Zatpol $zatpol, public Napreg $napreg, public Rastotal $rastotal, public Grvrast $grvrast, public Srerast $srerast, public Graviras $graviras, public Elpres $elpres, public Controls $controls)
     {
         $this->classPath = __DIR__ . '/' . class_basename(__CLASS__) . '.php';
     }
@@ -396,16 +397,18 @@ class ProjectsServices
     public function controls( int $id_project): array
     {
 
-        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
-        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
-        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
-
         $project = $this->projectsRepositories->getProjectById($id_project);
+        $kongras = $this->controls->kongras($id_project);
+        $konelras = $this->controls->konelras($id_project);
+        $isCalculate = $project->calculation;
+
+
         return ['data' => [
-            'raspres' => $raspres,
-            'zatpol' => $zatpol,
-            'gapres' => $gapres,
+
             'project' => $project,
+            'kongras' => $kongras,
+            'konelras' => $konelras,
+            'isCalculate' => $isCalculate,
         ]];
     }
 
@@ -654,21 +657,273 @@ class ProjectsServices
         ]];
     }
 
-    public function tableStringing( int $id_project): array
+    public function tableStringing(int $id_project): array
     {
-
-        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
-        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
-        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
-
         $project = $this->projectsRepositories->getProjectById($id_project);
+
+        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project)->values();
+        $zatpol  = $this->projectsRepositories->getZatpolByIdProject($id_project)->values();
+        $gapres  = $this->projectsRepositories->getGapresByIdProject($id_project)->values();
+
+        $trasa = $this->projectsRepositories->_getTrasaByIdProject($id_project)->values();
+
+        // map na raspres po id_trasa
+        $raspresMap = [];
+        foreach ($raspres as $r) {
+            $raspresMap[(int)($r->id_trasa ?? 0)] = $r;
+        }
+
+        // map na gapres po id_trasa
+        $gapresMap = [];
+        foreach ($gapres as $g) {
+            $gapresMap[(int)($g->id_trasa ?? 0)] = $g;
+        }
+
+        // map na trasa po id_trasa
+        $trasaMap = [];
+        foreach ($trasa as $i => $t) {
+            $trasaMap[(int)$t->id] = $i;
+        }
+
+        $temps = [-20, -10, 0, 10, 20, 30, 40, '-5+dt'];
+
+        $data = [];
+
+        foreach ($zatpol as $index => $z) {
+            $idxPo = $trasaMap[(int)($z->id_trasa_po ?? 0)] ?? null;
+            $idxKr = $trasaMap[(int)($z->id_trasa_kr ?? 0)] ?? null;
+
+            // gi zema site raspres zapisi koi pripagjaat na zateznoto pole
+            $fieldRaspres = collect();
+
+            if ($idxPo !== null && $idxKr !== null) {
+                for ($i = $idxPo; $i < $idxKr; $i++) {
+                    $trasaId = (int)($trasa[$i]->id ?? 0);
+
+                    if (isset($raspresMap[$trasaId])) {
+                        $fieldRaspres->push($raspresMap[$trasaId]);
+                    }
+                }
+            }
+
+            $idRas = (float)($z->id_raspon ?? 0);
+
+            // ============================================================
+            // ПРОВОДНИК
+            // ============================================================
+            $tovp   = (float)($z->tovpro ?? 0);
+            $tovp_1 = (float)($z->tovpro_1 ?? 0);
+
+            $napregP = [
+                (float)($z->napreg1_p ?? 0),
+                (float)($z->napreg2_p ?? 0),
+                (float)($z->napreg3_p ?? 0),
+                (float)($z->napreg4_p ?? 0),
+                (float)($z->napreg5_p ?? 0),
+                (float)($z->napreg6_p ?? 0),
+                (float)($z->napreg7_p ?? 0),
+                (float)($z->napreg8_p ?? 0),
+            ];
+
+            $provesIdr = [];
+
+            for ($k = 0; $k < 7; $k++) {
+                $provesIdr[] = $this->calcIdealSagCm(
+                    $napregP[$k],
+                    $tovp,
+                    $idRas
+                );
+            }
+
+            $provesIdr[] = $this->calcIdealSagCm(
+                $napregP[7],
+                $tovp_1,
+                $idRas
+            );
+
+            // spans za provodnik
+            $spans = [];
+
+            foreach ($fieldRaspres as $rIndex => $r) {
+                $idTrasa = (int)($r->id_trasa ?? 0);
+                $g = $gapresMap[$idTrasa] ?? null;
+
+                $rasp = (float)($r->raspon ?? 0);
+                $vr   = (float)($r->vr_pro ?? 0);
+
+                $provesi = [];
+                foreach ($provesIdr as $idealSagCm) {
+                    $provesi[] = $this->calcRealSagCm($rasp, $vr, $idRas, $idealSagCm);
+                }
+
+                $spans[] = [
+                    'raspon_br' => $r->raspon_br . '-' . ($r->raspon_br + 1),
+                    'raspon'    => $rasp,
+                    'vr'        => $vr,
+                    'raspres'   => $r,
+                    'gapres'    => $g,
+                    'provesi'   => $provesi,
+                ];
+            }
+
+            $crossSectionP = (float)(optional($project->conductors)->cross_section ?? 0);
+
+            // ============================================================
+            // ЗАШТИТНО ЈАЖЕ
+            // ============================================================
+            $tovz   = (float)($z->tovzaj ?? 0);
+            $tovz_1 = (float)($z->tovzaj_1 ?? 0);
+
+            $napregZ = [
+                (float)($z->napreg1_z ?? 0),
+                (float)($z->napreg2_z ?? 0),
+                (float)($z->napreg3_z ?? 0),
+                (float)($z->napreg4_z ?? 0),
+                (float)($z->napreg5_z ?? 0),
+                (float)($z->napreg6_z ?? 0),
+                (float)($z->napreg7_z ?? 0),
+                (float)($z->napreg8_z ?? 0),
+            ];
+
+            $provesIdrZ = [];
+
+            for ($k = 0; $k < 7; $k++) {
+                $provesIdrZ[] = $this->calcIdealSagCm(
+                    $napregZ[$k],
+                    $tovz,
+                    $idRas
+                );
+            }
+
+            $provesIdrZ[] = $this->calcIdealSagCm(
+                $napregZ[7],
+                $tovz_1,
+                $idRas
+            );
+
+            // spans za zastitno jaze
+            $spansZj = [];
+
+            foreach ($fieldRaspres as $rIndex => $r) {
+                $idTrasa = (int)($r->id_trasa ?? 0);
+                $g = $gapresMap[$idTrasa] ?? null;
+
+                $rasp = (float)($r->raspon ?? 0);
+                $vrZ  = (float)($r->vr_zaj ?? 0);
+
+                $provesiZ = [];
+                foreach ($provesIdrZ as $idealSagCm) {
+                    $provesiZ[] = $this->calcRealSagCm($rasp, $vrZ, $idRas, $idealSagCm);
+                }
+
+                $spansZj[] = [
+                    'raspon_br' => $r->raspon_br . '-' . ($r->raspon_br + 1),
+                    'raspon'    => $rasp,
+                    'vr'        => $vrZ,
+                    'raspres'   => $r,
+                    'gapres'    => $g,
+                    'provesi'   => $provesiZ,
+                ];
+            }
+
+            $crossSectionZ = (float)(optional($project->groundWires)->cross_section ?? 0);
+
+            // ============================================================
+            // КРАЕН ЗАПИС
+            // ============================================================
+            $data[] = [
+                'number' => $index + 1,
+
+                'summary' => [
+                    'conductor' => optional($project->conductors)->type,
+                    'nap_pro'   => (float)($z->nap_pro ?? 0),
+                    'kndt'      => (float)($z->kndt ?? 0),
+                    'pole_dol'  => (float)($z->pole_dol ?? 0),
+                    'id_raspon' => $idRas,
+                    'nap_zaj'   => (float)($z->nap_zaj ?? 0),
+                    'kidt'      => (float)($z->kidt ?? 0),
+                    'priv'      => (float)($z->priv ?? 0),
+                ],
+
+                'matrix' => [
+                    'temps' => $temps,
+                    'napreg_p' => $napregP,
+                    'sila_zateg' => [
+                        (float)($z->napreg1_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg2_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg3_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg4_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg5_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg6_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg7_p ?? 0) * $crossSectionP,
+                        (float)($z->napreg8_p ?? 0) * $crossSectionP,
+                    ],
+                    'proves_idr' => $provesIdr,
+                ],
+
+                'spans' => $spans,
+
+                // ========================================================
+                // ZJ podатоци za poseben loop vo Blade
+                // ========================================================
+                'summary_zj' => [
+                    'conductor' => optional($project->groundWires)->type ?? 'ZJ',
+                    'nap_zaj'   => (float)($z->nap_zaj ?? 0),
+                    'kndt'      => (float)($z->kndt ?? 0),
+                    'pole_dol'  => (float)($z->pole_dol ?? 0),
+                    'id_raspon' => $idRas,
+                    'priv'      => (float)($z->priv ?? 0),
+                ],
+
+                'matrix_zj' => [
+                    'temps' => $temps,
+                    'napreg_z' => $napregZ,
+                    'sila_zateg' => [
+                        (float)($z->napreg1_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg2_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg3_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg4_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg5_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg6_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg7_z ?? 0) * $crossSectionZ,
+                        (float)($z->napreg8_z ?? 0) * $crossSectionZ,
+                    ],
+                    'proves_idr' => $provesIdrZ,
+                ],
+
+                'spans_zj' => $spansZj,
+            ];
+        }
+
         return ['data' => [
-            'raspres' => $raspres,
-            'zatpol' => $zatpol,
-            'gapres' => $gapres,
+            'data'    => $data,
             'project' => $project,
         ]];
     }
+
+    private function calcIdealSagCm(float $nap, float $tov, float $idRas): float
+    {
+        if ($nap <= 0.0 || $tov <= 0.0 || $idRas <= 0.0) {
+            return 0.0;
+        }
+
+        $value = 100.0 * ($nap / $tov) * (cosh(($idRas * $tov) / (2.0 * $nap)) - 1.0);
+
+        return round($value, 0);
+    }
+
+    private function calcRealSagCm(float $rasp, float $vr, float $idRas, float $idealSagCm): float
+    {
+        if ($rasp <= 0.0 || $idRas <= 0.0 || $idealSagCm <= 0.0) {
+            return 0.0;
+        }
+
+        $value = sqrt(($rasp * $rasp) + ($vr * $vr)) * ($rasp / ($idRas * $idRas)) * $idealSagCm;
+
+        return round($value, 0);
+    }
+
+
 
     public function showRaspres( int $id_project): array
     {
@@ -990,6 +1245,17 @@ class ProjectsServices
         $rows = $data['data']['trasa'] ?? [];
 
         return collect($rows);
+    }
+
+    public function exportExcelStringing($id_project): array
+    {
+        $result = $this->tableStringing((int)$id_project);
+        //dd($result);
+
+        return [
+            'project' => $result['data']['project'] ?? null,
+            'data'    => $result['data']['data'] ?? [],
+        ];
     }
 
 }

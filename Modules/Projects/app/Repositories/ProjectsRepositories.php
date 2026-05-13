@@ -876,13 +876,11 @@ class ProjectsRepositories
         return Projects::find($id);
     }
 
-    /**
-     * Сите "столбни" точки (само каде има id_tower > 0), по stac_t растечки
-     */
+
     public function _getTrasaByIdProject(int $id_project): \Illuminate\Support\Collection
     {
 
-        return Trasa::with(['tower', 'insulator1', 'insulator2', 'trafo'])
+        return Trasa::with(['project','tower', 'insulator1', 'insulator2', 'trafo'])
             ->where('id_project', $id_project)
             ->where(function ($q) {
                 $q->where('id_tower', '>', 0)
@@ -898,7 +896,8 @@ class ProjectsRepositories
      */
     public function _getRaspresByIdProject(int $id_project): \Illuminate\Support\Collection
     {
-        return Raspres::where('id_project', $id_project)
+        return Raspres::with(['project', 'trasa'])
+        ->where('id_project', $id_project)
             ->orderBy('stac_t', 'asc')
             ->get();
     }
@@ -949,7 +948,7 @@ class ProjectsRepositories
 
     public function getGapresByIdProject($id_project): \Illuminate\Database\Eloquent\Collection
     {
-        return Gapres::with(['project'])
+        return Gapres::with(['project','trasa'])
             ->where('gapres.id_project', $id_project)
             ->get();
     }

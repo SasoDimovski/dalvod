@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Projects\Dto\ProjectsDto;
+use Modules\Projects\Exports\ReportsExportExcelStringing;
 use Modules\Projects\Exports\ReportsExportExcelTowers;
 use Modules\Projects\Http\Requests\ProjectsStorePointsRequest;
 use Modules\Projects\Http\Requests\ProjectsStoreRequest;
@@ -32,8 +33,9 @@ class ProjectsController extends Controller
         return view('Projects::projects/edit', $return['data']);
     }
 
-    public function store(ProjectsStoreRequest $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    public function store($lang, $id_module,ProjectsStoreRequest $request): \Illuminate\Foundation\Application|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
+        //dd($lang);
         $url_return= $request->get('url_return') ;
         $query= $request->get('query') ;
 
@@ -401,7 +403,7 @@ class ProjectsController extends Controller
 
     public function controls($lang, $id_module, $id_project): \Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory|\Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
     {
-        $return = $this->projectsServices->calculations($id_project);
+        $return = $this->projectsServices->controls($id_project);
         return view('Projects::projects/show-controls', $return['data']);
     }
 
@@ -439,6 +441,24 @@ class ProjectsController extends Controller
         $title = date('Ymd_His');
 
         return Excel::download(new ReportsExportExcelTowers($records), $title . '_towers_report.xlsx');
+    }
+
+    public function exportExcelStringing($lang, $id_module, $id_project, Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        ini_set('memory_limit', '-1');
+        set_time_limit(300);
+
+        $result = $this->projectsServices->exportExcelStringing((int)$id_project);
+
+        $records = $result['data'] ?? [];
+        $project = $result['project'] ?? null;
+
+        $title = date('Ymd_His');
+
+        return Excel::download(
+            new ReportsExportExcelStringing($records, $project),
+            $title . '_stringing_report.xlsx'
+        );
     }
 
 }

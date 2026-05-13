@@ -41,7 +41,7 @@
 
     $url = url('admin/' . $lang . '/' . $module->link);
 
-    $url_store =  $url . '/store/';
+    $url_store =  $url . '/store';
     $url_update =  $url . '/update/'. $id;
     $url_edit =  $url . '/edit';
     $url_action = !empty($id) ? $url_update : $url_store;
@@ -148,7 +148,9 @@
                             <input type="hidden" id="id" name="id" value="{{ $id}}">
                             <input type="hidden" id="id_module" name="id_module" value="{{ $id_module}}">
                             {{csrf_field()}}
-                            @method('PUT')
+                            @if($id)
+                                @method('PUT')
+                            @endif
 
 
                             <div class="card card">
