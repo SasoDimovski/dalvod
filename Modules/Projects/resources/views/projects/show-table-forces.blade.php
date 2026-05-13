@@ -192,8 +192,100 @@
                                     {{--=========================================================--}}
 
 
-                                    <div class="col-sm-7 col-md-6  col-lg-5 col-xl-4">
-                                       Во изработка
+                                    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+
+                                        @if(count($data) > 0)
+
+                                            @foreach($data as $item)
+
+                                                <div class="card card-primary mb-4">
+
+                                                    <div class="card-header bg-primary text-white">
+                                                        <h3 class="card-title">
+                                                            ТАБЕЛА НА СИЛИ ЗА СТОЛБ БР.: {{ $item['summary']['br_stolb'] ?? $item['number'] }}
+                                                        </h3>
+                                                    </div>
+
+                                                    <div class="card-body scrollmenu">
+
+                                                        <table class="table_grid table table-bordered text-center">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Sila [daN]</th>
+                                                                <th></th>
+                                                                <th>Vx</th>
+                                                                <th>Vy</th>
+                                                                <th>Vz</th>
+                                                                <th>Zx</th>
+                                                                <th>Zy</th>
+                                                                <th>Zz</th>
+                                                                <th>Sx</th>
+                                                                <th>Sy</th>
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($item['forces'] as $row)
+                                                                <tr>
+                                                                    <td>{{ $row['group'] }}</td>
+                                                                    <td><b>{{ $row['code'] }}</b></td>
+
+                                                                    <td>{{ number_format((float)$row['data']['vx'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['vy'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['vz'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['zx'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['zy'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['zz'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['sx'], 2, '.', '') }}</td>
+                                                                    <td>{{ number_format((float)$row['data']['sy'], 2, '.', '') }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+
+                                                        <div class="row mt-3">
+                                                            <div class="col-md-4">
+                                                                <b>Stolb tip:</b>
+                                                                {{ $item['summary']['tower_type'] ?? '' }}
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <b>Iz.veriga tip:</b>
+                                                                {{ $item['summary']['insulator'] ?? '' }}
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <b>a =</b>
+                                                                {{ number_format((float)($item['summary']['agol_t'] ?? 0), 3, '.', '') }} [°]
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mt-2">
+                                                            <div class="col-md-4">
+                                                                <b>Grav.ras.spr. =</b>
+                                                                {{ number_format((float)($item['summary']['grr_vpro'] ?? 0), 2, '.', '') }} [m]
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <b>Grav.r.z.j. =</b>
+                                                                {{ number_format((float)($item['summary']['grr_vzaj'] ?? 0), 2, '.', '') }} [m]
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <b>Sreden r. =</b>
+                                                                {{ number_format((float)($item['summary']['sre_ras'] ?? 0), 2, '.', '') }} [m]
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                            @endforeach
+
+                                        @else
+                                            {{ __('global.no_records') }}
+                                        @endif
+
                                     </div>
 
 

@@ -429,20 +429,101 @@ class ProjectsServices
         ]];
     }
 
-    public function tableForces( int $id_project): array
+    public function tableForces(int $id_project): array
     {
-
-        $raspres = $this->projectsRepositories->getRaspresByIdProject($id_project);
-        $zatpol = $this->projectsRepositories->getZatpolByIdProject($id_project);
-        $gapres = $this->projectsRepositories->getGapresByIdProject($id_project);
-
         $project = $this->projectsRepositories->getProjectById($id_project);
-        return ['data' => [
-            'raspres' => $raspres,
-            'zatpol' => $zatpol,
-            'gapres' => $gapres,
-            'project' => $project,
-        ]];
+
+        $gapres = $this->projectsRepositories
+            ->getGapresByIdProject($id_project)
+            ->values();
+
+        $data = [];
+
+        foreach ($gapres as $index => $g) {
+
+            $tower = optional($g->trasa)->tower;
+
+            $data[] = [
+                'number' => $index + 1,
+
+                'summary' => [
+                    'br_stolb'     => (int)($g->br_stolb ?? ($index + 1)),
+                    'stac_t'       => (float)($g->stac_t ?? 0),
+                    'id_trasa'     => (int)($g->id_trasa ?? 0),
+                    'tower_type'   => $tower->type ?? $tower->tip ?? '',
+                    'insulator'    => optional(optional($g->trasa)->insulator1)->type ?? '',
+                    'agol_t'       => (float)($g->agol_t ?? 0),
+                    'sre_ras'      => (float)($g->sre_ras ?? 0),
+                    'grr_vpro'     => (float)($g->grr_vpro ?? 0),
+                    'grr_vzaj'     => (float)($g->grr_vzaj ?? 0),
+                ],
+
+                'forces' => $this->calculateForcesForTower($g, $project),
+            ];
+        }
+
+        return [
+            'data' => [
+                'data'    => $data,
+                'project' => $project,
+            ]
+        ];
+    }
+    private function calculateForcesForTower($g, $project): array
+    {
+        $empty = [
+            'vx' => 0.00,
+            'vy' => 0.00,
+            'vz' => 0.00,
+            'zx' => 0.00,
+            'zy' => 0.00,
+            'zz' => 0.00,
+            'sx' => 0.00,
+            'sy' => 0.00,
+        ];
+
+        return [
+            [
+                'group' => 'Член 69',
+                'code'  => 'A',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 69',
+                'code'  => 'B',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 69',
+                'code'  => 'C',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Чл.69 т.2',
+                'code'  => 'D',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 70 т. 2b',
+                'code'  => 'PP',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 70 т. 2b',
+                'code'  => 'NP',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 70 т. 2b',
+                'code'  => 'PZ',
+                'data'  => $empty,
+            ],
+            [
+                'group' => 'Член 70 т. 2b',
+                'code'  => 'NZ',
+                'data'  => $empty,
+            ],
+        ];
     }
     public function tableTowers(int $id_project): array
     {
