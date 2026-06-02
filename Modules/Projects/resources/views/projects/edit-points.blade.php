@@ -606,34 +606,50 @@
                         </form>
 
                         @php
-                            $trasaPoints = $pointsGR->map(function($row) use ($url_edit_point,$url_show_tower,$query ) {
+                            $trasaPoints = $pointsGR->map(function($row) use ($url_edit_point, $url_show_tower, $query, $module) {
+
+                                $isTrafo = !empty($row->id_trafo);
+
+                                $elementHeight = $isTrafo
+                                    ? (float) (optional($row->trafo)->visina_p ?? 0)
+                                    : (float) (optional($row->tower)->vis ?? 0);
+
                                 return [
-                                    'x'         => (float) $row->stac_t,
-                                    'y'         => (float) $row->kota_t,
-                                    'id'        => (int) $row->id,
-                                    'url'       => $url_edit_point . '/' . $row->id,
+                                    'x'   => (float) $row->stac_t,
+                                    'y'   => (float) $row->kota_t,
+                                    'id'  => (int) $row->id,
+                                    'url' => $url_edit_point . '/' . $row->id . ($query ? '?' . $query : ''),
 
-                                    'tower_vis' => (float) optional($row->tower)->vis,
-                                    'agol_tr'   => (float) optional($row->tower)->angle,
+                                    'tower_vis' => $elementHeight,
 
+                                    'agol_tr' => $isTrafo
+                                        ? 0
+                                        : (float) (optional($row->tower)->angle ?? 0),
 
-                                    'tower_id'  => (int) optional($row->tower)->id,   // или ->id_tower (ако ти е така)
-                                    'tower_url' => !empty(optional($row->tower)->id) ? ($url_show_tower . '/' . optional($row->tower)->id. '?' .$query) : null,
+                                    'tower_id' => $isTrafo
+                                        ? (int) $row->id_trafo
+                                        : (int) optional($row->tower)->id,
 
-                                    // за наслов во modal (ако сакаш)
-                                    'tower_title' => $module->title ?? 'Tower',
+                                    'tower_url' => (!$isTrafo && !empty(optional($row->tower)->id))
+                                        ? ($url_show_tower . '/' . optional($row->tower)->id . ($query ? '?' . $query : ''))
+                                        : null,
 
+                                    'tower_title' => $isTrafo
+                                        ? 'Trafo'
+                                        : ($module->title ?? 'Tower'),
+
+                                    'is_trafo' => $isTrafo,
                                 ];
                             })->values();
 
-                            $activePoint = !empty($point) && !empty($point->id)
-                                ? [
-                                    'id' => (int) $point->id,
-                                    'x'  => (float) $point->stac_t,
-                                    'y'  => (float) $point->kota_t,
-                                    'url'=> $url_edit_point . '/' . $point->id. '?' .$query,
-                                ]
-                                : null;
+                                $activePoint = !empty($point) && !empty($point->id)
+        ? [
+            'id' => (int) $point->id,
+            'x'  => (float) $point->stac_t,
+            'y'  => (float) $point->kota_t,
+            'url'=> $url_edit_point . '/' . $point->id. '?' .$query,
+        ]
+        : null;
                         @endphp
 
                         <div class="card card-primary mt-3">
@@ -1275,34 +1291,32 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.7"></script>
 <script>
-
-
     document.addEventListener('DOMContentLoaded', function () {
 
         const input = document.getElementById('exel');
 
-        input.addEventListener('change', function () {
-            let fileName = this.files[0]?.name;
+        if (input) {
+            input.addEventListener('change', function () {
+                let fileName = this.files[0]?.name;
 
-            if (fileName) {
-                this.nextElementSibling.innerText = fileName;
-            }
-        });
+                if (fileName) {
+                    this.nextElementSibling.innerText = fileName;
+                }
+            });
+        }
 
     });
-
 
     document.addEventListener("input", function (e) {
         if (e.target.classList.contains("only-decimal")) {
 
             let value = e.target.value;
 
-            // 1) задржи само бројки и точки
             value = value.replace(/[^0-9.]/g, "");
             value = value.replace(/(\.\d{2}).+/g, '$1');
 
-            // 2) дозволи само една точка
             let parts = value.split('.');
+
             if (parts.length > 2) {
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
@@ -1310,9 +1324,10 @@
             e.target.value = value;
         }
     });
+
     function changeListingAndSubmit(form) {
-        // Избриши вредност на page
         let pageField = form.querySelector('input[name="page"]');
+
         if (pageField) {
             pageField.value = "";
         }
@@ -1322,58 +1337,200 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        // ===== DATA FROM PHP =====
-        // points: [{x, y, id, url, tower_vis, tower_ag, ...}, ...]
-        const points      = @json($trasaPoints);
+        const points = @json($trasaPoints);
         const activePoint = @json($activePoint);
+        const profileLines = @json($profileLines ?? []);
 
         if (!points || !points.length) return;
 
-        // ===== LIMITS (IMPORTANT: include tower TOPS so they don't "go out") =====
         const xValues = points.map(p => Number(p.x));
-        const yBase   = points.map(p => Number(p.y));
-        const yTops   = points.map(p => Number(p.y) + (Number(p.tower_vis || 0))); // kota + tower height
-
         const xMin = Math.min(...xValues);
         const xMax = Math.max(...xValues);
 
-        const yMin = Math.min(...yBase);
-        const yMax = Math.max(...yTops);
+        const terrainY = points.map(p => Number(p.y));
 
+        const towerY = points.map(p => {
+            return Number(p.y) + Number(p.tower_vis || 0);
+        });
+
+        const conductorY = profileLines
+            .filter(p => p.conductor !== null && p.conductor !== undefined)
+            .map(p => Number(p.conductor));
+
+
+        const groundY = profileLines
+            .filter(p => p.groundwire !== null && p.groundwire !== undefined)
+            .map(p => Number(p.groundwire));
+
+        const allY = [
+            ...terrainY,
+            ...towerY,
+            ...conductorY,
+           // ...groundY
+        ];
+
+        const yMin = Math.min(...allY);
+        const yMax = Math.max(...allY);
         const padY = (yMax - yMin) * 0.06 || 1;
 
-        // ===== COLORS =====
-        const LINE_COLOR = 'rgba(75, 192, 192, 1)';   // keep line as-is
-        const DOT_BG     = '#555';                    // dark gray points
-        const DOT_BORDER = '#333';
+        const STORAGE_KEY = 'trasa_zoom_xrange_' + {{ (int)$project->id }};
 
-        const RED        = 'rgba(220,53,69,1)';
+        function readSavedRange() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
 
-        // ===== MAIN DATASET (line + dark gray points) =====
+                const obj = JSON.parse(raw);
 
-        // ===== MAIN DATASET (line + dark gray points) =====
-        const mainDataset = {
-            label: 'kota_t според stac_t',
-            data: points,                 // contains x,y,id,url,tower_vis,agol_tr
+                if (typeof obj.min !== 'number' || typeof obj.max !== 'number') return null;
+                if (obj.min >= obj.max) return null;
+
+                return obj;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveRange(chart) {
+            const xs = chart.scales['x-axis-1'] || chart.scales['x-axis-0'];
+            if (!xs) return;
+
+            const min = Number(xs.options.ticks.min);
+            const max = Number(xs.options.ticks.max);
+
+            if (!isFinite(min) || !isFinite(max) || min >= max) return;
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ min, max }));
+        }
+
+        function clearRange() {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+
+        const terrainDataset = {
+            label: 'Терен',
+            data: points,
             showLine: true,
             fill: false,
-
-            // линијата останува тиркизна
-            borderColor: 'rgba(75, 192, 192, 1)',
+            borderColor: 'rgba(75,192,192,1)',
             lineTension: 0,
 
-            // точки темно сиви
             pointBackgroundColor: '#c0c0c0',
             pointBorderColor: '#000',
             pointHoverBackgroundColor: '#fff',
-            //pointHoverBorderColor: '#c0c0c0',
-            pointRadius: 3,
-            pointHoverRadius: 4,
 
+            pointRadius: 3,
+            pointHoverRadius: 4
         };
 
-        // ===== ACTIVE POINT (red) =====
+        const conductorDataset = {
+            label: 'Спроводник',
+            data: profileLines
+                .filter(p => p.conductor !== null && p.conductor !== undefined)
+                .map(p => ({
+                    x: Number(p.x),
+                    y: Number(p.conductor)
+                })),
+
+            showLine: true,
+            fill: false,
+
+            borderColor: '#0d6efd',
+            backgroundColor: '#0d6efd',
+
+            pointRadius: 0,
+            pointHoverRadius: 0,
+
+            borderWidth: 2,
+            lineTension: 0
+        };
+
+
+
+        function makeConductorMinus6Data(profileLines, points) {
+
+            const supports = points
+                .filter(p => Number(p.tower_vis || 0) > 0)
+                .map(p => Number(p.x))
+                .sort((a, b) => a - b);
+
+            return profileLines
+                .filter(p => p.conductor !== null && p.conductor !== undefined)
+                .map(p => {
+                    const x = Number(p.x);
+                    const y = Number(p.conductor);
+
+                    let x1 = null;
+                    let x2 = null;
+
+                    for (let i = 0; i < supports.length - 1; i++) {
+                        if (x >= supports[i] && x <= supports[i + 1]) {
+                            x1 = supports[i];
+                            x2 = supports[i + 1];
+                            break;
+                        }
+                    }
+
+                    if (x1 === null || x2 === null || x2 === x1) {
+                        return {
+                            x: x,
+                            y: y
+                        };
+                    }
+
+                    const t = (x - x1) / (x2 - x1);
+
+                    // 0 на столб, -6 во средина
+                    const offset = -6 * 4 * t * (1 - t);
+
+                    return {
+                        x: x,
+                        y: y + offset
+                    };
+                });
+        }
+
+        const conductorMinus6Dataset = {
+            label: 'Спроводник -6m во средина',
+            data: makeConductorMinus6Data(profileLines, points),
+
+            showLine: true,
+            fill: false,
+
+            borderColor: '#ff9800',
+            backgroundColor: '#ff9800',
+
+            pointRadius: 0,
+            pointHoverRadius: 0,
+
+            borderWidth: 2,
+            lineTension: 0
+        };
+
+        const groundwireDataset = {
+            label: 'Заштитно јаже',
+            data: profileLines
+                .filter(p => p.groundwire !== null && p.groundwire !== undefined)
+                .map(p => ({
+                    x: Number(p.x),
+                    y: Number(p.groundwire)
+                })),
+
+            showLine: true,
+            fill: false,
+
+            borderColor: '#28a745',
+            backgroundColor: '#28a745',
+
+            pointRadius: 0,
+            pointHoverRadius: 0,
+
+            borderWidth: 2,
+            lineTension: 0
+        };
+
         let activeDataset = null;
+
         if (activePoint) {
             activeDataset = {
                 label: 'Селектирана точка',
@@ -1393,48 +1550,82 @@
             };
         }
 
-        // ===== TOWERS PLUGIN (draw vertical lines for tower_vis) =====
         const towerPlugin = {
-            afterDatasetsDraw: function (chart) {
+            afterDatasetsDraw(chart) {
                 const ctx = chart.chart.ctx;
-                const xScale = chart.scales['x-axis-1'];
-                const yScale = chart.scales['y-axis-1'];
+                const xScale = chart.scales['x-axis-1'] || chart.scales['x-axis-0'];
+                const yScale = chart.scales['y-axis-1'] || chart.scales['y-axis-0'];
 
-                // towers only from main dataset (dataset 0)
+                const chartArea = chart.chartArea;
                 const ds = chart.data.datasets[0];
-                if (!ds || !ds.data) return;
+
+                if (!ds || !ds.data || !xScale || !yScale || !chartArea) return;
+
+                chart._towerHitZones = [];
+
+                const hoverIndex = chart._hoverTowerIndex ?? null;
 
                 ctx.save();
 
-                ds.data.forEach(p => {
-                    const vis  = Number(p.tower_vis || 0);
-                    const agol = Number(p.agol_tr || 0);
+                // IMPORTANT: не дозволува цртање надвор од графикот
+                ctx.beginPath();
+                ctx.rect(
+                    chartArea.left - 1,
+                    chartArea.top,
+                    (chartArea.right - chartArea.left) + 6,
+                    chartArea.bottom - chartArea.top
+                );
+                ctx.clip();
+
+                ds.data.forEach((p, i) => {
+                    const vis = Number(p.tower_vis || 0);
 
                     if (!vis || vis <= 0) return;
 
-                    // ако има агол → црвен столб
-                    ctx.strokeStyle = agol > 0 ? '#dc3545' : '#888';
-                    ctx.lineWidth = agol > 0 ? 3 : 2;
-
                     const xPix = xScale.getPixelForValue(Number(p.x));
 
+                    // ако столбот е надвор од видливата област, не го цртај
+                    if (xPix < chartArea.left - 4 || xPix > chartArea.right + 4) return;
+
                     const yBottomVal = Number(p.y);
-                    const yTopVal    = Number(p.y) + vis;
+                    const yTopVal = Number(p.y) + vis;
 
-                    const yBottomPix = yScale.getPixelForValue(yBottomVal);
-                    const yTopPix    = yScale.getPixelForValue(yTopVal);
+                    const yBottomPix = yScale.getPixelForValue(yBottomVal) - 3;
+                    const yTopPix = yScale.getPixelForValue(yTopVal) - 3;
 
-                    // вертикален столб
+                    const agol = Number(p.agol_tr || 0);
+                    const isTrafo = !!p.is_trafo;
+                    const isHover = (i === hoverIndex);
+
+                    ctx.strokeStyle = isHover
+                        ? '#0d6efd'
+                        : (isTrafo ? '#6f42c1' : (agol > 0 ? '#dc3545' : '#888'));
+
+                    ctx.lineWidth = isHover ? 5 : (agol > 0 ? 3 : 2);
+
                     ctx.beginPath();
                     ctx.moveTo(xPix, yBottomPix);
                     ctx.lineTo(xPix, yTopPix);
                     ctx.stroke();
 
-                    // капа на врвот
                     ctx.beginPath();
-                    ctx.moveTo(xPix - 5, yTopPix);
-                    ctx.lineTo(xPix + 5, yTopPix);
+                    ctx.moveTo(xPix - 6, yTopPix);
+                    ctx.lineTo(xPix + 6, yTopPix);
                     ctx.stroke();
+
+                    const padX = 10;
+                    const top = Math.min(yTopPix, yBottomPix);
+                    const height = Math.abs(yBottomPix - yTopPix);
+
+                    chart._towerHitZones.push({
+                        index: i,
+                        left: xPix - padX,
+                        right: xPix + padX,
+                        top: top,
+                        bottom: top + height,
+                        tower_url: p.tower_url || null,
+                        tower_title: p.tower_title || 'Tower'
+                    });
                 });
 
                 ctx.restore();
@@ -1444,26 +1635,42 @@
         const canvas = document.getElementById('trasaChart');
         const ctx = canvas.getContext('2d');
 
-        // ===== CHART =====
+        const saved = readSavedRange();
+
+        const startXMin = saved ? Math.max(xMin, saved.min) : xMin;
+        const startXMax = saved ? Math.min(xMax, saved.max) : xMax;
+
+        const datasets = [
+            terrainDataset,
+            conductorDataset,
+            conductorMinus6Dataset,
+            //groundwireDataset
+        ];
+
+        if (activeDataset) {
+            datasets.push(activeDataset);
+        }
+
         window.trasaChart = new Chart(ctx, {
             type: 'scatter',
             plugins: [towerPlugin],
             data: {
-                datasets: activeDataset ? [mainDataset, activeDataset] : [mainDataset]
+                datasets: datasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
 
-                // cursor pointer on hover
                 hover: {
                     onHover: function (e, elements) {
                         const chart = window.trasaChart;
+
                         if (!chart) return;
 
                         let overTowerIndex = null;
 
                         const zones = chart._towerHitZones || [];
+
                         if (zones.length) {
                             const rect = chart.canvas.getBoundingClientRect();
                             const mx = e.clientX - rect.left;
@@ -1471,7 +1678,7 @@
 
                             const hit = zones.find(z =>
                                 mx >= z.left && mx <= z.right &&
-                                my >= z.top  && my <= z.bottom
+                                my >= z.top && my <= z.bottom
                             );
 
                             if (hit) {
@@ -1479,390 +1686,158 @@
                             }
                         }
 
-                        // ако hover-от се сменил → redraw
                         if (chart._hoverTowerIndex !== overTowerIndex) {
                             chart._hoverTowerIndex = overTowerIndex;
                             chart.update(0);
                         }
 
                         const overPoint = elements && elements.length;
+
                         e.target.style.cursor = (overPoint || overTowerIndex !== null)
                             ? 'pointer'
                             : 'default';
                     }
                 },
 
-                // click point => redirect
                 onClick: function (evt, activeElements) {
+                    const chart = this;
+
+                    const zones = chart._towerHitZones || [];
+
+                    if (zones.length) {
+                        const rect = chart.canvas.getBoundingClientRect();
+                        const mx = evt.clientX - rect.left;
+                        const my = evt.clientY - rect.top;
+
+                        const hit = zones.find(z =>
+                            mx >= z.left && mx <= z.right &&
+                            my >= z.top && my <= z.bottom
+                        );
+
+                        if (hit && hit.tower_url) {
+                            if (typeof getContentID === 'function') {
+                                getContentID(hit.tower_url, 'ModalShow', hit.tower_title);
+                            } else {
+                                window.location.href = hit.tower_url;
+                            }
+
+                            return;
+                        }
+                    }
+
                     if (!activeElements || !activeElements.length) return;
 
                     const el = activeElements[0];
                     const datasetIndex = el._datasetIndex;
                     const index = el._index;
 
-                    const p = this.data.datasets[datasetIndex].data[index];
+                    const p = chart.data.datasets[datasetIndex].data[index];
 
                     if (p && p.url) {
-                        window.location.href = p.url; // ✅ .../edit_point/{projectId}/{pointId}
+                        window.location.href = p.url;
                     }
                 },
 
-                // pan + limits
                 pan: {
                     enabled: true,
                     mode: 'x',
                     rangeMin: { x: xMin },
                     rangeMax: { x: xMax },
+                    onPanComplete: function ({chart}) {
+                        saveRange(chart);
+                    }
                 },
 
-                // zoom + limits
                 zoom: {
                     enabled: true,
                     mode: 'x',
                     rangeMin: { x: xMin },
                     rangeMax: { x: xMax },
-                    sensitivity: 0.05
+                    sensitivity: 0.05,
+                    onZoomComplete: function ({chart}) {
+                        saveRange(chart);
+                    }
                 },
 
-                // axes
                 scales: {
                     xAxes: [{
                         type: 'linear',
                         ticks: {
-                            min: xMin,
-                            max: xMax,
+                            min: startXMin,
+                            max: startXMax,
                             autoSkip: false,
-
-                            // 👉 да ги прикаже stac_t вредностите долу (не мора сите ако се многу)
                             callback: function (value) {
-                                // прикажи 2 децимали ако има потреба
                                 return Number(value).toFixed(2).replace(/\.00$/, '');
                             }
                         },
-                        scaleLabel: { display: true, labelString: 'stac_t' }
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'stac_t'
+                        }
                     }],
                     yAxes: [{
-                        ticks: { min: yMin - padY, max: yMax + padY },
-                        scaleLabel: { display: true, labelString: 'kota_t' }
+                        ticks: {
+                            min: yMin - padY,
+                            max: yMax + padY
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'kota_t'
+                        }
                     }]
                 },
 
-                // tooltip
                 tooltips: {
                     callbacks: {
                         label: function (tooltipItem, data) {
                             const p = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                            const label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+                            if (label === 'Спроводник') {
+                                return 'Спроводник, stac_t: ' +
+                                    Number(p.x).toFixed(2) +
+                                    ', kota: ' +
+                                    Number(p.y).toFixed(2);
+                            }
+
+                            if (label === 'Заштитно јаже') {
+                                return 'Заштитно јаже, stac_t: ' +
+                                    Number(p.x).toFixed(2) +
+                                    ', kota: ' +
+                                    Number(p.y).toFixed(2);
+                            }
+
                             const ag = (p.agol_tr !== undefined) ? Number(p.agol_tr) : null;
+
                             return 'ID: ' + (p.id ?? '-') +
                                 ', stac_t: ' + Number(p.x).toFixed(2) +
                                 ', kota_t: ' + Number(p.y).toFixed(2) +
-                                (ag !== null ? (', agol_tr: ' + ag) : '');
+                                (ag !== null ? (', agol: ' + ag) : '');
                         }
                     }
                 }
             }
         });
 
-        // double click reset zoom
         canvas.addEventListener('dblclick', function () {
-            if (window.trasaChart) window.trasaChart.resetZoom();
+            if (!window.trasaChart) return;
+
+            window.trasaChart.resetZoom();
+
+            const xs = window.trasaChart.scales['x-axis-1'] || window.trasaChart.scales['x-axis-0'];
+
+            if (xs) {
+                xs.options.ticks.min = xMin;
+                xs.options.ticks.max = xMax;
+            }
+
+            window.trasaChart.update(0);
+
+            clearRange();
         });
 
     });
-
-        document.addEventListener('DOMContentLoaded', function () {
-
-        const points      = @json($trasaPoints);
-        const activePoint = @json($activePoint);
-        if (!points || !points.length) return;
-
-        const xValues = points.map(p => Number(p.x));
-        const yBase   = points.map(p => Number(p.y));
-        const yTops   = points.map(p => Number(p.y) + (Number(p.tower_vis || 0)));
-
-        const xMin = Math.min(...xValues);
-        const xMax = Math.max(...xValues);
-
-        const yMin = Math.min(...yBase);
-        const yMax = Math.max(...yTops);
-
-        const padY = (yMax - yMin) * 0.06 || 1;
-
-        // ✅ уникатен key по проект (за да не се меша zoom меѓу проекти)
-        const STORAGE_KEY = 'trasa_zoom_xrange_' + {{ (int)$project->id }};
-
-        function readSavedRange() {
-        try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (typeof obj.min !== 'number' || typeof obj.max !== 'number') return null;
-        if (obj.min >= obj.max) return null;
-        return obj;
-    } catch (e) {
-        return null;
-    }
-    }
-
-        function saveRange(chart) {
-        const xs = chart.scales['x-axis-1'] || chart.scales['x-axis-0'];
-        if (!xs) return;
-
-        const min = Number(xs.options.ticks.min);
-        const max = Number(xs.options.ticks.max);
-
-        if (!isFinite(min) || !isFinite(max) || min >= max) return;
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ min, max }));
-    }
-
-        function clearRange() {
-        localStorage.removeItem(STORAGE_KEY);
-    }
-
-        // ===== DATASETS =====
-        const mainDataset = {
-        label: 'kota_t според stac_t',
-        data: points,
-        showLine: true,
-        fill: false,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        lineTension: 0,
-        pointBackgroundColor: '#c0c0c0',
-        pointBorderColor: '#000',
-        pointHoverBackgroundColor: '#fff',
-        pointRadius: 3,
-        pointHoverRadius: 4,
-    };
-
-        let activeDataset = null;
-        if (activePoint) {
-        activeDataset = {
-        label: 'Селектирана точка',
-        data: [{
-        x: Number(activePoint.x),
-        y: Number(activePoint.y),
-        id: activePoint.id,
-        url: activePoint.url
-    }],
-        showLine: false,
-        borderColor: 'rgba(220,53,69,1)',
-        backgroundColor: 'rgba(220,53,69,1)',
-        pointBackgroundColor: 'rgba(220,53,69,1)',
-        pointBorderColor: 'rgba(220,53,69,1)',
-        pointRadius: 9,
-        pointHoverRadius: 11
-    };
-    }
-
-        // ===== TOWERS PLUGIN (draw + hit zones for click) =====
-            const towerPlugin = {
-                afterDatasetsDraw(chart) {
-                    const ctx = chart.chart.ctx;
-                    const xScale = chart.scales['x-axis-1'] || chart.scales['x-axis-0'];
-                    const yScale = chart.scales['y-axis-1'] || chart.scales['y-axis-0'];
-
-                    const ds = chart.data.datasets[0];
-                    if (!ds || !ds.data || !xScale || !yScale) return;
-
-                    chart._towerHitZones = [];
-                    const hoverIndex = chart._hoverTowerIndex ?? null;
-
-                    ctx.save();
-
-                    ds.data.forEach((p, i) => {
-                        const vis = Number(p.tower_vis || 0);
-                        if (!vis || vis <= 0) return;
-
-                        const xPix = xScale.getPixelForValue(Number(p.x));
-                        const yBottomVal = Number(p.y);
-                        const yTopVal    = Number(p.y) + vis;
-
-                        const yBottomPix = yScale.getPixelForValue(yBottomVal);
-                        const yTopPix    = yScale.getPixelForValue(yTopVal);
-
-                        const agol = Number(p.agol_tr || 0);
-                        const isHover = (i === hoverIndex);
-
-                        // 🎨 STYLE
-                        ctx.strokeStyle = isHover
-                            ? '#0d6efd'            // hover = сино
-                            : (agol > 0 ? '#dc3545' : '#888');
-
-                        ctx.lineWidth = isHover ? 5 : (agol > 0 ? 3 : 2);
-
-                        // столб
-                        ctx.beginPath();
-                        ctx.moveTo(xPix, yBottomPix);
-                        ctx.lineTo(xPix, yTopPix);
-                        ctx.stroke();
-
-                        // капа
-                        ctx.beginPath();
-                        ctx.moveTo(xPix - 6, yTopPix);
-                        ctx.lineTo(xPix + 6, yTopPix);
-                        ctx.stroke();
-
-                        // HIT ZONE
-                        const padX = 10;
-                        const top = Math.min(yTopPix, yBottomPix);
-                        const height = Math.abs(yBottomPix - yTopPix);
-
-                        chart._towerHitZones.push({
-                            index: i,
-                            left: xPix - padX,
-                            right: xPix + padX,
-                            top: top,
-                            bottom: top + height,
-                            tower_url: p.tower_url || null,
-                            tower_title: p.tower_title || 'Tower'
-                        });
-                    });
-
-                    ctx.restore();
-                }
-            };
-
-
-        const canvas = document.getElementById('trasaChart');
-        const ctx = canvas.getContext('2d');
-
-        // ✅ ако има снимен zoom, стартувај со него
-        const saved = readSavedRange();
-        const startXMin = saved ? Math.max(xMin, saved.min) : xMin;
-        const startXMax = saved ? Math.min(xMax, saved.max) : xMax;
-
-        window.trasaChart = new Chart(ctx, {
-        type: 'scatter',
-        plugins: [towerPlugin],
-        data: { datasets: activeDataset ? [mainDataset, activeDataset] : [mainDataset] },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-
-        hover: {
-        onHover: function (e, elements) {
-        const chart = window.trasaChart;
-        if (!chart) return;
-
-        // ✅ ако е над точка
-        let overPoint = (elements && elements.length);
-
-        // ✅ ако е над столб (hit-zone)
-        let overTower = false;
-        const zones = chart._towerHitZones || [];
-        if (zones.length) {
-        const rect = chart.canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        overTower = zones.some(z => mx >= z.left && mx <= z.right && my >= z.top && my <= z.bottom);
-    }
-
-        e.target.style.cursor = (overPoint || overTower) ? 'pointer' : 'default';
-    }
-    },
-
-        onClick: function (evt, activeElements) {
-        const chart = this;
-
-        // ✅ 1) прво пробај клик на столб
-        const zones = chart._towerHitZones || [];
-        if (zones.length) {
-        const rect = chart.canvas.getBoundingClientRect();
-        const mx = evt.clientX - rect.left;
-        const my = evt.clientY - rect.top;
-
-        const hit = zones.find(z => mx >= z.left && mx <= z.right && my >= z.top && my <= z.bottom);
-        if (hit && hit.tower_url) {
-        // ✅ отварање tower modal
-        if (typeof getContentID === 'function') {
-        getContentID(hit.tower_url, 'ModalShow', hit.tower_title);
-    } else {
-        console.warn('getContentID не е дефинирана.');
-        window.location.href = hit.tower_url; // fallback
-    }
-        return;
-    }
-    }
-
-        // ✅ 2) ако не е столб → точка
-        if (!activeElements || !activeElements.length) return;
-
-        const el = activeElements[0];
-        const p = chart.data.datasets[el._datasetIndex].data[el._index];
-        if (p && p.url) window.location.href = p.url;
-    },
-
-        pan: {
-        enabled: true,
-        mode: 'x',
-        rangeMin: { x: xMin },
-        rangeMax: { x: xMax },
-        onPanComplete: function ({chart}) { saveRange(chart); }
-    },
-
-        zoom: {
-        enabled: true,
-        mode: 'x',
-        rangeMin: { x: xMin },
-        rangeMax: { x: xMax },
-        sensitivity: 0.05,
-        onZoomComplete: function ({chart}) { saveRange(chart); }
-    },
-
-        scales: {
-        xAxes: [{
-        type: 'linear',
-        ticks: {
-        min: startXMin,
-        max: startXMax,
-        autoSkip: false,
-        callback: function (value) {
-        return Number(value).toFixed(2).replace(/\.00$/, '');
-    }
-    },
-        scaleLabel: { display: true, labelString: 'stac_t' }
-    }],
-        yAxes: [{
-        ticks: { min: yMin - padY, max: yMax + padY },
-        scaleLabel: { display: true, labelString: 'kota_t' }
-    }]
-    },
-
-        tooltips: {
-        callbacks: {
-        label: function (tooltipItem, data) {
-        const p = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-        const ag = (p.agol_tr !== undefined) ? Number(p.agol_tr) : null;
-        return 'ID: ' + (p.id ?? '-') +
-        ', stac_t: ' + Number(p.x).toFixed(2) +
-        ', kota_t: ' + Number(p.y).toFixed(2) +
-        (ag !== null ? (', agol: ' + ag) : '');
-    }
-    }
-    }
-    }
-    });
-
-        // ✅ Double-click reset + избриши го saved zoom
-        canvas.addEventListener('dblclick', function () {
-        if (!window.trasaChart) return;
-        window.trasaChart.resetZoom();
-
-        const xs = window.trasaChart.scales['x-axis-1'] || window.trasaChart.scales['x-axis-0'];
-        if (xs) {
-        xs.options.ticks.min = xMin;
-        xs.options.ticks.max = xMax;
-    }
-        window.trasaChart.update(0);
-
-        clearRange();
-    });
-
-    });
-
-
-
 </script>
 
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Projects\Dto\ProjectsDto;
+use Modules\Projects\Exports\ReportsExportExcelForces;
 use Modules\Projects\Exports\ReportsExportExcelStringing;
 use Modules\Projects\Exports\ReportsExportExcelTowers;
 use Modules\Projects\Http\Requests\ProjectsStorePointsRequest;
@@ -458,6 +459,24 @@ class ProjectsController extends Controller
         return Excel::download(
             new ReportsExportExcelStringing($records, $project),
             $title . '_stringing_report.xlsx'
+        );
+    }
+
+    public function exportExcelForces($lang, $id_module, $id_project, Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        ini_set('memory_limit', '-1');
+        set_time_limit(300);
+
+        $result = $this->projectsServices->exportExcelForces((int)$id_project);
+
+        $records = $result['data'] ?? [];
+        $project = $result['project'] ?? null;
+
+        $title = date('Ymd_His');
+
+        return Excel::download(
+            new ReportsExportExcelForces($records, $project),
+            $title . '_forces_report.xlsx'
         );
     }
 

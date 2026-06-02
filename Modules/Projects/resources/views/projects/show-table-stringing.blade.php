@@ -99,7 +99,7 @@
 
 
     $path_upload = 'uploads/projects/';
-    $url_export_excel = $url .'/export-excel-stringing/'. $id;;;
+    $url_export_excel = $url .'/export-excel-stringing/'. $id;
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
     $message_success = (isset($id)) ? __('global.update_success') : __('global.save_success');

@@ -226,12 +226,14 @@ class ProjectsServices
         $firstTwoIds =$this->projectsRepositories->firstTwoIds($id_project);
         $pointsGR = $this->projectsRepositories->showProfile($id_project);
         $checkImportPoints = $this->projectsRepositories->checkImportPoints($id_project);
+        $profileLines = $this->profileData($id_project);
         return ['data' => [
             'firstTwoIds' => $firstTwoIds,
             'project' => $project,
             'trasa' => $trasa,
             'pointsGR' => $pointsGR,
             'checkImportPoints' => $checkImportPoints,
+            'profileLines' => $profileLines,
 
         ]];
     }
@@ -437,28 +439,85 @@ class ProjectsServices
             ->getGapresByIdProject($id_project)
             ->values();
 
+        $zatpol = $this->projectsRepositories
+            ->getZatpolByIdProject($id_project)
+            ->values();
+
         $data = [];
 
         foreach ($gapres as $index => $g) {
 
-            $tower = optional($g->trasa)->tower;
+            $trasa = $g->trasa;
+            if (!$trasa) {
+                continue;
+            }
+
+            $tower = optional($trasa)->tower;
+            $trafo = optional($trasa)->trafo;
+
+            $stolbId = $trasa->id_tower ?: $trasa->id_trafo;
+
+            if (!$stolbId) {
+                continue;
+            }
+
+            $stBr = (int)$g->br_stolb - 1;
+
+
+            $idTrasa = (int)$g->id_trasa;
+            $zA = $zatpol->first(function ($item) use ($idTrasa) {
+
+                return
+                    (int)$item->id_trasa_po <= $idTrasa
+                    &&
+                    (int)$item->id_trasa_kr >= $idTrasa;
+            });
+
+            if (!$zA) {
+                continue;
+            }
+
+            $zB = $zatpol->first(function ($item) use ($idTrasa) {
+
+                return (int)$item->id_trasa_po === $idTrasa;
+            });
+
+            $grrVpro = (($g->grr_lpro ?? 0) + ($g->grr_dpro ?? 0));
+
+            $grrVzaj = (($g->grr_lzaj ?? 0) + ($g->grr_dzaj ?? 0));
 
             $data[] = [
                 'number' => $index + 1,
-
                 'summary' => [
-                    'br_stolb'     => (int)($g->br_stolb ?? ($index + 1)),
-                    'stac_t'       => (float)($g->stac_t ?? 0),
-                    'id_trasa'     => (int)($g->id_trasa ?? 0),
-                    'tower_type'   => $tower->type ?? $tower->tip ?? '',
-                    'insulator'    => optional(optional($g->trasa)->insulator1)->type ?? '',
-                    'agol_t'       => (float)($g->agol_t ?? 0),
-                    'sre_ras'      => (float)($g->sre_ras ?? 0),
-                    'grr_vpro'     => (float)($g->grr_vpro ?? 0),
-                    'grr_vzaj'     => (float)($g->grr_vzaj ?? 0),
+                    'br_stolb' => $stBr,
+                    'stac_t'   => (float)($g->stac_t ?? 0),
+                    'id_trasa' => (int)($g->id_trasa ?? 0),
+                    'tower_type' => $tower->type
+                        ?? $tower->tip
+                            ?? $tower->name
+                            ?? $trafo->ime
+                            ?? '',
+                    'insulator' => trim(
+                        (optional($trasa->insulator1)->type ?? '') .
+                        (optional($trasa->insulator2)->type ? '/' . optional($trasa->insulator2)->type : '')
+                    ),
+                    'agol_t'   => (float)($trasa->agol_tr ?? $g->agol_t ?? 0),
+                    'sre_ras'  => (float)($g->sre_ras ?? 0),
+                    'grr_vpro' => (float)$grrVpro,
+                    'grr_vzaj' => (float)$grrVzaj,
                 ],
 
-                'forces' => $this->calculateForcesForTower($g, $project),
+                'forces' => $this->calculateForcesForTower(
+                    $g,
+                    $zA,
+                    $zB,
+                    $project,
+                    $trasa,
+                    $tower,
+                    $trafo,
+                    $stBr,
+                    $gapres
+                ),
             ];
         }
 
@@ -466,65 +525,292 @@ class ProjectsServices
             'data' => [
                 'data'    => $data,
                 'project' => $project,
-            ]
+            ],
         ];
     }
-    private function calculateForcesForTower($g, $project): array
+
+    private function calculateForcesForTower($g, $zA, $zB, $project, $trasa, $tower, $trafo, int $stBr, $gapres): array
     {
-        $empty = [
-            'vx' => 0.00,
-            'vy' => 0.00,
-            'vz' => 0.00,
-            'zx' => 0.00,
-            'zy' => 0.00,
-            'zz' => 0.00,
-            'sx' => 0.00,
-            'sy' => 0.00,
-        ];
+        $preseP = (float)(optional($project->conductors)->cross_section ?? 0);
+        $preseZ = (float)(optional($project->groundWires)->cross_section ?? 0);
+
+        $dijamP = (float)(optional($project->conductors)->diameter ?? 0);
+        $dijamZ = (float)(optional($project->groundWires)->diameter ?? 0);
+
+        $nomNap = $this->getNominalVoltageFromProject($project);
+        $brojPs = (float)($project->num_cond_systems ?? 1);
+
+        $agoTra = (float)($trasa->agol_tr ?? $g->agol_t ?? 0);
+
+        $stoAg = (float)($tower->angle ?? $tower->ag ?? 0);
+        $stoNap = $tower ? (float)($tower->voltage ?? $tower->nap ?? 0) : 0;
+        $stoMa = (float)($tower->mass ?? $tower->masa ?? 0);
+
+        $grLp = (float)($g->grr_lpro ?? 0);
+        $grDp = (float)($g->grr_dpro ?? 0);
+        $grVp = (float)($g->grr_vpro ?? 0);
+
+        $grLz = (float)($g->grr_lzaj ?? 0);
+        $grDz = (float)($g->grr_dzaj ?? 0);
+        $grVz = (float)($g->grr_vzaj ?? 0);
+
+        $sreR = (float)($g->sre_ras ?? 0);
+
+        $knDta = (float)($zA->kndt ?? 0);
+        $kiDta = (float)($zA->kidt ?? 0);
+        $pritVe = (float)($zA->priv ?? 0);
+
+        $tovp = (float)($zA->tovpro ?? 0);
+        $tovp1 = (float)($zA->tovpro_1 ?? 0);
+        $tovz = (float)($zA->tovzaj ?? 0);
+        $tovz1 = (float)($zA->tovzaj_1 ?? 0);
+
+        $naprmPa = max((float)($zA->napreg1_p ?? 0), (float)($zA->napreg8_p ?? 0));
+        $naprmZa = max((float)($zA->napreg1_z ?? 0), (float)($zA->napreg8_z ?? 0));
+
+        if ($zB) {
+            $tovp1b = (float)($zB->tovpro_1 ?? 0);
+            $tovz1b = (float)($zB->tovzaj_1 ?? 0);
+            $knDtb = (float)($zB->kndt ?? 0);
+            $kiDtb = (float)($zB->kidt ?? 0);
+
+            $naprmPb = max((float)($zB->napreg1_p ?? 0), (float)($zB->napreg8_p ?? 0));
+            $naprmZb = max((float)($zB->napreg1_z ?? 0), (float)($zB->napreg8_z ?? 0));
+        } else {
+            $tovp1b = 0;
+            $tovz1b = 0;
+            $knDtb = 0;
+            $kiDtb = 0;
+            $naprmPb = 0;
+            $naprmZb = 0;
+        }
+
+        $knDtm = max($knDta, $knDtb);
+        $kiDtm = max($kiDta, $kiDtb);
+
+        $naprmP = max($naprmPa, $naprmPb) * $knDtm;
+        $naprmZ = max($naprmZa, $naprmZb) * $kiDtm;
+
+        $izoM1 = (float)(optional($trasa->insulator1)->mass ?? 0);
+        $izoMd1 = (float)(optional($trasa->insulator1)->masad ?? $izoM1);
+
+        $izoM2 = (float)(optional($trasa->insulator2)->mass ?? 0);
+        $izoMd2 = (float)(optional($trasa->insulator2)->masad ?? $izoM2);
+
+        $izoMd1 = $izoM1 + $knDtm * ($izoMd1 - $izoM1);
+        $izoMd2 = $izoM2 + $knDtm * ($izoMd2 - $izoM2);
+
+        $sinHalf = $this->sinDeg($agoTra / 2);
+        $cosHalf = $this->cosDeg($agoTra / 2);
+
+        $firstBr = (int)$gapres->first()->br_stolb - 1;
+        $lastBr = (int)$gapres->last()->br_stolb - 1;
+        $isFirstOrLast = ($stBr === $firstBr || $stBr === $lastBr);
+
+        if ($stoAg == 0 && $stoNap > 0) {
+
+            $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            $zzA = $preseZ * $tovz1 * $grVz;
+
+            $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
+            $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1;
+            $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
+            $zzB = $preseZ * $tovz * $grVz;
+            $sxB = 2.6 * $pritVe;
+
+            $vyC = $brojPs * 0.25 * 0.001 * $dijamP * $pritVe * $sreR;
+            $vzC = $vzB;
+            $zyC = 0.25 * 0.001 * $dijamZ * $pritVe * $sreR;
+            $zzC = $zzB;
+            $syC = 2.6 * $pritVe;
+
+            if ($nomNap > 20) {
+                $vyE = ($brojPs == 1)
+                    ? $brojPs * 0.5 * $naprmP * $preseP
+                    : $brojPs * 0.25 * $naprmP * $preseP;
+
+                $vzE = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+                $zzE = $preseZ * $tovz1 * $grVz;
+                $zyE = 0.5 * $naprmZ * $preseZ;
+            } else {
+                $vyE = 0;
+                $vzE = 0;
+                $zzE = 0;
+                $zyE = 0;
+            }
+
+            return [
+                ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow(0, null, $vzA, 0, null, $zzA)],
+                ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, null, $vzB, $zxB, null, $zzB, $sxB)],
+                ['group' => 'Член 69', 'code' => 'C', 'data' => $this->forceRow(0, $vyC, $vzC, 0, $zyC, $zzC, null, $syC)],
+                ['group' => 'Чл.69 т.2', 'code' => 'D', 'data' => $this->forceRow()],
+                ['group' => 'Член 70 т. 2b', 'code' => 'PP', 'data' => $this->forceRow(0, $vyE, $vzE)],
+                ['group' => 'Член 70 т. 2b', 'code' => 'NP', 'data' => $this->forceRow(0, null, $vzE, 0, null, $zzE)],
+                ['group' => 'Член 70 т. 2b', 'code' => 'PZ', 'data' => $this->forceRow(null, null, null, 0, $zyE, $zzE)],
+                ['group' => 'Член 70 т. 2b', 'code' => 'NZ', 'data' => $this->forceRow(0, null, $vzE, 0, null, $zzE)],
+            ];
+        }
+
+        $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+        $vzA = ($brojPs * $preseP * $tovp1 * $grLp)
+            + ($brojPs * $preseP * $tovp1b * $grDp)
+            + $izoMd1 + $izoMd2;
+
+        $zxA = 2 * $preseZ * $naprmZ * $sinHalf;
+        $zzA = ($preseZ * $tovz1 * $grLz)
+            + ($preseZ * $tovz1b * $grDz);
+
+        $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR
+            + 4 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
+
+        if ($stoMa == 0) {
+            $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
+        }
+
+        $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+
+        $zxB = 0.001 * $dijamZ * $pritVe * $sreR
+            + 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
+
+        if ($stoMa == 0) {
+            $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
+        }
+
+        $zzB = $preseZ * $tovz * $grVz;
+        $sxB = 2.6 * $pritVe;
+
+        $vxC = $brojPs * 4 * ($preseP * $naprmP * $sinHalf) / 3;
+
+        $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * $sinHalf;
+        if ($agoTra < 28.955) {
+            $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;
+        }
+
+        $vzC = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+
+        $zxC = 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
+
+        $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf;
+        if ($agoTra < 28.955) {
+            $zyC = 0.001 * $dijamZ * $pritVe * $sreR * 0.25;
+        }
+
+        $zzC = $preseZ * $tovz * $grVz;
+        $syC = 2.6 * $pritVe;
+
+        $vxD = 2 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
+        $vzD = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+        $zxD = 2 * ($preseZ * $naprmZ * $sinHalf) / 3;
+        $zzD = $preseZ * $tovz * $grVz;
+
+        if ($agoTra == 0 && $izoM2 == 0) {
+            $vyD = $brojPs * $naprmP * $preseP;
+            $zyD = $naprmZ * $preseZ;
+        } else {
+            $vyD = 2 * ($brojPs * $preseP * $naprmP * $cosHalf) / 3;
+            $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;
+        }
+
+        if ($nomNap > 20) {
+
+            if ($isFirstOrLast) {
+                $vxPP = $brojPs * $naprmP * $preseP * $this->sinDeg($agoTra);
+                $vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);
+            } else {
+                $vxPP = $brojPs * $preseP * $naprmP * $sinHalf;
+                $vyPP = $brojPs * $preseP * $naprmP * $cosHalf;
+            }
+
+            $vzPP = ($brojPs * $preseP * $tovp1 * $grLp)
+                + ($brojPs * $preseP * $tovp1b * $grDp)
+                + $izoMd1 + $izoMd2;
+
+            $vxNP = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+            $vzNP = $vzPP;
+
+            $zxNP = 2 * $preseZ * $naprmZ * $sinHalf;
+            $zzNP = ($preseZ * $tovz1 * $grLz)
+                + ($preseZ * $tovz1b * $grDz);
+
+            if ($isFirstOrLast) {
+                $zxPZ = $preseZ * $naprmZ * $this->sinDeg($agoTra);
+                $zyPZ = $preseZ * $naprmZ * $this->cosDeg($agoTra);
+            } else {
+                $zxPZ = $preseZ * $naprmZ * $sinHalf;
+                $zyPZ = $preseZ * $naprmZ * $cosHalf;
+            }
+
+            $zzPZ = ($preseZ * $tovz1 * $grLz)
+                + ($preseZ * $tovz1b * $grDz);
+
+            $vxNZ = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+            $vzNZ = $vzPP;
+            $zxNZ = $zxA;
+            $zzNZ = $zzA;
+
+        } else {
+            $vxPP = $vyPP = $vzPP = 0;
+            $vxNP = $vzNP = $zxNP = $zzNP = 0;
+            $zxPZ = $zyPZ = $zzPZ = 0;
+            $vxNZ = $vzNZ = $zxNZ = $zzNZ = 0;
+        }
 
         return [
-            [
-                'group' => 'Член 69',
-                'code'  => 'A',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 69',
-                'code'  => 'B',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 69',
-                'code'  => 'C',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Чл.69 т.2',
-                'code'  => 'D',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 70 т. 2b',
-                'code'  => 'PP',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 70 т. 2b',
-                'code'  => 'NP',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 70 т. 2b',
-                'code'  => 'PZ',
-                'data'  => $empty,
-            ],
-            [
-                'group' => 'Член 70 т. 2b',
-                'code'  => 'NZ',
-                'data'  => $empty,
-            ],
+            ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow($vxA, null, $vzA, $zxA, null, $zzA)],
+            ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, null, $vzB, $zxB, null, $zzB, $sxB)],
+            ['group' => 'Член 69', 'code' => 'C', 'data' => $this->forceRow($vxC, $vyC, $vzC, $zxC, $zyC, $zzC, null, $syC)],
+            ['group' => 'Чл.69 т.2', 'code' => 'D', 'data' => $this->forceRow($vxD, $vyD, $vzD, $zxD, $zyD, $zzD)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'PP', 'data' => $this->forceRow($vxPP, $vyPP, $vzPP)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'NP', 'data' => $this->forceRow($vxNP, null, $vzNP, $zxNP, null, $zzNP)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'PZ', 'data' => $this->forceRow(null, null, null, $zxPZ, $zyPZ, $zzPZ)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'NZ', 'data' => $this->forceRow($vxNZ, null, $vzNZ, $zxNZ, null, $zzNZ)],
         ];
     }
+
+    private function forceRow(
+        $vx = null,
+        $vy = null,
+        $vz = null,
+        $zx = null,
+        $zy = null,
+        $zz = null,
+        $sx = null,
+        $sy = null
+    ): array {
+        return compact('vx', 'vy', 'vz', 'zx', 'zy', 'zz', 'sx', 'sy');
+    }
+
+    private function sinDeg(float $deg): float
+    {
+        return sin(deg2rad($deg));
+    }
+
+    private function cosDeg(float $deg): float
+    {
+        return cos(deg2rad($deg));
+    }
+
+    private function getNominalVoltageFromProject($project): float
+    {
+        $value =
+            optional($project->voltages)->voltage
+            ?? optional($project->voltage)->voltage
+            ?? optional($project->voltages)->name
+            ?? optional($project->voltage)->name
+            ?? $project->voltage
+            ?? 0;
+
+        if (is_numeric($value)) {
+            return (float)$value;
+        }
+
+        if (preg_match('/\d+(\.\d+)?/', (string)$value, $matches)) {
+            return (float)$matches[0];
+        }
+
+        return 0.0;
+    }
+
     public function tableTowers(int $id_project): array
     {
         $project = $this->projectsRepositories->_getProjectById($id_project);
@@ -1032,6 +1318,218 @@ class ProjectsServices
         ]];
     }
 
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    public function profileData(int $id_project): array
+    {
+        $raspres = $this->projectsRepositories
+            ->getRaspresByIdProject($id_project)
+            ->sortBy('stac_t')
+            ->values();
+
+        $trasa = $this->projectsRepositories
+            ->_getTrasaByIdProject($id_project)
+            ->sortBy('stac_t')
+            ->values();
+
+        $zatpol = $this->projectsRepositories
+            ->getZatpolByIdProject($id_project)
+            ->values();
+
+        $trasaById = [];
+        foreach ($trasa as $t) {
+            $trasaById[(int)$t->id] = $t;
+        }
+
+        $data = [];
+
+        foreach ($raspres as $r) {
+
+            $startPoint = $trasaById[(int)($r->id_trasa ?? 0)] ?? null;
+
+            if (!$startPoint) {
+                continue;
+            }
+
+            $startIndex = $trasa->search(function ($item) use ($startPoint) {
+                return (int)$item->id === (int)$startPoint->id;
+            });
+
+            $endPoint = $trasa[$startIndex + 1] ?? null;
+
+            if (!$endPoint) {
+                continue;
+            }
+
+            $stac1 = (float)$startPoint->stac_t;
+            $stac2 = (float)$endPoint->stac_t;
+            $rasp  = $stac2 - $stac1;
+
+            if ($rasp <= 0) {
+                continue;
+            }
+
+            $kotaOp1 = $this->profileConductorPointHeight($startPoint);
+            $kotaOp2 = $this->profileConductorPointHeight($endPoint);
+
+            $kotaOz1 = $this->profileGroundWirePointHeight($startPoint);
+            $kotaOz2 = $this->profileGroundWirePointHeight($endPoint);
+
+            $virp = $kotaOp2 - $kotaOp1;
+            $virz = $kotaOz2 - $kotaOz1;
+
+            $idTrasa = (int)$r->id_trasa;
+
+            $z = $zatpol->first(function ($item) use ($idTrasa) {
+                return (int)$item->id_trasa_po <= $idTrasa
+                    && (int)$item->id_trasa_kr >= $idTrasa;
+            });
+
+            if (!$z) {
+                continue;
+            }
+
+            $tovp = (float)($z->tovpro ?? 0);
+            $napP = (float)($z->napreg7_p ?? 0);
+
+            $tovz = (float)($z->tovzaj ?? 0);
+            $napZ = (float)($z->napreg1_z ?? 0);
+
+            for ($stac = $stac1; $stac <= $stac2; $stac += 2) {
+
+                $conductor = null;
+                $groundwire = null;
+
+                if ($tovp > 0 && $napP > 0) {
+                    $conductor = $this->profileCableHeight(
+                        $kotaOp1,
+                        $kotaOp2,
+                        $stac1,
+                        $stac2,
+                        $stac,
+                        $rasp,
+                        $virp,
+                        $tovp,
+                        $napP
+                    );
+                }
+
+                if ($kotaOz1 > 0 && $kotaOz2 > 0 && $tovz > 0 && $napZ > 0) {
+                    $groundwire = $this->profileCableHeight(
+                        $kotaOz1,
+                        $kotaOz2,
+                        $stac1,
+                        $stac2,
+                        $stac,
+                        $rasp,
+                        $virz,
+                        $tovz,
+                        $napZ
+                    );
+                }
+
+                $data[] = [
+                    'x' => round($stac, 2),
+                    'conductor' => $conductor !== null ? round($conductor, 2) : null,
+                    'groundwire' => $groundwire !== null ? round($groundwire, 2) : null,
+                ];
+            }
+
+            if (round($stac2, 2) !== round($stac - 2, 2)) {
+
+                $conductor = null;
+                $groundwire = null;
+
+                if ($tovp > 0 && $napP > 0) {
+                    $conductor = $this->profileCableHeight(
+                        $kotaOp1,
+                        $kotaOp2,
+                        $stac1,
+                        $stac2,
+                        $stac2,
+                        $rasp,
+                        $virp,
+                        $tovp,
+                        $napP
+                    );
+                }
+
+                if ($kotaOz1 > 0 && $kotaOz2 > 0 && $tovz > 0 && $napZ > 0) {
+                    $groundwire = $this->profileCableHeight(
+                        $kotaOz1,
+                        $kotaOz2,
+                        $stac1,
+                        $stac2,
+                        $stac2,
+                        $rasp,
+                        $virz,
+                        $tovz,
+                        $napZ
+                    );
+                }
+
+                $data[] = [
+                    'x' => round($stac2, 2),
+                    'conductor' => $conductor !== null ? round($conductor, 2) : null,
+                    'groundwire' => $groundwire !== null ? round($groundwire, 2) : null,
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    private function profileConductorPointHeight($point): float
+    {
+        if (!empty($point->id_trafo)) {
+            return (float)$point->kota_t + (float)(optional($point->trafo)->visina_p ?? 0);
+        }
+
+        return (float)$point->kota_t + (float)(optional($point->tower)->vis ?? 0);
+    }
+
+    private function profileGroundWirePointHeight($point): float
+    {
+        if (!empty($point->id_trafo)) {
+            return (float)$point->kota_t + (float)(optional($point->trafo)->visina_z ?? optional($point->trafo)->visina_p ?? 0);
+        }
+
+        return (float)$point->kota_t
+            + (float)(optional($point->tower)->vis ?? 0)
+            + (float)(optional($point->tower)->vig ?? 0);
+    }
+    private function profileCableHeight(
+        float $kota1,
+        float $kota2,
+        float $stac1,
+        float $stac2,
+        float $stac,
+        float $rasp,
+        float $vir,
+        float $tov,
+        float $napreg
+    ): float {
+        if ($rasp == 0 || $napreg == 0 || $stac2 == $stac1) {
+            return $kota1;
+        }
+
+        $dx = $stac - $stac1;
+
+        return $kota1
+            + (($kota2 - $kota1) * $dx / ($stac2 - $stac1))
+            - (
+                ($dx * ($rasp - $dx) * $tov)
+                /
+                (2 * $napreg * ($rasp / sqrt(($rasp ** 2) + ($vir ** 2))))
+            );
+    }
+
+
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
     public function importPoints(int $projectId, Request $request): ResponseError|ResponseSuccess
     {
         $methodName = 'importPoints(int $projectId, Request $request)';
@@ -1339,4 +1837,13 @@ class ProjectsServices
         ];
     }
 
-}
+    public function exportExcelForces($id_project): array
+    {
+        $result = $this->tableForces((int)$id_project);
+        //dd($result);
+
+        return [
+            'project' => $result['data']['project'] ?? null,
+            'data'    => $result['data']['data'] ?? [],
+        ];
+    }}

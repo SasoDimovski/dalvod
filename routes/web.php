@@ -160,6 +160,7 @@ Route::middleware([LanguageMiddleware::class])->group(function () {
 
                             Route::match(['get','post'],'export-excel-towers/{id}', [ProjectsController::class, 'exportExcelTowers']);
                             Route::match(['get','post'],'export-excel-stringing/{id}', [ProjectsController::class, 'exportExcelStringing']);
+                            Route::match(['get','post'],'export-excel-forces/{id}', [ProjectsController::class, 'exportExcelForces']);
 
 
 

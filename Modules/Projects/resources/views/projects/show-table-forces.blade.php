@@ -98,6 +98,7 @@
     /*======================================================================================*/
 
     $path_upload = 'uploads/projects/';
+    $url_export_excel = $url .'/export-excel-forces/'. $id;
 
     $message_error = (isset($id)) ? __('global.update_error') : __('global.save_error');
     $message_success = (isset($id)) ? __('global.update_success') : __('global.save_success');
@@ -202,7 +203,8 @@
 
                                                     <div class="card-header bg-primary text-white">
                                                         <h3 class="card-title">
-                                                            ТАБЕЛА НА СИЛИ ЗА СТОЛБ БР.: {{ $item['summary']['br_stolb'] ?? $item['number'] }}
+                                                           Столб број:
+                                                            {{ $item['summary']['br_stolb'] ?? '' }}
                                                         </h3>
                                                     </div>
 
@@ -211,7 +213,7 @@
                                                         <table class="table_grid table table-bordered text-center">
                                                             <thead>
                                                             <tr>
-                                                                <th>Sila [daN]</th>
+                                                                <th>Сила [daN]</th>
                                                                 <th></th>
                                                                 <th>Vx</th>
                                                                 <th>Vy</th>
@@ -225,19 +227,19 @@
                                                             </thead>
 
                                                             <tbody>
-                                                            @foreach($item['forces'] as $row)
+                                                            @foreach($item['forces'] ?? [] as $row)
                                                                 <tr>
-                                                                    <td>{{ $row['group'] }}</td>
-                                                                    <td><b>{{ $row['code'] }}</b></td>
+                                                                    <td>{{ $row['group'] ?? '' }}</td>
+                                                                    <td><b>{{ $row['code'] ?? '' }}</b></td>
 
-                                                                    <td>{{ number_format((float)$row['data']['vx'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['vy'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['vz'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['zx'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['zy'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['zz'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['sx'], 2, '.', '') }}</td>
-                                                                    <td>{{ number_format((float)$row['data']['sy'], 2, '.', '') }}</td>
+                                                                    <td>{{ ($row['data']['vx'] ?? null) !== null ? number_format((float)$row['data']['vx'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['vy'] ?? null) !== null ? number_format((float)$row['data']['vy'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['vz'] ?? null) !== null ? number_format((float)$row['data']['vz'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['zx'] ?? null) !== null ? number_format((float)$row['data']['zx'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['zy'] ?? null) !== null ? number_format((float)$row['data']['zy'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['zz'] ?? null) !== null ? number_format((float)$row['data']['zz'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['sx'] ?? null) !== null ? number_format((float)$row['data']['sx'], 2, '.', '') : '' }}</td>
+                                                                    <td>{{ ($row['data']['sy'] ?? null) !== null ? number_format((float)$row['data']['sy'], 2, '.', '') : '' }}</td>
                                                                 </tr>
                                                             @endforeach
                                                             </tbody>
@@ -245,34 +247,34 @@
 
                                                         <div class="row mt-3">
                                                             <div class="col-md-4">
-                                                                <b>Stolb tip:</b>
+                                                                <b>Тип на столб:</b>
                                                                 {{ $item['summary']['tower_type'] ?? '' }}
                                                             </div>
 
                                                             <div class="col-md-4">
-                                                                <b>Iz.veriga tip:</b>
+                                                                <b>Тип на изолациона верига:</b>
                                                                 {{ $item['summary']['insulator'] ?? '' }}
                                                             </div>
 
                                                             <div class="col-md-4">
-                                                                <b>a =</b>
+                                                                <b>Агол</b>
                                                                 {{ number_format((float)($item['summary']['agol_t'] ?? 0), 3, '.', '') }} [°]
                                                             </div>
                                                         </div>
 
                                                         <div class="row mt-2">
                                                             <div class="col-md-4">
-                                                                <b>Grav.ras.spr. =</b>
+                                                                <b>Гравитационен распон на спроводник:</b>
                                                                 {{ number_format((float)($item['summary']['grr_vpro'] ?? 0), 2, '.', '') }} [m]
                                                             </div>
 
                                                             <div class="col-md-4">
-                                                                <b>Grav.r.z.j. =</b>
+                                                                <b>Гравитационен распон на з. ј.:</b>
                                                                 {{ number_format((float)($item['summary']['grr_vzaj'] ?? 0), 2, '.', '') }} [m]
                                                             </div>
 
                                                             <div class="col-md-4">
-                                                                <b>Sreden r. =</b>
+                                                                <b>Среден распон:</b>
                                                                 {{ number_format((float)($item['summary']['sre_ras'] ?? 0), 2, '.', '') }} [m]
                                                             </div>
                                                         </div>
@@ -291,7 +293,13 @@
 
                                 </div>
 
-
+                                <div class="row">
+                                    <a class="btn btn-default btn-sm float-right"
+                                       href="{{$url_export_excel}}"
+                                       title="{{__('global.export_excel')}}"><i
+                                            class="fa fa-print"></i> {{__('global.export_excel')}}
+                                    </a>
+                                </div>
 
                                 {{--=========================================================--}}
                             </div>
