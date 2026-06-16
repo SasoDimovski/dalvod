@@ -610,9 +610,13 @@
 
                                 $isTrafo = !empty($row->id_trafo);
 
-                                $elementHeight = $isTrafo
-                                    ? (float) (optional($row->trafo)->visina_p ?? 0)
-                                    : (float) (optional($row->tower)->vis ?? 0);
+                                                           $elementHeight = $isTrafo
+                                        ? (float) (optional($row->trafo)->visina_zj ?? 0)
+                                        : (
+                                            (float) (optional($row->tower)->vis ?? 0)
+                                            +
+                                            (float) (optional($row->tower)->vig ?? 0)
+                                        );
 
                                 return [
                                     'x'   => (float) $row->stac_t,
@@ -1366,7 +1370,7 @@
             ...terrainY,
             ...towerY,
             ...conductorY,
-           // ...groundY
+            ...groundY
         ];
 
         const yMin = Math.min(...allY);
@@ -1447,52 +1451,14 @@
 
 
 
-        function makeConductorMinus6Data(profileLines, points) {
-
-            const supports = points
-                .filter(p => Number(p.tower_vis || 0) > 0)
-                .map(p => Number(p.x))
-                .sort((a, b) => a - b);
-
-            return profileLines
-                .filter(p => p.conductor !== null && p.conductor !== undefined)
-                .map(p => {
-                    const x = Number(p.x);
-                    const y = Number(p.conductor);
-
-                    let x1 = null;
-                    let x2 = null;
-
-                    for (let i = 0; i < supports.length - 1; i++) {
-                        if (x >= supports[i] && x <= supports[i + 1]) {
-                            x1 = supports[i];
-                            x2 = supports[i + 1];
-                            break;
-                        }
-                    }
-
-                    if (x1 === null || x2 === null || x2 === x1) {
-                        return {
-                            x: x,
-                            y: y
-                        };
-                    }
-
-                    const t = (x - x1) / (x2 - x1);
-
-                    // 0 на столб, -6 во средина
-                    const offset = -6 * 4 * t * (1 - t);
-
-                    return {
-                        x: x,
-                        y: y + offset
-                    };
-                });
-        }
-
         const conductorMinus6Dataset = {
-            label: 'Спроводник -6m во средина',
-            data: makeConductorMinus6Data(profileLines, points),
+            label: 'Спроводник -6m',
+            data: profileLines
+                .filter(p => p.conductor !== null && p.conductor !== undefined)
+                .map(p => ({
+                    x: Number(p.x),
+                    y: Number(p.conductor) - 6
+                })),
 
             showLine: true,
             fill: false,
@@ -1644,7 +1610,7 @@
             terrainDataset,
             conductorDataset,
             conductorMinus6Dataset,
-            //groundwireDataset
+            groundwireDataset
         ];
 
         if (activeDataset) {

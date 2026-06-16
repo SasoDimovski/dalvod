@@ -1492,7 +1492,8 @@ class ProjectsServices
     private function profileGroundWirePointHeight($point): float
     {
         if (!empty($point->id_trafo)) {
-            return (float)$point->kota_t + (float)(optional($point->trafo)->visina_z ?? optional($point->trafo)->visina_p ?? 0);
+            return (float)$point->kota_t
+                + (float)(optional($point->trafo)->visina_zj ?? 0);
         }
 
         return (float)$point->kota_t
