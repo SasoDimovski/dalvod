@@ -257,7 +257,7 @@
                                                             </div>
 
                                                             <div class="col-md-4">
-                                                                <b>Агол</b>
+                                                                <b>Агол:</b>
                                                                 {{ number_format((float)($item['summary']['agol_t'] ?? 0), 3, '.', '') }} [°]
                                                             </div>
                                                         </div>

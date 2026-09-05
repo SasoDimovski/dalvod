@@ -447,24 +447,30 @@ class ProjectsServices
 
         foreach ($gapres as $index => $g) {
 
+            //ги зема сите податоци од табелата траса и ги става во објект
             $trasa = $g->trasa;
-            if (!$trasa) {
-                continue;
-            }
+            if (!$trasa) {continue;}
 
+            //ги зема сите податоци од табелата towers и ги става во објект
             $tower = optional($trasa)->tower;
+
+            //ги зема сите податоци од табелата trafo и ги става во објект
             $trafo = optional($trasa)->trafo;
 
             $stolbId = $trasa->id_tower ?: $trasa->id_trafo;
-
-            if (!$stolbId) {
-                continue;
-            }
+            if (!$stolbId) {continue;}
 
             $stBr = (int)$g->br_stolb - 1;
-
-
             $idTrasa = (int)$g->id_trasa;
+
+            // Дали тековниот столб е прв или последен?
+            $firstIdTrasa = (int)$gapres->first()->id_trasa;
+            $lastIdTrasa  = (int)$gapres->last()->id_trasa;
+
+            $isFirst = ($idTrasa === $firstIdTrasa);
+            $isLast  = ($idTrasa === $lastIdTrasa);
+
+            // Основно затезно поле во кое се наоѓа столбот
             $zA = $zatpol->first(function ($item) use ($idTrasa) {
 
                 return
@@ -477,13 +483,42 @@ class ProjectsServices
                 continue;
             }
 
-            $zB = $zatpol->first(function ($item) use ($idTrasa) {
+            // По default нема второ затезно поле
+            $zB = null;
 
-                return (int)$item->id_trasa_po === $idTrasa;
-            });
+
+
+            // Второ поле бараме само кај внатрешните столбови
+            if (!$isFirst && !$isLast) {
+
+                $zB = $zatpol->first(function ($item) use ($idTrasa) {
+                    return (int)$item->id_trasa_po === $idTrasa;
+                });
+
+                // Не дозволуваме zA и zB да бидат исто поле
+                if ($zB && $zA->id === $zB->id) {
+                    $zB = null;
+                }
+            }
+
+//            dump([
+//                'stolb' => $g->br_stolb,
+//                'id_trasa' => $idTrasa,
+//
+//                'zA' => $zA ? [
+//                    'id' => $zA->id,
+//                    'po' => $zA->id_trasa_po,
+//                    'kr' => $zA->id_trasa_kr,
+//                ] : null,
+//
+//                'zB' => $zB ? [
+//                    'id' => $zB->id,
+//                    'po' => $zB->id_trasa_po,
+//                    'kr' => $zB->id_trasa_kr,
+//                ] : null,
+//            ]);
 
             $grrVpro = (($g->grr_lpro ?? 0) + ($g->grr_dpro ?? 0));
-
             $grrVzaj = (($g->grr_lzaj ?? 0) + ($g->grr_dzaj ?? 0));
 
             $data[] = [
@@ -537,14 +572,14 @@ class ProjectsServices
         $dijamP = (float)(optional($project->conductors)->diameter ?? 0);
         $dijamZ = (float)(optional($project->groundWires)->diameter ?? 0);
 
-        $nomNap = $this->getNominalVoltageFromProject($project);
+        $nomNap = (float)($project->voltages->title ?? 0);
         $brojPs = (float)($project->num_cond_systems ?? 1);
 
-        $agoTra = (float)($trasa->agol_tr ?? $g->agol_t ?? 0);
+        $agoTra = (float)($trasa->agol_tr ?? 0);
 
-        $stoAg = (float)($tower->angle ?? $tower->ag ?? 0);
-        $stoNap = $tower ? (float)($tower->voltage ?? $tower->nap ?? 0) : 0;
-        $stoMa = (float)($tower->mass ?? $tower->masa ?? 0);
+        $stoAg = (float)($tower->angle ?? 0);
+        $stoNap = $tower ? (float)($tower->voltage ?? 0) : 0;
+        $stoMa = (float)($tower->mass ?? 0);
 
         $grLp = (float)($g->grr_lpro ?? 0);
         $grDp = (float)($g->grr_dpro ?? 0);
@@ -652,118 +687,109 @@ class ProjectsServices
         }
 
         $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
-        $vzA = ($brojPs * $preseP * $tovp1 * $grLp)
-            + ($brojPs * $preseP * $tovp1b * $grDp)
-            + $izoMd1 + $izoMd2;
-
+        $vyA = null;
+        $vzA = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
         $zxA = 2 * $preseZ * $naprmZ * $sinHalf;
-        $zzA = ($preseZ * $tovz1 * $grLz)
-            + ($preseZ * $tovz1b * $grDz);
+        $zyA = null;
+        $zzA = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
+        $sxA = null;
+        $syA = null;
 
-        $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR
-            + 4 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
-
-        if ($stoMa == 0) {
-            $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
-        }
-
+        $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR + 4 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3; if ($stoMa == 0) {$vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;}
+        $vyB = null;
         $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
-
-        $zxB = 0.001 * $dijamZ * $pritVe * $sreR
-            + 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
-
-        if ($stoMa == 0) {
-            $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
-        }
-
+        $zxB = 0.001 * $dijamZ * $pritVe * $sreR + 4 * ($preseZ * $naprmZ * $sinHalf) / 3; if ($stoMa == 0) {$zxB = 0.001 * $dijamZ * $pritVe * $sreR;}
+        $zyB = null;
         $zzB = $preseZ * $tovz * $grVz;
         $sxB = 2.6 * $pritVe;
+        $syB = null;
 
         $vxC = $brojPs * 4 * ($preseP * $naprmP * $sinHalf) / 3;
-
-        $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * $sinHalf;
-        if ($agoTra < 28.955) {
-            $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;
-        }
-
+        $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * $sinHalf; if ($agoTra < 28.955) {$vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;}
         $vzC = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
-
         $zxC = 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
-
-        $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf;
-        if ($agoTra < 28.955) {
-            $zyC = 0.001 * $dijamZ * $pritVe * $sreR * 0.25;
-        }
-
+        $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf; if ($agoTra < 28.955) {$zyC = 0.001 * $dijamZ * $pritVe * $sreR * 0.25;}
         $zzC = $preseZ * $tovz * $grVz;
+        $sxC = null;
         $syC = 2.6 * $pritVe;
 
         $vxD = 2 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
+        $vyD = 2 * ($brojPs * $preseP * $naprmP * $cosHalf) / 3; if ($agoTra == 0 && $izoM2 == 0) { $vyD = $brojPs * $naprmP * $preseP;}
         $vzD = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
         $zxD = 2 * ($preseZ * $naprmZ * $sinHalf) / 3;
+        $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;if ($agoTra == 0 && $izoM2 == 0) { $zyD = $naprmZ * $preseZ;}
         $zzD = $preseZ * $tovz * $grVz;
+        $sxD = null;
+        $syD = null;
 
-        if ($agoTra == 0 && $izoM2 == 0) {
-            $vyD = $brojPs * $naprmP * $preseP;
-            $zyD = $naprmZ * $preseZ;
-        } else {
-            $vyD = 2 * ($brojPs * $preseP * $naprmP * $cosHalf) / 3;
-            $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;
-        }
+        $vxPP = 0;
+        $vyPP = 0;
+        $vzPP = 0;
+        $zxPP = null;
+        $zyPP = null;
+        $zzPP = null;
+        $sxPP = null;
+        $syPP = null;
+
+        $vxNP = 0;
+        $vyNP = null;
+        $vzNP = 0;
+        $zxNP = 0;
+        $zyNP = null;
+        $zzNP = 0;
+        $sxNP = null;
+        $syNP = null;
+
+        $vxPZ = null;
+        $vyPZ = null;
+        $vzPZ = null;
+        $zxPZ = 0;
+        $zyPZ = 0;
+        $zzPZ = 0;
+        $sxPZ = null;
+        $syPZ = null;
+
+        $vxNZ = 0;
+        $vyNZ = null;
+        $vzNZ = 0;
+        $zxNZ = 0;
+        $zyNZ = null;
+        $zzNZ = 0;
+        $sxNZ = null;
+        $syNZ = null;
+
 
         if ($nomNap > 20) {
 
-            if ($isFirstOrLast) {
-                $vxPP = $brojPs * $naprmP * $preseP * $this->sinDeg($agoTra);
-                $vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);
-            } else {
-                $vxPP = $brojPs * $preseP * $naprmP * $sinHalf;
-                $vyPP = $brojPs * $preseP * $naprmP * $cosHalf;
-            }
-
-            $vzPP = ($brojPs * $preseP * $tovp1 * $grLp)
-                + ($brojPs * $preseP * $tovp1b * $grDp)
-                + $izoMd1 + $izoMd2;
+            $vxPP = $brojPs * $preseP * $naprmP * $sinHalf; if ($isFirstOrLast) { $vxPP = $brojPs * $naprmP * $preseP * $this->sinDeg($agoTra);}
+            $vyPP = $brojPs * $preseP * $naprmP * $cosHalf; if ($isFirstOrLast) {$vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);}
+            $vzPP = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
 
             $vxNP = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
             $vzNP = $vzPP;
-
             $zxNP = 2 * $preseZ * $naprmZ * $sinHalf;
-            $zzNP = ($preseZ * $tovz1 * $grLz)
-                + ($preseZ * $tovz1b * $grDz);
+            $zzNP = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
 
-            if ($isFirstOrLast) {
-                $zxPZ = $preseZ * $naprmZ * $this->sinDeg($agoTra);
-                $zyPZ = $preseZ * $naprmZ * $this->cosDeg($agoTra);
-            } else {
-                $zxPZ = $preseZ * $naprmZ * $sinHalf;
-                $zyPZ = $preseZ * $naprmZ * $cosHalf;
-            }
-
-            $zzPZ = ($preseZ * $tovz1 * $grLz)
-                + ($preseZ * $tovz1b * $grDz);
+            $zxPZ = $preseZ * $naprmZ * $this->sinDeg($agoTra); if ($isFirstOrLast) {$zxPZ = $preseZ * $naprmZ * $sinHalf;}
+            $zyPZ = $preseZ * $naprmZ * $this->cosDeg($agoTra); if ($isFirstOrLast) {$zyPZ = $preseZ * $naprmZ * $cosHalf;}
+            $zzPZ = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
 
             $vxNZ = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
             $vzNZ = $vzPP;
             $zxNZ = $zxA;
             $zzNZ = $zzA;
 
-        } else {
-            $vxPP = $vyPP = $vzPP = 0;
-            $vxNP = $vzNP = $zxNP = $zzNP = 0;
-            $zxPZ = $zyPZ = $zzPZ = 0;
-            $vxNZ = $vzNZ = $zxNZ = $zzNZ = 0;
         }
 
         return [
-            ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow($vxA, null, $vzA, $zxA, null, $zzA)],
-            ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, null, $vzB, $zxB, null, $zzB, $sxB)],
-            ['group' => 'Член 69', 'code' => 'C', 'data' => $this->forceRow($vxC, $vyC, $vzC, $zxC, $zyC, $zzC, null, $syC)],
-            ['group' => 'Чл.69 т.2', 'code' => 'D', 'data' => $this->forceRow($vxD, $vyD, $vzD, $zxD, $zyD, $zzD)],
-            ['group' => 'Член 70 т. 2b', 'code' => 'PP', 'data' => $this->forceRow($vxPP, $vyPP, $vzPP)],
-            ['group' => 'Член 70 т. 2b', 'code' => 'NP', 'data' => $this->forceRow($vxNP, null, $vzNP, $zxNP, null, $zzNP)],
-            ['group' => 'Член 70 т. 2b', 'code' => 'PZ', 'data' => $this->forceRow(null, null, null, $zxPZ, $zyPZ, $zzPZ)],
-            ['group' => 'Член 70 т. 2b', 'code' => 'NZ', 'data' => $this->forceRow($vxNZ, null, $vzNZ, $zxNZ, null, $zzNZ)],
+            ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow($vxA, $vyA, $vzA, $zxA, $zyA, $zzA, $sxA, $syA)],
+            ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, $vyB, $vzB, $zxB, $zyB, $zzB, $sxB, $syB)],
+            ['group' => 'Член 69', 'code' => 'C', 'data' => $this->forceRow($vxC, $vyC, $vzC, $zxC, $zyC, $zzC, $sxC, $syC)],
+            ['group' => 'Чл.69 т.2', 'code' => 'D', 'data' => $this->forceRow($vxD, $vyD, $vzD, $zxD, $zyD, $zzD, $sxD, $syD)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'PP', 'data' => $this->forceRow($vxPP, $vyPP, $vzPP, $zxPP, $zyPP, $zzPP, $sxPP, $syPP)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'NP', 'data' => $this->forceRow($vxNP, $vyNP, $vzNP, $zxNP, $zyNP, $zzNP, $sxNP, $syNP)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'PZ', 'data' => $this->forceRow($vxPZ, $vyPZ, $vzPZ, $zxPZ, $zyPZ, $zzPZ, $sxPZ, $syPZ)],
+            ['group' => 'Член 70 т. 2b', 'code' => 'NZ', 'data' => $this->forceRow($vxNZ, $vyNZ, $vzNZ, $zxNZ, $zyNZ, $zzNZ, $sxNZ, $syNZ)],
         ];
     }
 
@@ -790,26 +816,7 @@ class ProjectsServices
         return cos(deg2rad($deg));
     }
 
-    private function getNominalVoltageFromProject($project): float
-    {
-        $value =
-            optional($project->voltages)->voltage
-            ?? optional($project->voltage)->voltage
-            ?? optional($project->voltages)->name
-            ?? optional($project->voltage)->name
-            ?? $project->voltage
-            ?? 0;
 
-        if (is_numeric($value)) {
-            return (float)$value;
-        }
-
-        if (preg_match('/\d+(\.\d+)?/', (string)$value, $matches)) {
-            return (float)$matches[0];
-        }
-
-        return 0.0;
-    }
 
     public function tableTowers(int $id_project): array
     {
