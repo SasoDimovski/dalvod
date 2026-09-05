@@ -644,143 +644,229 @@ class ProjectsServices
 
         if ($stoAg == 0 && $stoNap > 0) {
 
+            $vxA = 0;
+            $vyA = null;
             $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            $zxA = 0;
+            $zyA = null;
             $zzA = $preseZ * $tovz1 * $grVz;
+            $sxA = null;
+            $syA = null;
 
             $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
+            $vyB = null;
             $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1;
             $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
+            $zyB = null;
             $zzB = $preseZ * $tovz * $grVz;
             $sxB = 2.6 * $pritVe;
+            $syB = null;
 
+            $vxC = 0;
             $vyC = $brojPs * 0.25 * 0.001 * $dijamP * $pritVe * $sreR;
             $vzC = $vzB;
+            $zxC = 0;
             $zyC = 0.25 * 0.001 * $dijamZ * $pritVe * $sreR;
             $zzC = $zzB;
+            $sxC = null;
             $syC = 2.6 * $pritVe;
 
+            $vxD = null;
+            $vyD = null;
+            $vzD = null;
+            $zxD = null;
+            $zyD = null;
+            $zzD = null;
+            $sxD = null;
+            $syD = null;
+
+            $vxPP = 0;
+            $vyPP = 0;
             if ($nomNap > 20) {
-                $vyE = ($brojPs == 1)
-                    ? $brojPs * 0.5 * $naprmP * $preseP
-                    : $brojPs * 0.25 * $naprmP * $preseP;
-
-                $vzE = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
-                $zzE = $preseZ * $tovz1 * $grVz;
-                $zyE = 0.5 * $naprmZ * $preseZ;
-            } else {
-                $vyE = 0;
-                $vzE = 0;
-                $zzE = 0;
-                $zyE = 0;
+                $vyPP = ($brojPs == 1) ? $brojPs * 0.5 * $naprmP * $preseP : $brojPs * 0.25 * $naprmP * $preseP;
             }
+            $vzPP = 0;
+            if ($nomNap > 20) {
+                $vzPP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            }
+            $zxPP = null;
+            $zyPP = null;
+            $zzPP = null;
+            $sxPP = null;
+            $syPP = null;
 
-            return [
-                ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow(0, null, $vzA, 0, null, $zzA)],
-                ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, null, $vzB, $zxB, null, $zzB, $sxB)],
-                ['group' => 'Член 69', 'code' => 'C', 'data' => $this->forceRow(0, $vyC, $vzC, 0, $zyC, $zzC, null, $syC)],
-                ['group' => 'Чл.69 т.2', 'code' => 'D', 'data' => $this->forceRow()],
-                ['group' => 'Член 70 т. 2b', 'code' => 'PP', 'data' => $this->forceRow(0, $vyE, $vzE)],
-                ['group' => 'Член 70 т. 2b', 'code' => 'NP', 'data' => $this->forceRow(0, null, $vzE, 0, null, $zzE)],
-                ['group' => 'Член 70 т. 2b', 'code' => 'PZ', 'data' => $this->forceRow(null, null, null, 0, $zyE, $zzE)],
-                ['group' => 'Член 70 т. 2b', 'code' => 'NZ', 'data' => $this->forceRow(0, null, $vzE, 0, null, $zzE)],
-            ];
+            $vxNP = 0;
+            $vyNP = null;
+            $vzNP = 0;
+            if ($nomNap > 20) {
+                $vzNP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            }
+            $zxNP = 0;
+            $zyNP = null;
+            $zzNP = 0;
+            if ($nomNap > 20) {
+                $zzNP = $preseZ * $tovz1 * $grVz;
+            }
+            $sxNP = null;
+            $syNP = null;
+
+            $vxPZ = null;
+            $vyPZ = null;
+            $vzPZ = null;
+            $zxPZ = 0;
+            $zyPZ = 0;
+            if ($nomNap > 20) {
+                $zyPZ = 0.5 * $naprmZ * $preseZ;
+            }
+            $zzPZ = 0;
+            if ($nomNap > 20) {
+                $zzPZ = $preseZ * $tovz1 * $grVz;
+            }
+            $sxPZ = null;
+            $syPZ = null;
+
+            $vxNZ = 0;
+            $vyNZ = null;
+            $vzNZ = 0;
+            if ($nomNap > 20) {
+                $vzNZ = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            }
+            $zxNZ = 0;
+            $zyNZ = null;
+            $zzNZ = 0;
+            if ($nomNap > 20) {
+                $zzNZ = $preseZ * $tovz1 * $grVz;
+            }
+            $sxNZ = null;
+            $syNZ = null;
+
+
+        } else {
+            $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+            $vyA = null;
+            $vzA = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
+            $zxA = 2 * $preseZ * $naprmZ * $sinHalf;
+            $zyA = null;
+            $zzA = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
+            $sxA = null;
+            $syA = null;
+
+            $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR + 4 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
+            if ($stoMa == 0) {
+                $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
+            }
+            $vyB = null;
+            $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $zxB = 0.001 * $dijamZ * $pritVe * $sreR + 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
+            if ($stoMa == 0) {
+                $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
+            }
+            $zyB = null;
+            $zzB = $preseZ * $tovz * $grVz;
+            $sxB = 2.6 * $pritVe;
+            $syB = null;
+
+            $vxC = $brojPs * 4 * ($preseP * $naprmP * $sinHalf) / 3;
+            $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * $sinHalf;
+            if ($agoTra < 28.955) {
+                $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;
+            }
+            $vzC = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $zxC = 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
+            $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf;
+            if ($agoTra < 28.955) {
+                $zyC = 0.001 * $dijamZ * $pritVe * $sreR * 0.25;
+            }
+            $zzC = $preseZ * $tovz * $grVz;
+            $sxC = null;
+            $syC = 2.6 * $pritVe;
+
+            $vxD = 2 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
+            $vyD = 2 * ($brojPs * $preseP * $naprmP * $cosHalf) / 3;
+            if ($agoTra == 0 && $izoM2 == 0) {
+                $vyD = $brojPs * $naprmP * $preseP;
+            }
+            $vzD = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $zxD = 2 * ($preseZ * $naprmZ * $sinHalf) / 3;
+            $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;
+            if ($agoTra == 0 && $izoM2 == 0) {
+                $zyD = $naprmZ * $preseZ;
+            }
+            $zzD = $preseZ * $tovz * $grVz;
+            $sxD = null;
+            $syD = null;
+
+            $vxPP = 0;
+            $vyPP = 0;
+            $vzPP = 0;
+            $zxPP = null;
+            $zyPP = null;
+            $zzPP = null;
+            $sxPP = null;
+            $syPP = null;
+
+            $vxNP = 0;
+            $vyNP = null;
+            $vzNP = 0;
+            $zxNP = 0;
+            $zyNP = null;
+            $zzNP = 0;
+            $sxNP = null;
+            $syNP = null;
+
+            $vxPZ = null;
+            $vyPZ = null;
+            $vzPZ = null;
+            $zxPZ = 0;
+            $zyPZ = 0;
+            $zzPZ = 0;
+            $sxPZ = null;
+            $syPZ = null;
+
+            $vxNZ = 0;
+            $vyNZ = null;
+            $vzNZ = 0;
+            $zxNZ = 0;
+            $zyNZ = null;
+            $zzNZ = 0;
+            $sxNZ = null;
+            $syNZ = null;
+
+
+            if ($nomNap > 20) {
+
+                $vxPP = $brojPs * $preseP * $naprmP * $sinHalf;
+                if ($isFirstOrLast) {
+                    $vxPP = $brojPs * $naprmP * $preseP * $this->sinDeg($agoTra);
+                }
+                $vyPP = $brojPs * $preseP * $naprmP * $cosHalf;
+                if ($isFirstOrLast) {
+                    $vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);
+                }
+                $vzPP = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
+
+                $vxNP = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+                $vzNP = $vzPP;
+                $zxNP = 2 * $preseZ * $naprmZ * $sinHalf;
+                $zzNP = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
+
+                $zxPZ = $preseZ * $naprmZ * $this->sinDeg($agoTra);
+                if ($isFirstOrLast) {
+                    $zxPZ = $preseZ * $naprmZ * $sinHalf;
+                }
+                $zyPZ = $preseZ * $naprmZ * $this->cosDeg($agoTra);
+                if ($isFirstOrLast) {
+                    $zyPZ = $preseZ * $naprmZ * $cosHalf;
+                }
+                $zzPZ = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
+
+                $vxNZ = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
+                $vzNZ = $vzPP;
+                $zxNZ = $zxA;
+                $zzNZ = $zzA;
+
+            }
         }
-
-        $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
-        $vyA = null;
-        $vzA = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
-        $zxA = 2 * $preseZ * $naprmZ * $sinHalf;
-        $zyA = null;
-        $zzA = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
-        $sxA = null;
-        $syA = null;
-
-        $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR + 4 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3; if ($stoMa == 0) {$vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;}
-        $vyB = null;
-        $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
-        $zxB = 0.001 * $dijamZ * $pritVe * $sreR + 4 * ($preseZ * $naprmZ * $sinHalf) / 3; if ($stoMa == 0) {$zxB = 0.001 * $dijamZ * $pritVe * $sreR;}
-        $zyB = null;
-        $zzB = $preseZ * $tovz * $grVz;
-        $sxB = 2.6 * $pritVe;
-        $syB = null;
-
-        $vxC = $brojPs * 4 * ($preseP * $naprmP * $sinHalf) / 3;
-        $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * $sinHalf; if ($agoTra < 28.955) {$vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;}
-        $vzC = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
-        $zxC = 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
-        $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf; if ($agoTra < 28.955) {$zyC = 0.001 * $dijamZ * $pritVe * $sreR * 0.25;}
-        $zzC = $preseZ * $tovz * $grVz;
-        $sxC = null;
-        $syC = 2.6 * $pritVe;
-
-        $vxD = 2 * ($brojPs * $preseP * $naprmP * $sinHalf) / 3;
-        $vyD = 2 * ($brojPs * $preseP * $naprmP * $cosHalf) / 3; if ($agoTra == 0 && $izoM2 == 0) { $vyD = $brojPs * $naprmP * $preseP;}
-        $vzD = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
-        $zxD = 2 * ($preseZ * $naprmZ * $sinHalf) / 3;
-        $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;if ($agoTra == 0 && $izoM2 == 0) { $zyD = $naprmZ * $preseZ;}
-        $zzD = $preseZ * $tovz * $grVz;
-        $sxD = null;
-        $syD = null;
-
-        $vxPP = 0;
-        $vyPP = 0;
-        $vzPP = 0;
-        $zxPP = null;
-        $zyPP = null;
-        $zzPP = null;
-        $sxPP = null;
-        $syPP = null;
-
-        $vxNP = 0;
-        $vyNP = null;
-        $vzNP = 0;
-        $zxNP = 0;
-        $zyNP = null;
-        $zzNP = 0;
-        $sxNP = null;
-        $syNP = null;
-
-        $vxPZ = null;
-        $vyPZ = null;
-        $vzPZ = null;
-        $zxPZ = 0;
-        $zyPZ = 0;
-        $zzPZ = 0;
-        $sxPZ = null;
-        $syPZ = null;
-
-        $vxNZ = 0;
-        $vyNZ = null;
-        $vzNZ = 0;
-        $zxNZ = 0;
-        $zyNZ = null;
-        $zzNZ = 0;
-        $sxNZ = null;
-        $syNZ = null;
-
-
-        if ($nomNap > 20) {
-
-            $vxPP = $brojPs * $preseP * $naprmP * $sinHalf; if ($isFirstOrLast) { $vxPP = $brojPs * $naprmP * $preseP * $this->sinDeg($agoTra);}
-            $vyPP = $brojPs * $preseP * $naprmP * $cosHalf; if ($isFirstOrLast) {$vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);}
-            $vzPP = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
-
-            $vxNP = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
-            $vzNP = $vzPP;
-            $zxNP = 2 * $preseZ * $naprmZ * $sinHalf;
-            $zzNP = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
-
-            $zxPZ = $preseZ * $naprmZ * $this->sinDeg($agoTra); if ($isFirstOrLast) {$zxPZ = $preseZ * $naprmZ * $sinHalf;}
-            $zyPZ = $preseZ * $naprmZ * $this->cosDeg($agoTra); if ($isFirstOrLast) {$zyPZ = $preseZ * $naprmZ * $cosHalf;}
-            $zzPZ = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
-
-            $vxNZ = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
-            $vzNZ = $vzPP;
-            $zxNZ = $zxA;
-            $zzNZ = $zzA;
-
-        }
-
         return [
             ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow($vxA, $vyA, $vzA, $zxA, $zyA, $zzA, $sxA, $syA)],
             ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, $vyB, $vzB, $zxB, $zyB, $zzB, $sxB, $syB)],
