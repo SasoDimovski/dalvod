@@ -750,13 +750,33 @@ function savePicture() {
 // ===========================================================================
 function showGroundWires2(el) {
     //alert(el.value);
-    if (el.value === '1') {
+
+    if (el.value === '0') {
+        document.getElementById('ground_wires').style.display = 'none';
+        $('#id_ground_wires').val(null).trigger('change');
+        document.getElementById('tensile_stress_ground').value = ''
+
         document.getElementById('ground_wires2').style.display = 'none';
-        document.getElementById('id_ground_wires2').value = ''
+        $('#id_ground_wires2').val(null).trigger('change');
         document.getElementById('tensile_stress_ground2').value = ''
 
     }
-    if (el.value === '2') {document.getElementById('ground_wires2').style.display = 'block' }
+
+    if (el.value === '1') {
+        document.getElementById('ground_wires').style.display = 'block'
+
+        document.getElementById('ground_wires2').style.display = 'none';
+        $('#id_ground_wires2').val(null).trigger('change');
+        document.getElementById('tensile_stress_ground2').value = ''
+
+    }
+    if (el.value === '2') {
+        document.getElementById('ground_wires').style.display = 'block'
+        document.getElementById('ground_wires2').style.display = 'block'
+        $('#id_ground_wires2').val(null).trigger('change');
+        document.getElementById('tensile_stress_ground2').value = ''
+
+    }
 }
 // ===========================================================================
 

@@ -11,13 +11,21 @@
     $title = $project->title ?? old('title');
     $id_voltage = $project->id_voltage ?? old('id_voltage');
     $id_conductor = $project->id_conductor ?? old('id_conductor');
-    $id_ground_wires = $project->id_ground_wires ?? old('id_ground_wires');
-    $id_ground_wires2 = $project->id_ground_wires2 ?? old('id_ground_wires2');
+  //  $id_ground_wires = $project->id_ground_wires ?? old('id_ground_wires');
+   // $id_ground_wires2 = $project->id_ground_wires2 ?? old('id_ground_wires2');
+    $id_ground_wires = old('id_ground_wires', $project->id_ground_wires ?? '');
+    $id_ground_wires2 = old('id_ground_wires2', $project->id_ground_wires2 ?? '');
+    $num_ground_wires = old('num_ground_wires', $project->num_ground_wires ?? 0);
+
     $id_starting_point = $project->id_starting_point ?? old('id_starting_point');
     $id_ending_point = $project->id_ending_point ?? old('id_ending_point');
     $tensile_stress_cond = $project->tensile_stress_cond ?? old('tensile_stress_cond');
-    $tensile_stress_ground = $project->tensile_stress_ground ?? old('tensile_stress_ground');
-    $tensile_stress_ground2 = $project->tensile_stress_ground2 ?? old('tensile_stress_ground2');
+
+    //$tensile_stress_ground = $project->tensile_stress_ground ?? old('tensile_stress_ground');
+    //$tensile_stress_ground2 = $project->tensile_stress_ground2 ?? old('tensile_stress_ground2');
+    $tensile_stress_ground = old('tensile_stress_ground ', $project->tensile_stress_ground  ?? '');
+    $tensile_stress_ground2 = old('tensile_stress_ground2 ', $project->tensile_stress_ground2  ?? '');
+
     $kn = $project->kn ?? old('kn');
     $ki = $project->ki ?? old('ki');
     $id_wind_pressure = $project->id_wind_pressure ?? old('id_wind_pressure');
@@ -26,7 +34,7 @@
     $approx_number_towers = $project->approx_number_towers ?? old('approx_number_towers');
     $num_cond_systems = $project->num_cond_systems ?? old('num_cond_systems');
     $num_cond_bundle = $project->num_cond_bundle ?? old('num_cond_bundle');
-    $num_ground_wires = $project->num_ground_wires ?? old('num_ground_wires');
+//    $num_ground_wires = $project->num_ground_wires ?? old('num_ground_wires');
 
 
     $created_at = (isset($project->created_at)) ? date("d.m.Y H:i:s", strtotime($project->created_at)) : old('created_at');
@@ -350,8 +358,10 @@
                                                     @endif
                                                 </select>
                                             </div>
-
                                         </div>
+
+
+
                                         <div class="col-sm-3">
                                             <?php
                                             $input_value = $tensile_stress_cond;
@@ -380,6 +390,9 @@
                                                 Дозволена вредности: три цели и две децимали
                                             </div>
                                         </div>
+
+
+
                                         <div class="col-sm-3">
                                             <?php
 
@@ -461,74 +474,96 @@
                                                         onchange="showGroundWires2(this)"
                                                         style="{{$input_style}}"
                                                 >
-                                                    <option value="1" {{ ($num_ground_wires)==1 ? 'selected' : '' }}>1
-                                                    </option>
-                                                    <option value="2" {{ ($num_ground_wires)==2 ? 'selected' : '' }}>2
-                                                    </option>
+                                                    <option value="0" {{ ($num_ground_wires)==0 ? 'selected' : '' }}>0</option>
+                                                    <option value="1" {{ ($num_ground_wires)==1 ? 'selected' : '' }}>1</option>
+                                                    <option value="2" {{ ($num_ground_wires)==2 ? 'selected' : '' }}>2</option>
                                                 </select>
                                             </div>
 
                                         </div>
                                     </div>
                                     {{--=========================================================--}}
-                                    <div class="row" style="background-color: #ddffd9">
-                                        <div class="col-sm-3">
-                                            <?php
-                                            $input_value = $id_ground_wires;
-                                            $input_name = 'id_ground_wires';
-                                            $input_desc = __('projects.id_ground_wires');
-                                            $input_readonly = '';
-                                            $input_css = 'text-red';
-                                            $input_style = 'width:100%;';
-                                            ?>
-                                            <div class="form-group">
-                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
-                                                <select class="select2bs4"
-                                                        id="{{ $input_name }}" name="{{ $input_name }}"
-                                                        style="{{$input_style}}"
-                                                        autocomplete="off" {{ $input_readonly }}>
-                                                    @if (count($groundWires) > 0)
-                                                        <option value="">&nbsp;</option>
-                                                        @foreach ($groundWires as $groundWire)
-                                                            <option
-                                                                value="{{ $groundWire->id }}"
-                                                                {{ (($id_ground_wires)==$groundWire->id) ? 'selected' : '' }}>
-                                                                {{ $groundWire->type }}
-                                                            </option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
+
+                                    <?php
+                                    $input_value = $id_ground_wires;
+                                    $input_name = 'id_ground_wires';
+                                    $input_desc = __('projects.id_ground_wires');
+                                    $input_readonly = '';
+                                    $input_css = 'text-red';
+                                    $input_style = 'width:100%;';
+
+                                    if ($num_ground_wires > 0) {
+                                        $Style_wires = 'display: block';
+                                    } else {
+                                        $Style_wires = 'display: none';
+                                    }
+
+
+                                    ?>
+                                    <div id="ground_wires" style="{{ $Style_wires }}">
+                                        <div class="row" style="background-color: #ddffd9">
+
+
+                                            <div class="col-sm-3">
+
+
+
+
+                                                <div class="form-group">
+                                                    <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+                                                    <select class="select2bs4"
+                                                            id="{{ $input_name }}" name="{{ $input_name }}"
+                                                            style="{{$input_style}}"
+                                                            autocomplete="off" {{ $input_readonly }}>
+                                                        @if (count($groundWires) > 0)
+                                                            <option value="">&nbsp;</option>
+                                                            @foreach ($groundWires as $groundWire)
+                                                                <option
+                                                                    value="{{ $groundWire->id }}"
+                                                                    {{ (($id_ground_wires)==$groundWire->id) ? 'selected' : '' }}>
+                                                                    {{ $groundWire->type }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-6">
+
+                                                <?php
+                                                $input_value = $tensile_stress_ground;
+                                                $input_name = 'tensile_stress_ground';
+                                                $input_desc = __('projects.tensile_stress_ground');
+                                                $input_maxlength = 6;
+                                                $input_readonly = '';
+                                                $input_css = 'text-red';
+                                                $input_style = 'width: 20%;';
+
+
+                                                ?>
+
+
+                                                <div class="form-group">
+                                                    <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
+                                                        *</label>
+                                                    <input type="text" id="{{$input_name}}" name="{{$input_name}}"
+                                                           style="{{$input_style}}"
+                                                           class="form-control" value="{{$input_value}}"
+                                                           maxlength="{{$input_maxlength}}"
+                                                           pattern="^\d{1,3}(\.\d{1,2})?$"
+                                                           inputmode="decimal"
+                                                           title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
+                                                           oninput="validateNumberInput(this)"
+                                                        {{$input_readonly}}>
+                                                    Дозволена вредности: три цели и две децимали
+
+                                                </div>
+
+
                                             </div>
 
                                         </div>
-
-                                        <div class="col-sm-6">
-                                            <?php
-                                            $input_value = $tensile_stress_ground;
-                                            $input_name = 'tensile_stress_ground';
-                                            $input_desc = __('projects.tensile_stress_ground');
-                                            $input_maxlength = 6;
-                                            $input_readonly = '';
-                                            $input_css = 'text-red';
-                                            $input_style = 'width: 20%;';
-                                            ?>
-                                            <div class="form-group">
-                                                <label for="{{$input_name}}" class="{{$input_css}}">{{$input_desc}}
-                                                    *</label>
-                                                <input type="text" id="{{$input_name}}" name="{{$input_name}}"
-                                                       style="{{$input_style}}"
-                                                       class="form-control" value="{{$input_value}}"
-                                                       maxlength="{{$input_maxlength}}"
-                                                       pattern="^\d{1,3}(\.\d{1,2})?$"
-                                                       inputmode="decimal"
-                                                       title="Внеси број до 3 цели и 2 децимали (пример: 120.55)"
-                                                       oninput="validateNumberInput(this)"
-                                                    {{$input_readonly}}>
-                                                Дозволена вредности: три цели и две децимали
-
-                                            </div>
-                                        </div>
-
                                     </div>
 
                                     {{--=========================================================--}}
@@ -541,19 +576,19 @@
                                     $input_css = 'text-red';
                                     $input_style = 'width:100%;';
 
-                                    if ($id && $num_ground_wires == 2) {
-                                        $Style_wires = 'display: block';
-
+                                    if ($num_ground_wires == 2) {
+                                        $Style_wires2 = 'display: block';
                                     } else {
-                                        $Style_wires = 'display: none';
+                                        $Style_wires2 = 'display: none';
                                     }
 
                                     ?>
 
 
-                                    <div id="ground_wires2" style="{{ $Style_wires }}">
+                                    <div id="ground_wires2" style="{{ $Style_wires2 }}">
 
                                         <div class="row"  style="background-color: #ddffd9">
+
                                             <div class="col-sm-3">
 
                                                 <div class="form-group">
@@ -604,6 +639,7 @@
                                             </div>
 
                                         </div>
+
                                     </div>
                                     {{--=========================================================--}}
 

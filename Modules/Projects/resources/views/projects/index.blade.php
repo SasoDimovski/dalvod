@@ -392,7 +392,7 @@
                                                     <td>{!! highlightSearch($project->title, 'title', $global_style_search) !!}</td>
                                                     <td  class="text-center">{{ $project->voltages->title }} kV</td>
                                                     <td>{{ $project->conductors->type }}</td>
-                                                    <td>{{ $project->groundWires->type }}</td>
+                                                    <td>{{ $project->groundWires?->type }}</td>
 
                                                     <td>
                                                         @if($project->active == 0)

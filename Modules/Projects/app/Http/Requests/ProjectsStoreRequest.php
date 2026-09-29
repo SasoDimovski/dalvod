@@ -23,15 +23,22 @@ class ProjectsStoreRequest extends FormRequest
             'id_ending_point' => 'required',
             'id_conductor' => 'required',
             'tensile_stress_cond' => 'required',
-            'id_ground_wires' => 'required',
-            'tensile_stress_ground' => 'required',
+
+
+
+            'num_ground_wires' => 'required|in:0,1,2',
+            'id_ground_wires' => 'required_if:num_ground_wires,1,2',
+            'tensile_stress_ground' => 'required_if:num_ground_wires,1,2',
+            'id_ground_wires2' => 'required_if:num_ground_wires,2',
+            'tensile_stress_ground2' => 'required_if:num_ground_wires,2',
+
             'kn' => 'required',
             'ki' => 'required',
             'id_wind_pressure' => 'required',
             'id_insulator_chain' => 'required',
             'num_cond_systems' => 'required',
             'num_cond_bundle' => 'required',
-            'num_ground_wires' => 'required',
+
 
         ];
     }
@@ -46,8 +53,12 @@ class ProjectsStoreRequest extends FormRequest
             'id_ending_point.required' => __('global.required', ['name' => __('projects.id_ending_point')]),
             'id_conductor.required' => __('global.required', ['name' => __('projects.id_conductor')]),
             'tensile_stress_cond.required' => __('global.required', ['name' => __('projects.tensile_stress_cond')]),
-            'id_ground_wires.required' => __('global.required', ['name' => __('projects.id_ground_wires')]),
-            'tensile_stress_ground.required' => __('global.required', ['name' => __('projects.tensile_stress_ground')]),
+
+            'id_ground_wires.required_if' => __('global.required', ['name' => __('projects.id_ground_wires')]),
+            'tensile_stress_ground.required_if' => __('global.required', ['name' => __('projects.tensile_stress_ground')]),
+            'id_ground_wires2.required_if' => __('global.required', ['name' => __('projects.id_ground_wires')]),
+            'tensile_stress_ground2.required_if' => __('global.required', ['name' => __('projects.tensile_stress_ground')]),
+
             'kn.required' => __('global.required', ['name' => __('projects.kn')]),
             'ki.required' => __('global.required', ['name' => __('projects.ki')]),
             'id_wind_pressure.required' => __('global.required', ['name' => __('projects.id_wind_pressure')]),
