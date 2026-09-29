@@ -109,6 +109,7 @@ class Raspres
                     $stolb_vig2 = (float) (optional($p2->tower)->vig ?? 0.0);
                 } elseif ($p2->id_trafo) {
                     $stolb_vig2 = (float) (optional($p2->trafo)->visina_zj ?? 0.0);
+                    $stolb_vigp = (float) (optional($p2->trafo)->visina_p ?? 0.0);
                 } else {
                     $stolb_vig2= 0.0;
                 }
@@ -199,7 +200,9 @@ class Raspres
                     $kota_zaj2 = 0.0;
                 }
                 if ($p2->id_trafo) {
-                    $kota_zaj2 = ($kota_t2 + $stolb_vig2);
+                    $kota_zaj2 = ($kota_t2 + $stolb_vig2-$stolb_vigp);
+
+
                 }
 
                 //=======================================================================================================
