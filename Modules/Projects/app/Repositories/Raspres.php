@@ -15,6 +15,7 @@ class Raspres
             $project = Projects::with([
                 'conductors',
                 'groundWires',
+                'groundWires2',
                 'insulatorChain',
             ])->findOrFail($projectId);
 
@@ -22,9 +23,11 @@ class Raspres
             // Напони на затегање (N/mm2) – ги користиш веќе
             $tensile_stress_cond = (float) ($project->tensile_stress_cond ?? 0);   // проводник
             $tensile_stress_ground = (float) ($project->tensile_stress_ground ?? 0); // заземјач
+            $tensile_stress_ground2 = (float) ($project->tensile_stress_ground2 ?? 0); // заземјач 2
 
             // Колку заземјачи има (ако 0 → "---")
             $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
+            $hasGround2 = (int) ($project->num_ground_wires ?? 0) === 2;
 
             // Тип на сврзување (POTP / SILK / …) – прилагоди по својата шема
             //$izo_tied = optional($project->insulatorChain)->id ?? 'POTP';
@@ -37,9 +40,19 @@ class Raspres
             $groundWires_cross_section = (float) optional($project->groundWires)->cross_section;  // mm² (прилагоди)
             $groundWires_mass  = (float) optional($project->groundWires)->mass;           // kg/km (прилагоди)
 
+            // Заземјач 2 – ако го користиш првиот ground wire
+            $groundWires_cross_section2 = (float) optional($project->groundWires2)->cross_section;  // mm² (прилагоди)
+            $groundWires_mass2  = (float) optional($project->groundWires2)->mass;           // kg/km (прилагоди)
+
             // Безбедност: ако недостигаат параметри, фрли јасна грешка
             if (!$conductors_cross_section || !$conductors_mass || !$tensile_stress_cond) {
                 throw new \RuntimeException('Недостатни параметри за проводник (presек/маса/напон).');
+            }
+            if ($hasGround&&(!$groundWires_cross_section || !$groundWires_mass || !$tensile_stress_ground)) {
+                throw new \RuntimeException('Недостатни параметри за заштитно јаже (presек/маса/напон).');
+            }
+            if ($hasGround2&&(!$groundWires_cross_section2 || !$groundWires_mass2 || !$tensile_stress_ground2)) {
+                throw new \RuntimeException('Недостатни параметри за заштитно јаже 2 (presек/маса/напон).');
             }
 
             // ----- Читање на трасата, сортирано по станица -----
@@ -101,6 +114,7 @@ class Raspres
                     $stolb_vig1 = (float) (optional($p1->tower)->vig ?? 0.0); // вис. јарем (ако ја имаш)
                 } elseif ($p1->id_trafo) {
                     $stolb_vig1 = (float) (optional($p1->trafo)->visina_zj ?? 0.0);
+                    $stolb_vigp1 = (float) (optional($p1->trafo)->visina_p ?? 0.0);
                 } else {
                     $stolb_vig1 = 0.0;
                 }
@@ -109,7 +123,7 @@ class Raspres
                     $stolb_vig2 = (float) (optional($p2->tower)->vig ?? 0.0);
                 } elseif ($p2->id_trafo) {
                     $stolb_vig2 = (float) (optional($p2->trafo)->visina_zj ?? 0.0);
-                    $stolb_vigp = (float) (optional($p2->trafo)->visina_p ?? 0.0);
+                    $stolb_vigp2 = (float) (optional($p2->trafo)->visina_p ?? 0.0);
                 } else {
                     $stolb_vig2= 0.0;
                 }
@@ -189,7 +203,7 @@ class Raspres
                     $kota_pro2 = ($kota_t2 + $stolb_vis2);
                 }
                 if ($p2->id_trafo) {
-                    $kota_pro2 = ($kota_t2 + $stolb_vis2);
+                    $kota_pro2 = ($kota_t2 + $stolb_vis2 - $stolb_vigp1);
                 }
 
                 //=======================================================================================================
@@ -200,7 +214,7 @@ class Raspres
                     $kota_zaj2 = 0.0;
                 }
                 if ($p2->id_trafo) {
-                    $kota_zaj2 = ($kota_t2 + $stolb_vig2-$stolb_vigp);
+                    $kota_zaj2 = ($kota_t2 + $stolb_vig2 - $stolb_vigp2);
 
 
                 }
@@ -227,10 +241,27 @@ class Raspres
 
                 $dol_zaj = 0.0;
                 if ($hasGround && $groundWires_cross_section && $tensile_stress_ground && $groundWires_mass) {
-                    $dol_zaj = 2 * 1000 * $groundWires_cross_section * $tensile_stress_ground *
-                        sinh(($raspon * $groundWires_mass) / (2 * 1000 * $groundWires_cross_section * $tensile_stress_ground)) / $groundWires_mass;
+                    $dol_zaj = 2 * 1000 * $groundWires_cross_section * $tensile_stress_ground * sinh(($raspon * $groundWires_mass) / (2 * 1000 * $groundWires_cross_section * $tensile_stress_ground)) / $groundWires_mass;
                 }
 
+                $dol_zaj2 = 0.0;
+
+                if (
+                    $hasGround2 &&
+                    $groundWires_cross_section2 &&
+                    $tensile_stress_ground2 &&
+                    $groundWires_mass2
+                ) {
+                    $dol_zaj2 =
+                        2 * 1000 *
+                        $groundWires_cross_section2 *
+                        $tensile_stress_ground2 *
+                        sinh(
+                            ($raspon * $groundWires_mass2) /
+                            (2 * 1000 * $groundWires_cross_section2 * $tensile_stress_ground2)
+                        ) /
+                        $groundWires_mass2;
+                }
                 // ----- Запис во RASPRES -----
                 \App\Models\Raspres::create([
                     'id_project' => $projectId,
@@ -251,6 +282,7 @@ class Raspres
 
                     'dol_pro'    =>  $dol_pro,
                     'dol_zaj'    =>  $dol_zaj,
+                    'dol_zaj2'    =>  $dol_zaj2,
                 ]);
 
                 $inserted++;

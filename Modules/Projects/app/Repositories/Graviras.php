@@ -14,18 +14,18 @@ class Graviras
     {
         return DB::transaction(function () use ($projectId) {
 
-            $project = Projects::with(['groundWires'])->findOrFail($projectId);
+            $project = Projects::findOrFail($projectId);
 
-            $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
-            if (!$hasGround) {
-                $hasGround = !empty(optional($project->groundWires)->id);
-            }
+            $hasGround  = (int) ($project->num_ground_wires ?? 0) > 0;
+            $hasGround2 = (int) ($project->num_ground_wires ?? 0) === 2;
+            $numGroundWires = (int) ($project->num_ground_wires ?? 0);
 
-            $raspres = Raspres::where('id_project', $projectId)
-                ->orderBy('stac_t', 'asc')
-                ->get();
 
-            $trasa = Trasa::with(['tower', 'insulator1', 'insulator2', 'trafo'])
+            // ============================================================
+            // 1. Сите столбови и трафо/портали по редослед
+            // ============================================================
+
+            $trasa = Trasa::with(['tower', 'trafo'])
                 ->where('id_project', $projectId)
                 ->where(function ($q) {
                     $q->where('id_tower', '>', 0)
@@ -34,214 +34,316 @@ class Graviras
                 ->orderBy('stac_t', 'asc')
                 ->get();
 
-            if ($raspres->isEmpty() || $trasa->isEmpty()) {
+            if ($trasa->isEmpty()) {
                 return 0;
             }
 
-            // КЛУЧНО: map po trasa.id
-            $trasaMap = $trasa->keyBy('id');
 
-            $grr_lpro_temp = 0.0;
-            $grr_lprk_temp = 0.0;
-            $grr_lzaj_temp = 0.0;
-            $sr_rasp_temp  = 0.0;
+            // ============================================================
+            // 2. RASPRES - keyBy(id_trasa)
+            // ============================================================
+
+            $raspres = Raspres::where('id_project', $projectId)
+                ->get()
+                ->keyBy('id_trasa');
+
+
+            // ============================================================
+            // 3. Почетни вредности - исто како DOS
+            //
+            // gr_lp  = 0
+            // gr_lpk = 0
+            // gr_lz  = 0
+            // sr_rl  = 0
+            // ============================================================
+
+            $gr_lp  = 0.0;
+            $gr_lpk = 0.0;
+            $gr_lz  = 0.0;
+            $gr_lz2 = 0.0;
+
+            $sr_rl = 0.0;
 
             $inserted = 0;
 
-            foreach ($raspres as $index => $rp) {
 
-                $idTrasa = (int) ($rp->id_trasa ?? 0);
-                $t = $trasaMap[$idTrasa] ?? null;
+            // ============================================================
+            // 4. LOOP ПО TRASA
+            // ============================================================
 
-                if (!$t) {
+            foreach ($trasa as $index => $t) {
+
+                /*
+                 * Последната точка нема распон после неа.
+                 * Неа ќе ја запишеме посебно подолу.
+                 */
+                if ($index === $trasa->count() - 1) {
+                    break;
+                }
+
+
+                // RASPRES што почнува од овој столб
+                $rp = $raspres->get((int) $t->id);
+
+                if (!$rp) {
                     continue;
                 }
 
-                $sta_t    = (float) ($rp->stac_t ?? 0.0);
-                $raspon   = (float) ($rp->raspon ?? 0.0);
+
+                // ========================================================
+                // Вредности од RASPRES
+                // ========================================================
+
+                $raspon1 = (float) ($rp->raspon ?? 0.0);
 
                 $ras_tp1  = (float) ($rp->ras_totp ?? 0.0);
                 $ras_tp1k = (float) ($rp->ras_t2op ?? 0.0);
-                $ras_tz1  = (float) ($rp->ras_totz ?? 0.0);
 
-                $vir_p1   = (float) ($rp->vr_pro ?? 0.0);
-                $vir_z1   = (float) ($rp->vr_zaj ?? 0.0);
+                $ras_tz1 = (float) ($rp->ras_totz ?? 0.0);
+                $ras_tz2 = (float) ($rp->ras_totz2 ?? 0.0);
 
-                $agol_t   = (float) ($t->agol_tr ?? 0.0);
-                $stol_ag1 = (int) (optional($t->tower)->angle ?? 0);
+                $vir_p1 = (float) ($rp->vr_pro ?? 0.0);
+                $vir_z1 = (float) ($rp->vr_zaj ?? 0.0);
 
-                // ако немаш br_raspon во raspres, користи реден број
-                $br_stolb = (int) ($rp->br_raspon ?? ($index + 1));
 
-                // ============================================================
-                // grr_lpro
-                $grr_lpro = $grr_lpro_temp;
+                // ========================================================
+                // ЛЕВИ вредности
+                // Ова се вредностите пресметани од претходниот распон.
+                // ========================================================
 
-                if ($vir_p1 >= 0) {
-                    $grr_lpro_temp = $ras_tp1 / 2.0;
+                $grr_lpro = $gr_lp;
+                $grr_lprk = $gr_lpk;
+                $grr_lzaj = $gr_lz;
+                $grr_lzaj2 = $gr_lz2;
+
+
+                // ========================================================
+                // Среден распон - DOS:
+                //
+                // sr_rd   = raspon1 / 2
+                // sr_rasp = sr_rl + sr_rd
+                // ========================================================
+
+                $sr_rd   = $raspon1 / 2.0;
+                $sr_rasp = $sr_rl + $sr_rd;
+
+
+                // ========================================================
+                // Проводник
+                // ========================================================
+
+                if ($vir_p1 >= 0.0) {
+
+                    $gr_lp  = $ras_tp1 / 2.0;
+                    $gr_lpk = $ras_tp1k / 2.0;
+
+                    $gr_dp  = $raspon1 - ($ras_tp1 / 2.0);
+                    $gr_dpk = $raspon1 - ($ras_tp1k / 2.0);
+
                 } else {
-                    $grr_lpro_temp = $raspon - ($ras_tp1 / 2.0);
+
+                    $gr_lp  = $raspon1 - ($ras_tp1 / 2.0);
+                    $gr_lpk = $raspon1 - ($ras_tp1k / 2.0);
+
+                    $gr_dp  = $ras_tp1 / 2.0;
+                    $gr_dpk = $ras_tp1k / 2.0;
                 }
 
-                // grr_dpro
-                if ($vir_p1 >= 0) {
-                    $grr_dpro = $raspon - ($ras_tp1 / 2.0);
-                } else {
-                    $grr_dpro = $ras_tp1 / 2.0;
-                }
 
-                // grr_vpro
-                $grr_vpro = $grr_lpro + $grr_dpro;
-
-                // ============================================================
-                // grr_lprk
-                $grr_lprk = $grr_lprk_temp;
-
-                if ($vir_p1 >= 0) {
-                    $grr_lprk_temp = $ras_tp1k / 2.0;
-                } else {
-                    $grr_lprk_temp = $raspon - ($ras_tp1k / 2.0);
-                }
-
-                // grr_dprk
-                if ($vir_p1 >= 0) {
-                    $grr_dprk = $raspon - ($ras_tp1k / 2.0);
-                } else {
-                    $grr_dprk = $ras_tp1k / 2.0;
-                }
-
-                // grr_vprk
-                $grr_vprk = $grr_lprk + $grr_dprk;
-
-                // ============================================================
-                // sr_rasp
-                $sr_rasp = $sr_rasp_temp + ($raspon / 2.0);
-
-                // ============================================================
-                // grr_lzaj
-                $grr_lzaj = $grr_lzaj_temp;
+                // ========================================================
+                // Прво заштитно јаже
+                // ========================================================
 
                 if (!$hasGround) {
-                    $grr_lzaj_temp = 0.0;
+
+                    $gr_lz = 0.0;
+                    $gr_dz = 0.0;
+
                 } else {
-                    if ($vir_z1 >= 0) {
-                        $grr_lzaj_temp = $ras_tz1 / 2.0;
+
+                    if ($vir_z1 >= 0.0) {
+
+                        $gr_lz = $ras_tz1 / 2.0;
+                        $gr_dz = $raspon1 - ($ras_tz1 / 2.0);
+
                     } else {
-                        $grr_lzaj_temp = $raspon - ($ras_tz1 / 2.0);
+
+                        $gr_lz = $raspon1 - ($ras_tz1 / 2.0);
+                        $gr_dz = $ras_tz1 / 2.0;
                     }
                 }
 
-                // grr_dzaj
-                if (!$hasGround) {
-                    $grr_dzaj = 0.0;
+
+                // ========================================================
+                // Второ заштитно јаже
+                // ========================================================
+
+                if (!$hasGround2) {
+
+                    $gr_lz2 = 0.0;
+                    $gr_dz2 = 0.0;
+
                 } else {
-                    if ($vir_z1 >= 0) {
-                        $grr_dzaj = $raspon - ($ras_tz1 / 2.0);
+
+                    // Засега користиме иста vr_zaj геометрија
+                    if ($vir_z1 >= 0.0) {
+
+                        $gr_lz2 = $ras_tz2 / 2.0;
+                        $gr_dz2 = $raspon1 - ($ras_tz2 / 2.0);
+
                     } else {
-                        $grr_dzaj = $ras_tz1 / 2.0;
+
+                        $gr_lz2 = $raspon1 - ($ras_tz2 / 2.0);
+                        $gr_dz2 = $ras_tz2 / 2.0;
                     }
                 }
 
-                // grr_vzaj
-                $grr_vzaj = $grr_lzaj + $grr_dzaj;
 
-                // br_ras
-                $br_ras = $br_stolb . '-' . ($br_stolb + 1);
+                // ========================================================
+                // Вкупни гравитациони распони
+                // ========================================================
+
+                $gr_vkp  = $grr_lpro  + $gr_dp;
+                $gr_vkpk = $grr_lprk  + $gr_dpk;
+
+                $gr_vkz  = $grr_lzaj  + $gr_dz;
+                $gr_vkz2 = $grr_lzaj2 + $gr_dz2;
+
+
+                // ========================================================
+                // Број на столб
+                // ========================================================
+
+                $br_stolb = (int) ($rp->raspon_br ?? ($index + 1));
+
+                $br_rasp = $br_stolb . '-' . ($br_stolb + 1);
+
+
+                // ========================================================
+                // GAPRES
+                // ========================================================
 
                 Gapres::create([
+
                     'id_project' => $projectId,
-                    'id_trasa'   => $idTrasa,
-                    'br_stolb'   => $br_stolb,
-                    'stac_t'     => $sta_t,
-                    'raspon'     => $raspon,
+                    'id_trasa'   => $t->id,
 
-                    'grr_lpro'   => $grr_lpro,
-                    'grr_dpro'   => $grr_dpro,
-                    'grr_vpro'   => $grr_vpro,
+                    'br_stolb' => $br_stolb,
+                    'stac_t'   => (float) $t->stac_t,
+                    'raspon'   => $raspon1,
 
-                    'grr_lprk'   => $grr_lprk,
-                    'grr_dprk'   => $grr_dprk,
-                    'grr_vprk'   => $grr_vprk,
+                    // Проводник
+                    'grr_lpro' => $grr_lpro,
+                    'grr_dpro' => $gr_dp,
+                    'grr_vpro' => $gr_vkp,
 
-                    'grr_lzaj'   => $grr_lzaj,
-                    'grr_dzaj'   => $grr_dzaj,
-                    'grr_vzaj'   => $grr_vzaj,
+                    'grr_lprk' => $grr_lprk,
+                    'grr_dprk' => $gr_dpk,
+                    'grr_vprk' => $gr_vkpk,
 
-                    'sre_ras'    => $sr_rasp,
-                    'kota_pro'   => (float) ($rp->kota_pro ?? 0.0),
-                    'kota_zaj'   => (float) ($rp->kota_zaj ?? 0.0),
-                    'ras_totp'   => $ras_tp1,
-                    'ras_totz'   => $ras_tz1,
+                    // Прво заштитно јаже
+                    'grr_lzaj' => $hasGround ? $grr_lzaj : null,
+                    'grr_dzaj' => $hasGround ? $gr_dz : null,
+                    'grr_vzaj' => $hasGround ? $gr_vkz : null,
 
-                    'agol_t'     => $agol_t,
-                    'stol_ag1'   => $stol_ag1,
-                    'br_ras'     => $br_ras,
+                    // Второ заштитно јаже
+                    'grr_lzaj2' => $hasGround2 ? $grr_lzaj2 : null,
+                    'grr_dzaj2' => $hasGround2 ? $gr_dz2 : null,
+                    'grr_vzaj2' => $hasGround2 ? $gr_vkz2 : null,
+
+                    'sre_ras' => $sr_rasp,
+
+                    'kota_pro' => (float) ($rp->kota_pro ?? 0.0),
+                    'kota_zaj' => (float) ($rp->kota_zaj ?? 0.0),
+
+                    'ras_totp' => $ras_tp1,
+                    'ras_totz' => $hasGround ? $ras_tz1 : null,
+                    'ras_totz2' => $hasGround ? $ras_tz2 : null,
+
+                    'agol_t' => (float) ($t->agol_tr ?? 0.0),
+
+                    'stol_ag1' => $t->id_tower
+                        ? (int) (optional($t->tower)->angle ?? 0)
+                        : 0,
+
+                    'br_ras' => $br_rasp,
                 ]);
 
-                $sr_rasp_temp = $raspon / 2.0;
+
+                // DOS:
+                // sr_rl = raspon1 / 2
+                $sr_rl = $raspon1 / 2.0;
+
                 $inserted++;
             }
 
+
             // ============================================================
-            // Последен ред
-            $lastT  = $trasa->last();
-            $lastRp = $raspres->last();
+            // 5. ПОСЛЕДЕН СТОЛБ / ПОРТАЛ
+            // ============================================================
 
-            if ($lastT && $lastRp) {
+            $lastT = $trasa->last();
 
-                $sta_t_last = (float) ($lastT->stac_t ?? 0.0);
-
-                $vir_p = (float) ($lastRp->vr_pro ?? 0.0);
-                $vir_z = (float) ($lastRp->vr_zaj ?? 0.0);
-
-                $raspon_last = (float) ($lastRp->raspon ?? 0.0);
-                $sr_rl_last  = $raspon_last / 2.0;
-
-                $agol_t   = (float) ($lastT->agol_tr ?? 0.0);
-                $stol_ag1 = (int) (optional($lastT->tower)->angle ?? 0);
+            if ($lastT && $inserted > 0) {
 
                 $prev = Gapres::where('id_project', $projectId)
                     ->orderBy('id', 'desc')
                     ->first();
 
-                $pomk_p = (float) ($prev->kota_pro ?? 0.0);
-                $pomk_z = (float) ($prev->kota_zaj ?? 0.0);
+                $lastRp = $raspres->last();
 
-                $br_st_last = (int) ($prev->br_stolb ?? $inserted);
-                $br_st_new  = $br_st_last + 1;
+                if ($prev && $lastRp) {
 
-                Gapres::create([
-                    'id_project' => $projectId,
-                    'id_trasa'   => (int) $lastT->id,
+                    $vir_p = (float) ($lastRp->vr_pro ?? 0.0);
+                    $vir_z = (float) ($lastRp->vr_zaj ?? 0.0);
 
-                    'br_stolb'   => $br_st_new,
-                    'stac_t'     => $sta_t_last,
+                    $raspon_last = (float) ($lastRp->raspon ?? 0.0);
 
-                    'sre_ras'    => $sr_rl_last,
+                    Gapres::create([
 
-                    'grr_lpro'   => $grr_lpro_temp,
-                    'grr_dpro'   => 0.0,
-                    'grr_vpro'   => $grr_lpro_temp,
+                        'id_project' => $projectId,
+                        'id_trasa'   => $lastT->id,
 
-                    'grr_lprk'   => $grr_lprk_temp,
-                    'grr_dprk'   => 0.0,
-                    'grr_vprk'   => $grr_lprk_temp,
+                        'br_stolb' => ((int) $prev->br_stolb) + 1,
+                        'stac_t'   => (float) $lastT->stac_t,
 
-                    'grr_lzaj'   => $grr_lzaj_temp,
-                    'grr_dzaj'   => 0.0,
-                    'grr_vzaj'   => $grr_lzaj_temp,
+                        'sre_ras' => $raspon_last / 2.0,
 
-                    'kota_pro'   => $pomk_p + $vir_p,
-                    'kota_zaj'   => $pomk_z + $vir_z,
+                        'grr_lpro' => $gr_lp,
+                        'grr_dpro' => 0.0,
+                        'grr_vpro' => $gr_lp,
 
-                    'agol_t'     => $agol_t,
-                    'stol_ag1'   => $stol_ag1,
+                        'grr_lprk' => $gr_lpk,
+                        'grr_dprk' => 0.0,
+                        'grr_vprk' => $gr_lpk,
 
-                    'br_ras'     => '',
-                ]);
+                        // Прво заштитно јаже
+                        'grr_lzaj' => $hasGround ? $gr_lz : null,
+                        'grr_dzaj' => $hasGround ? 0.0 : null,
+                        'grr_vzaj' => $hasGround ? $gr_lz : null,
 
-                $inserted++;
+                        // Второ заштитно јаже
+                        'grr_lzaj2' => $hasGround2 ? $gr_lz2 : null,
+                        'grr_dzaj2' => $hasGround2 ? 0.0 : null,
+                        'grr_vzaj2' => $hasGround2 ? $gr_lz2 : null,
+
+                        'kota_pro' =>
+                            (float) $prev->kota_pro + $vir_p,
+
+                        'kota_zaj' =>
+                            (float) $prev->kota_zaj + $vir_z,
+
+                        // DOS експлицитно става 0
+                        'agol_t'   => 0.0,
+                        'stol_ag1' => 0,
+
+                        'br_ras' => '',
+                    ]);
+
+                    $inserted++;
+                }
             }
+
 
             return $inserted;
         });

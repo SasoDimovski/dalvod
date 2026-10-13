@@ -19,6 +19,7 @@ class Elpres
                 'voltages',
                 'conductors',
                 'groundWires',
+                'groundWires2',
             ])->findOrFail($projectId);
 
             $nom_nap = (float) (optional($project->voltages)->title ?? 0);
@@ -30,12 +31,17 @@ class Elpres
             $pro_mas = (float) (optional($project->conductors)->mass ?? 0);
             $pro_dij = (float) (optional($project->conductors)->diameter ?? 0);
 
-            $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
+            $numGroundWires = (int) ($project->num_ground_wires ?? 0);
 
             $zaj_mod = (float) (optional($project->groundWires)->model ?? 0);
             $zaj_tem = (float) (optional($project->groundWires)->temp_exp_coeff ?? 0);
             $zaj_mas = (float) (optional($project->groundWires)->mass ?? 0);
             $zaj_dij = (float) (optional($project->groundWires)->diameter ?? 0);
+
+            $zaj_mod2 = (float) (optional($project->groundWires2)->model ?? 0);
+            $zaj_tem2 = (float) (optional($project->groundWires2)->temp_exp_coeff ?? 0);
+            $zaj_mas2 = (float) (optional($project->groundWires2)->mass ?? 0);
+            $zaj_dij2 = (float) (optional($project->groundWires2)->diameter ?? 0);
 
             // GAPRES ===========================================================
 
@@ -49,6 +55,7 @@ class Elpres
             // TRASA ============================================================
             $trasaRows = Trasa::with([
                 'tower.towerA',
+                'trafo',
                 'insulator1',
                 'insulator2',
             ])
@@ -106,7 +113,7 @@ class Elpres
 
                     $zatpol = $zatpolStartMap[$key];
 
-                    [$p, $z] = $this->calcElras(
+                    [$p, $z, $z2] = $this->calcElras(
                         $zatpol,
                         $trasa,
                         $pro_mod,
@@ -117,12 +124,17 @@ class Elpres
                         $zaj_tem,
                         $zaj_mas,
                         $zaj_dij,
-                        $hasGround,
+                        $zaj_mod2,
+                        $zaj_tem2,
+                        $zaj_mas2,
+                        $zaj_dij2,
+                        $numGroundWires,
                         $d_sig
                     );
 
                     $updates['elr_pro2'] = $p;
                     $updates['elr_zaj2'] = $z;
+                    $updates['elr_zaj22'] = $z2;
                 }
 
                 // =================================================================
@@ -132,7 +144,7 @@ class Elpres
 
                     $zatpol = $zatpolEndMap[$key];
 
-                    [$p, $z] = $this->calcElras(
+                    [$p, $z, $z2] = $this->calcElras(
                         $zatpol,
                         $trasa,
                         $pro_mod,
@@ -143,12 +155,17 @@ class Elpres
                         $zaj_tem,
                         $zaj_mas,
                         $zaj_dij,
-                        $hasGround,
+                        $zaj_mod2,
+                        $zaj_tem2,
+                        $zaj_mas2,
+                        $zaj_dij2,
+                        $numGroundWires,
                         $d_sig
                     );
 
                     $updates['elr_pro1'] = $p;
                     $updates['elr_zaj1'] = $z;
+                    $updates['elr_zaj12'] = $z2;
                 }
 
                 // =================================================================
@@ -162,7 +179,7 @@ class Elpres
 
                     if ($mid) {
 
-                        [$p, $z] = $this->calcElras(
+                        [$p, $z, $z2] = $this->calcElras(
                             $mid,
                             $trasa,
                             $pro_mod,
@@ -173,7 +190,11 @@ class Elpres
                             $zaj_tem,
                             $zaj_mas,
                             $zaj_dij,
-                            $hasGround,
+                            $zaj_mod2,
+                            $zaj_tem2,
+                            $zaj_mas2,
+                            $zaj_dij2,
+                            $numGroundWires,
                             $d_sig
                         );
 
@@ -181,6 +202,8 @@ class Elpres
                         $updates['elr_pro2'] = $p;
                         $updates['elr_zaj1'] = $z;
                         $updates['elr_zaj2'] = $z;
+                        $updates['elr_zaj12'] = $z2;
+                        $updates['elr_zaj22'] = $z2;
                     }
                 }
 
@@ -208,7 +231,11 @@ class Elpres
         $zaj_tem,
         $zaj_mas,
         $zaj_dij,
-        $hasGround,
+        $zaj_mod2,
+        $zaj_tem2,
+        $zaj_mas2,
+        $zaj_dij2,
+        $numGroundWires,
         $d_sig
     ): array {
 
@@ -216,8 +243,11 @@ class Elpres
         $tovp_1 = (float) ($zatpol->tovpro_1 ?? 0);
         $tovz   = (float) ($zatpol->tovzaj ?? 0);
         $tovz_1 = (float) ($zatpol->tovzaj_1 ?? 0);
+        $tovz2   = (float) ($zatpol->tovzaj2 ?? 0);
+        $tovz_12 = (float) ($zatpol->tovzaj_12 ?? 0);
         $nap_p  = (float) ($zatpol->nap_pro ?? 0);
         $nap_z  = (float) ($zatpol->nap_zaj ?? 0);
+        $nap_z2  = (float) ($zatpol->nap_zaj2 ?? 0);
         $pri_v  = (float) ($zatpol->priv ?? 0);
 
         $stb_nap = (float) (optional($trasa->tower)->voltage ?? 0);
@@ -234,14 +264,14 @@ class Elpres
             $izo_dol = 0;
         }
         // ===================================================================================================================================================
-        // Proves za provodnik +40
+        // Провес за проводник +40
         // ===================================================================================================================================================
 
-        //$stb_rap=$trasa->tower->rap
-        //$pri_v=$zatpol->priv
-        //$pro_dij=$project->conductors->diameter
-        //$pro_mas=$project->conductors->mass
+        if($trasa->id_trafo){
+            $stb_rap='H';
+            $stb_dp=(float) (optional($trasa->trafo)->hor_ras ?? 0);
 
+        }
         $pro_kof = $this->resolveRapCoefficient($stb_rap, $pri_v, $pro_dij, $pro_mas);
 
         $prvs_p4o = 0.0;
@@ -249,16 +279,18 @@ class Elpres
         if ($pro_kof > 0) {
             $prvs_p4o = ((100 * $stb_dp - $d_sig) / $pro_kof) ** 2 - (100 * $izo_dol);
         }
-        // ===================================================================================================================================================
-
 
         // ===================================================================================================================================================
-        // Proves za zajaze +40
+        // Провес за заштитно јаже 1 +40
         // ===================================================================================================================================================
         $prvs_z4o = $prvs_p4o;
 
-        if ($hasGround && $zaj_dij > 0 && $zaj_mas > 0) {
+        if (($numGroundWires===1 ||$numGroundWires===2 )&& $zaj_dij > 0 && $zaj_mas > 0) {
             $raz = strtoupper(trim($stb_raz));
+
+            if($trasa->id_trafo){
+                $raz='K';
+            }
 
             if ($raz === 'K') {
                 $zaj_kof = 2 + $this->arcTgDeg($pri_v * $zaj_dij / $zaj_mas) / 10;
@@ -286,11 +318,49 @@ class Elpres
                 $prvs_z4o = (100 * $stb_dz / $zaj_kof) ** 2;
             }
         }
+
         // ===================================================================================================================================================
+        // Провес за заштитно јаже 2 +40
+        // ===================================================================================================================================================
+        $prvs_z4o2= $prvs_p4o;
+
+        if ($numGroundWires===2&& $zaj_dij2 > 0 && $zaj_mas2 > 0) {
+            $raz = strtoupper(trim($stb_raz));
+
+            if($trasa->id_trafo){
+                $raz='K';
+            }
+
+            if ($raz === 'K') {
+                $zaj_kof2 = 2 + $this->arcTgDeg($pri_v * $zaj_dij2 / $zaj_mas2) / 10;
+                if ($zaj_kof2 < 7) {
+                    $zaj_kof2 = 7;
+                }
+                $prvs_z4o2 = $prvs_p4o;
+
+            } elseif ($raz === 'H') {
+                if ($stb_nap == 0) {
+                    $prvs_z4o2 = $prvs_p4o;
+                } else {
+                    $zaj_kof2 = 4 + $this->arcTgDeg($pri_v * $zaj_dij2 / $zaj_mas2) / 25;
+                    if ($zaj_kof2 < 6) {
+                        $zaj_kof2 = 6;
+                    }
+                    $prvs_z4o2 = (100 * $stb_dz / $zaj_kof2) ** 2;
+                }
+
+            } elseif ($raz === 'V') {
+                $zaj_kof2 = 4 + $this->arcTgDeg($pri_v * $zaj_dij2 / $zaj_mas2) / 5;
+                if ($zaj_kof2 < 14) {
+                    $zaj_kof2 = 14;
+                }
+                $prvs_z4o2 = (100 * $stb_dz / $zaj_kof2) ** 2;
+            }
+        }
 
 
         // ===================================================================================================================================================
-        // El. raspon za provodnik
+        // Електричен распон за проводник
         // ===================================================================================================================================================
 
         $elras_p = 0.0;
@@ -317,9 +387,9 @@ class Elpres
 
 
 
-        $elras_z = 0.0;
+        $elras_z = null;
 
-        if ($hasGround && $tovz > 0) {
+        if (($numGroundWires >= 1) && $tovz > 0) {
             $denZ = 3 * ($nap_z ** 2) * $tovz + $zaj_mod * ($tovz_1 ** 2) * 0.01 * $prvs_z4o;
 
             if ($denZ > 0) {
@@ -343,7 +413,35 @@ class Elpres
             }
         }
 
-        return [$elras_p, $elras_z];
+        $elras_z2 = null;
+
+        if ($numGroundWires===2 && $tovz2 > 0) {
+            $denZ2 = 3 * ($nap_z2 ** 2) * $tovz2 + $zaj_mod2 * ($tovz_12 ** 2) * 0.01 * $prvs_z4o2;
+
+            if ($denZ2 > 0) {
+                $az_pom = (3 * ($nap_z2 ** 2) * $tovz2 * (45 * $zaj_tem2 * $zaj_mod2 - $nap_z2)) / $denZ2;
+                $bz_pom = (($tovz2 ** 2) * ($nap_z2 ** 2) * $zaj_mod2 * 0.01 * $prvs_z4o2) / $denZ2;
+
+                if ($stb_nap == 0) {
+                    $elras_z2 = $elras_p;
+                } else {
+                    $inside = $az_pom ** 2 + 4 * $bz_pom;
+
+                    if ($inside >= 0) {
+                        $root = sqrt($inside);
+                        $expr = (8 * 0.01 * $prvs_z4o2 * ($root - $az_pom)) / (2 * $tovz2);
+
+                        if ($expr >= 0) {
+                            $elras_z2 = sqrt($expr);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        return [$elras_p, $elras_z, $elras_z2];
     }
 
     private function resolveSafetyDistances(float $nomNap): array

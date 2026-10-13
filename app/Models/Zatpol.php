@@ -20,6 +20,7 @@ class Zatpol extends Model
         'pole_dol',
         'nap_pro',
         'nap_zaj',
+        'nap_zaj2',
         'kndt',
         'kidt',
         'priv',
@@ -49,7 +50,20 @@ class Zatpol extends Model
         'napreg7_z',
         'napreg8_z',
         'krit_te_z',
-        'krit_ra_z'
+        'krit_ra_z',
+        'tovzaj2',
+        'tovzaj_12',
+        'tovzaj_22',
+        'napreg1_z2',
+        'napreg2_z2',
+        'napreg3_z2',
+        'napreg4_z2',
+        'napreg5_z2',
+        'napreg6_z2',
+        'napreg7_z2',
+        'napreg8_z2',
+        'krit_te_z2',
+        'krit_ra_z2'
     ];
     public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

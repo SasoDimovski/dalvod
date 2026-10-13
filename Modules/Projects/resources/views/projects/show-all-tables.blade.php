@@ -229,7 +229,7 @@
                                                             <thead>
                                                             <tr>
                                                                 <th class="text-center"
-                                                                    style="white-space: nowrap; width: 1px;"></th>
+                                                                    style="white-space: nowrap; width: 1px;">raspon_br</th>
 {{--                                                                <th class="text-center"--}}
 {{--                                                                    style="white-space: nowrap; width: 1px;">id--}}
 {{--                                                                </th>--}}
@@ -250,8 +250,11 @@
                                                                 <th class="text-center">ras_t2op</th>
                                                                 <th class="text-center">ras_totz</th>
                                                                 <th class="text-center">ras_t2oz</th>
+                                                                <th class="text-center">ras_totz2</th>
+                                                                <th class="text-center">ras_t2oz2</th>
                                                                 <th class="text-center">dol_pro</th>
                                                                 <th class="text-center">dol_zaj</th>
+                                                                <th class="text-center">dol_zaj2</th>
 
                                                             </tr>
                                                             </thead>
@@ -267,6 +270,7 @@
                                                                     $id = $raspres_->id ?? '';
                                                                     $id_project = $raspres_->id_project ?? '';
                                                                     $id_trasa = $raspres_->id_trasa ?? '';
+                                                                    $raspon_br = $raspres_->raspon_br ?? '';
                                                                     $stac_t = $raspres_->stac_t ?? '';
                                                                     $kota_t = $raspres_->kota_t ?? '';
                                                                     $raspon = $raspres_->raspon ?? '';
@@ -278,15 +282,19 @@
                                                                     $ras_t2op = $raspres_->ras_t2op ?? '';
                                                                     $ras_totz = $raspres_->ras_totz ?? '';
                                                                     $ras_t2oz = $raspres_->ras_t2oz ?? '';
+                                                                    $ras_totz2 = $raspres_->ras_totz2 ?? '';
+                                                                    $ras_t2oz2 = $raspres_->ras_t2oz2 ?? '';
                                                                     $dol_pro = $raspres_->dol_pro ?? '';
                                                                     $dol_zaj = $raspres_->dol_zaj ?? '';
+                                                                    $dol_zaj2 = $raspres_->dol_zaj2 ?? '';
                                                                     ?>
 
                                                                 <tr>
-                                                                    <td class="text-center"  title="{{$id}}">{{$n}}</td>
+                                                                    <td class="text-center"  title="{{$id}}">{{$raspon_br}}</td>
 {{--                                                                    <td class="text-center">{{$id}}</td>--}}
 {{--                                                                    <td class="text-center">{{$id_project}}</td>--}}
                                                                     <td class="text-center">{{$id_trasa}}</td>
+
                                                                     <td class="text-center">{{$stac_t}}</td>
                                                                     <td class="text-center">{{$kota_t}}</td>
                                                                     <td class="text-center">{{$raspon}}</td>
@@ -298,8 +306,11 @@
                                                                     <td class="text-center"  style="background-color: #ddffd9">{{$ras_t2op}}</td>
                                                                     <td class="text-center"  style="background-color: #ddffd9">{{$ras_totz}}</td>
                                                                     <td class="text-center"  style="background-color: #ddffd9">{{$ras_t2oz}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_totz2}}</td>
+                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$ras_t2oz2}}</td>
                                                                     <td class="text-center">{{$dol_pro}}</td>
                                                                     <td class="text-center">{{$dol_zaj}}</td>
+                                                                    <td class="text-center">{{$dol_zaj2}}</td>
 
 
                                                                 </tr>
@@ -373,6 +384,20 @@
                                                                 <th class="text-center">napreg8_z</th>
                                                                 <th class="text-center">krit_te_z</th>
                                                                 <th class="text-center">krit_ra_z</th>
+                                                                <th class="text-center">tovzaj2</th>
+                                                                <th class="text-center">tovzaj_12</th>
+                                                                <th class="text-center">tovzaj_22</th>
+                                                                <th class="text-center">napreg1_z2</th>
+                                                                <th class="text-center">napreg2_z2</th>
+                                                                <th class="text-center">napreg3_z2</th>
+                                                                <th class="text-center">napreg4_z2</th>
+                                                                <th class="text-center">napreg5_z2</th>
+                                                                <th class="text-center">napreg6_z2</th>
+                                                                <th class="text-center">napreg7_z2</th>
+                                                                <th class="text-center">napreg8_z2</th>
+                                                                <th class="text-center">krit_te_z2</th>
+                                                                <th class="text-center">krit_ra_z2</th>
+
 
                                                             </tr>
                                                             </thead>
@@ -426,6 +451,19 @@
                                                                     $napreg8_z = $zatpol_->napreg8_z ?? '';
                                                                     $krit_te_z = $zatpol_->krit_te_z ?? '';
                                                                     $krit_ra_z = $zatpol_->krit_ra_z ?? '';
+                                                                    $tovzaj2 = $zatpol_->tovzaj2 ?? '';
+                                                                    $tovzaj_12 = $zatpol_->tovzaj_12 ?? '';
+                                                                    $tovzaj_22 = $zatpol_->tovzaj_22 ?? '';
+                                                                    $napreg1_z2 = $zatpol_->napreg1_z2 ?? '';
+                                                                    $napreg2_z2 = $zatpol_->napreg2_z2 ?? '';
+                                                                    $napreg3_z2 = $zatpol_->napreg3_z2 ?? '';
+                                                                    $napreg4_z2 = $zatpol_->napreg4_z2 ?? '';
+                                                                    $napreg5_z2 = $zatpol_->napreg5_z2 ?? '';
+                                                                    $napreg6_z2 = $zatpol_->napreg6_z2 ?? '';
+                                                                    $napreg7_z2 = $zatpol_->napreg7_z2 ?? '';
+                                                                    $napreg8_z2 = $zatpol_->napreg8_z2 ?? '';
+                                                                    $krit_te_z2 = $zatpol_->krit_te_z2 ?? '';
+                                                                    $krit_ra_z2 = $zatpol_->krit_ra_z2 ?? '';
                                                                     ?>
 
                                                                 <tr>
@@ -446,19 +484,19 @@
                                                                     <td class="text-center">{{$kidt}}</td>
                                                                     <td class="text-center">{{$priv}}</td>
                                                                     <td class="text-center">{{$id_raspon}}</td>
-                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$tovpro}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovpro_1}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$tovpro_2}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg1_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg2_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg3_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg4_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg5_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg6_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg7_p}}</td>
-                                                                    <td class="text-center" style="background-color: #ddffd9">{{$napreg8_p}}</td>
-                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$krit_te_p}}</td>
-                                                                    <td class="text-center"  style="background-color: #ddffd9">{{$krit_ra_p}}</td>
+                                                                    <td class="text-center"  style="background-color: #ffe187">{{$tovpro}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$tovpro_1}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$tovpro_2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg1_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg2_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg3_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg4_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg5_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg6_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg7_p}}</td>
+                                                                    <td class="text-center" style="background-color: #ffe187">{{$napreg8_p}}</td>
+                                                                    <td class="text-center"  style="background-color: #ffe187">{{$krit_te_p}}</td>
+                                                                    <td class="text-center"  style="background-color: #ffe187">{{$krit_ra_p}}</td>
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$tovzaj}}</td>
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$tovzaj_1}}</td>
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$tovzaj_2}}</td>
@@ -472,6 +510,19 @@
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$napreg8_z}}</td>
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$krit_te_z}}</td>
                                                                     <td class="text-center" style="background-color: #ddffd9">{{$krit_ra_z}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$tovzaj2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$tovzaj_12}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$tovzaj_22}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg1_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg2_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg3_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg4_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg5_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg6_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg7_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$napreg8_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$krit_te_z2}}</td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">{{$krit_ra_z2}}</td>
 
 
                                                                 </tr>
@@ -521,13 +572,20 @@
                                                                     <th class="text-center">grr_lzaj</th>
                                                                     <th class="text-center">grr_dzaj</th>
                                                                     <th class="text-center">grr_vzaj</th>
+                                                                    <th class="text-center">grr_lzaj2</th>
+                                                                    <th class="text-center">grr_dzaj2</th>
+                                                                    <th class="text-center">grr_vzaj2</th>
                                                                     <th class="text-center">proc_gz</th>
+                                                                    <th class="text-center">proc_gz2</th>
                                                                     <th class="text-center">elr_zaj1</th>
                                                                     <th class="text-center">elr_zaj2</th>
+                                                                    <th class="text-center">elr_zaj12</th>
+                                                                    <th class="text-center">elr_zaj22</th>
                                                                     <th class="text-center">kota_pro</th>
                                                                     <th class="text-center">kota_zaj</th>
                                                                     <th class="text-center">ras_totp</th>
                                                                     <th class="text-center">ras_totz</th>
+                                                                    <th class="text-center">ras_totz2</th>
                                                                     <th class="text-center">agol_t</th>
                                                                     <th class="text-center">stol_ag1</th>
                                                                     <th class="text-center">br_ras</th>
@@ -562,13 +620,20 @@
                                                                         $grr_lzaj = $gapres_->grr_lzaj ?? '';
                                                                         $grr_dzaj = $gapres_->grr_dzaj ?? '';
                                                                         $grr_vzaj = $gapres_->grr_vzaj ?? '';
+                                                                        $grr_lzaj2 = $gapres_->grr_lzaj2 ?? '';
+                                                                        $grr_dzaj2 = $gapres_->grr_dzaj2 ?? '';
+                                                                        $grr_vzaj2 = $gapres_->grr_vzaj2 ?? '';
                                                                         $proc_gz = $gapres_->proc_gz ?? '';
+                                                                        $proc_gz2 = $gapres_->proc_gz2 ?? '';
                                                                         $elr_zaj1 = $gapres_->elr_zaj1 ?? '';
                                                                         $elr_zaj2 = $gapres_->elr_zaj2 ?? '';
+                                                                        $elr_zaj12 = $gapres_->elr_zaj12 ?? '';
+                                                                        $elr_zaj22 = $gapres_->elr_zaj22 ?? '';
                                                                         $kota_pro = $gapres_->kota_pro ?? '';
                                                                         $kota_zaj = $gapres_->kota_zaj ?? '';
                                                                         $ras_totp = $gapres_->ras_totp ?? '';
                                                                         $ras_totz = $gapres_->ras_totz ?? '';
+                                                                        $ras_totz2 = $gapres_->ras_totz2 ?? '';
                                                                         $agol_t = $gapres_->agol_t ?? '';
                                                                         $stol_ag1 = $gapres_->stol_ag1 ?? '';
                                                                         $br_ras = $gapres_->br_ras ?? '';
@@ -597,13 +662,20 @@
                                                                         <td class="text-center">{{$grr_lzaj}}</td>
                                                                         <td class="text-center">{{$grr_dzaj}}</td>
                                                                         <td class="text-center">{{$grr_vzaj}}</td>
+                                                                        <td class="text-center">{{$grr_lzaj2}}</td>
+                                                                        <td class="text-center">{{$grr_dzaj2}}</td>
+                                                                        <td class="text-center">{{$grr_vzaj2}}</td>
                                                                         <td class="text-center"  style="background-color: #ffe187">{{$proc_gz}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffe187">{{$proc_gz2}}</td>
                                                                         <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj1}}</td>
                                                                         <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj2}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj12}}</td>
+                                                                        <td class="text-center"  style="background-color: #ffafaf">{{$elr_zaj22}}</td>
                                                                         <td class="text-center">{{$kota_pro}}</td>
                                                                         <td class="text-center">{{$kota_zaj}}</td>
                                                                         <td class="text-center">{{$ras_totp}}</td>
                                                                         <td class="text-center">{{$ras_totz}}</td>
+                                                                        <td class="text-center">{{$ras_totz2}}</td>
                                                                         <td class="text-center">{{$agol_t}}</td>
                                                                         <td class="text-center">{{$stol_ag1}}</td>
                                                                         <td class="text-center">{{$br_ras}}</td>

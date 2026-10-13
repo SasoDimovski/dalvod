@@ -20,15 +20,16 @@ class Grvrast
             $project = Projects::with([
                 'conductors',
                 'groundWires',
+                'groundWires2',
             ])->findOrFail($projectId);
 
             $broj_ps = (float) ($project->num_cond_bundle ?? 0); // BR_PRSN
-            $dim_p   = (float) (optional($project->conductors)->diameter ?? 0);
-            $dim_z   = (float) (optional($project->groundWires)->diameter ?? 0);
+
             $pre_p   = (float) (optional($project->conductors)->cross_section ?? 0);
             $pre_z   = (float) (optional($project->groundWires)->cross_section ?? 0);
+            $pre_z2 = (float) (optional($project->groundWires2)->cross_section ?? 0);
 
-            $hasGround = !($dim_z == 0.0 || $pre_z == 0.0);
+            $numGroundWires = (int) ($project->num_ground_wires ?? 0);
 
             if ($broj_ps <= 0 || $pre_p <= 0) {
                 throw new \RuntimeException('GRVRAST: Недостатни параметри за проводник.');
@@ -54,6 +55,7 @@ class Grvrast
                 ->orderBy('stac_t', 'asc')
                 ->get();
 
+
             $trasaMap = [];
             foreach ($trasaRows as $t) {
                 $trasaMap[$this->stKey($t->stac_t)] = $t;
@@ -70,16 +72,12 @@ class Grvrast
 
                 $sta = (float) ($gp->stac_t ?? 0);
                 $staKey = $this->stKey($sta);
-
-                /** @var Trasa|null $trasa */
                 $trasa = $trasaMap[$staKey] ?? null;
                 if (!$trasa) {
                     continue;
                 }
 
                 // ОСНОВНИ ПОДАТОЦИ ===========================================================================================
-                $sto_ag = (float) (optional($trasa->tower)->angle ?? 0);
-                $ag_t   = (float) ($trasa->agol_tr ?? 0);
 
                 $tower_specification = strtoupper(trim((string) (optional($trasa->tower)->specification ?? '')));
 
@@ -97,9 +95,10 @@ class Grvrast
                 $izo_m2      = (float) (optional($trasa->insulator2)->mass ?? 0);
                 $izo_md2_raw = (float) (optional($trasa->insulator2)->massd ?? 0);
 
-                $agv_st = 0.0;
-                $prc_gv = 0.0;
-                $prc_gz = 0.0;
+                $agv_st  = 0.0;
+                $prc_gv  = 0.0;
+                $prc_gz  = null;
+                $prc_gz2 = null;
 
                 // =========================================================================================================
                 // АГОЛНО-ЗАТЕЗЕН СТОЛБ
@@ -111,18 +110,22 @@ class Grvrast
 
                     $tov_p   = (float) ($zatEnd->tovpro ?? 0);
                     $tov_z   = (float) ($zatEnd->tovzaj ?? 0);
+                    $tov_z2 = (float) ($zatEnd->tovzaj2 ?? 0);
 
                     $tov_p1a = (float) ($zatStart->tovpro_1 ?? 0);
                     $tov_z1a = (float) ($zatStart->tovzaj_1 ?? 0);
+                    $tov_z1a2 = (float) ($zatStart->tovzaj_12 ?? 0);
                     $kn_dta  = (float) ($zatStart->kndt ?? 0);
 
                     $tov_p1b = (float) ($zatEnd->tovpro_1 ?? 0);
                     $tov_z1b = (float) ($zatEnd->tovzaj_1 ?? 0);
+                    $tov_z1b2 = (float) ($zatEnd->tovzaj_12 ?? 0);
                     $kn_dtb  = (float) ($zatEnd->kndt ?? 0);
 
                     $kn_dt  = max($kn_dta, $kn_dtb);
                     $tov_p1 = max($tov_p1a, $tov_p1b);
                     $tov_z1 = max($tov_z1a, $tov_z1b);
+                    $tov_z12 = max($tov_z1a2, $tov_z1b2);
 
                     $izo_md  = 0.981 * ($izo_m  + $kn_dt * ($izo_md_raw  - $izo_m));
                     $izo_md2 = 0.981 * ($izo_m2 + $kn_dt * ($izo_md2_raw - $izo_m2));
@@ -133,6 +136,8 @@ class Grvrast
                     $agv_4 = 0.0;
                     $agv_5 = 0.0;
                     $agv_6 = 0.0;
+                    $agv_7 = 0.0;
+                    $agv_8 = 0.0;
 
                     if (($broj_ps * $tov_p1 * $pre_p) != 0.0) {
                         $agv_1 = ($vz_a - $izo_md - $izo_md2) / ($broj_ps * $tov_p1 * $pre_p);
@@ -142,23 +147,92 @@ class Grvrast
                         $agv_2 = ($vz_b - $izo_m - $izo_m2) / ($broj_ps * $tov_p * $pre_p);
                     }
 
-                    if (!$hasGround) {
+                    if ($numGroundWires === 0) {
                         $agv_st = min($agv_1, $agv_2);
-                    } else {
+                    } elseif ($numGroundWires === 1) {
+
+                        // ПРОВОДНИК
                         $agv_3 = min($agv_1, $agv_2);
 
+                        // ЗАШТИТНО ЈАЖЕ 1
                         if (($tov_z1 * $pre_z) != 0.0) {
                             $agv_4 = $zz_a / ($tov_z1 * $pre_z);
                         }
-
-                        $agv_5 = min($agv_3, $agv_4);
-
                         if (($tov_z * $pre_z) != 0.0) {
                             $agv_6 = $zz_b / ($tov_z * $pre_z);
                         }
 
+                        $agv_5 = min($agv_3, $agv_4);
                         $agv_st = min($agv_5, $agv_6);
+
+                    } elseif ($numGroundWires === 2) {
+
+                        // ПРОВОДНИК
+                        $agv_3 = min($agv_1, $agv_2);
+
+                        // ЗАШТИТНО ЈАЖЕ 1
+                        if (($tov_z1 * $pre_z) != 0.0) {
+                            $agv_4 = $zz_a / ($tov_z1 * $pre_z);
+                        }
+                        if (($tov_z * $pre_z) != 0.0) {
+                            $agv_6 = $zz_b / ($tov_z * $pre_z);
+                        }
+
+                        // // ЗАШТИТНО ЈАЖЕ 2
+                        if (($tov_z12 * $pre_z2) != 0.0) {
+                            $agv_7 = $zz_a / ($tov_z12 * $pre_z2);
+                        }
+                        if (($tov_z2 * $pre_z2) != 0.0) {
+                            $agv_8 = $zz_b / ($tov_z2 * $pre_z2);
+                        }
+                        $agv_st = min(
+                            $agv_3,
+                            $agv_4,
+                            $agv_6,
+                            $agv_7,
+                            $agv_8
+                        );
+
                     }
+
+
+/*                    if ($gp->id_trasa===2167) {
+                        dd([
+                            'stac_t' => $sta,
+                            'tower_specification' => $tower_specification,
+
+                            'vz_a' => $vz_a,
+                            'vz_b' => $vz_b,
+                            'zz_a' => $zz_a,
+                            'zz_b' => $zz_b,
+
+                            'izo_m' => $izo_m,
+                            'izo_md' => $izo_md,
+
+                            'tov_p' => $tov_p,
+                            'tov_p1' => $tov_p1,
+                            'tov_z' => $tov_z,
+                            'tov_z1' => $tov_z1,
+
+                            'agv_1' => $agv_1,
+                            'agv_2' => $agv_2,
+                            'agv_3' => $agv_3,
+                            'agv_4' => $agv_4,
+                            'agv_5' => $agv_5,
+                            'agv_6' => $agv_6,
+
+                            'agv_st' => $agv_st,
+
+                            'izo_m2' => $izo_m2,
+                            'izo_md2' => $izo_md2,
+                            'broj_ps' => $broj_ps,
+                            'pre_p' => $pre_p,
+                            'kn_dt' => $kn_dt,
+                        ]);
+                    }*/
+
+
+
 
                 } else {
                     // =====================================================================================================
@@ -168,8 +242,13 @@ class Grvrast
 
                     $tov_p  = (float) ($zatEnd->tovpro ?? 0);
                     $tov_p1 = (float) ($zatEnd->tovpro_1 ?? 0);
+                    // ЗАШТИТНО ЈАЖЕ 1
                     $tov_z  = (float) ($zatEnd->tovzaj ?? 0);
                     $tov_z1 = (float) ($zatEnd->tovzaj_1 ?? 0);
+
+                    // ЗАШТИТНО ЈАЖЕ 2
+                    $tov_z2  = (float) ($zatEnd->tovzaj2 ?? 0);
+                    $tov_z12 = (float) ($zatEnd->tovzaj_12 ?? 0);
                     $kn_dt  = (float) ($zatEnd->kndt ?? 0);
 
                     $izo_md = 0.981 * ($izo_m + $kn_dt * ($izo_md_raw - $izo_m));
@@ -180,6 +259,8 @@ class Grvrast
                     $agv_4 = 0.0;
                     $agv_5 = 0.0;
                     $agv_6 = 0.0;
+                    $agv_7 = 0.0;
+                    $agv_8 = 0.0;
 
                     if (($broj_ps * $tov_p1 * $pre_p) != 0.0) {
                         $agv_1 = ($vz_a - $izo_md) / ($broj_ps * $tov_p1 * $pre_p);
@@ -189,36 +270,79 @@ class Grvrast
                         $agv_2 = ($vz_b - $izo_m) / ($broj_ps * $tov_p * $pre_p);
                     }
 
-                    if (!$hasGround) {
+                    if ($numGroundWires === 0) {
+
+                        // НЕМА ЗАШТИТНО ЈАЖЕ
                         $agv_st = min($agv_1, $agv_2);
-                    } else {
+
+                    } elseif ($numGroundWires === 1) {
+
+                        // ПРОВОДНИК
                         $agv_3 = min($agv_1, $agv_2);
 
+                        // ЗАШТИТНО ЈАЖЕ 1
                         if (($tov_z1 * $pre_z) != 0.0) {
                             $agv_4 = $zz_a / ($tov_z1 * $pre_z);
                         }
-
-                        $agv_5 = min($agv_3, $agv_4);
 
                         if (($tov_z * $pre_z) != 0.0) {
                             $agv_6 = $zz_b / ($tov_z * $pre_z);
                         }
 
+                        $agv_5  = min($agv_3, $agv_4);
                         $agv_st = min($agv_5, $agv_6);
+
+                    } elseif ($numGroundWires === 2) {
+
+                        // ПРОВОДНИК
+                        $agv_3 = min($agv_1, $agv_2);
+
+                        // ЗАШТИТНО ЈАЖЕ 1
+                        if (($tov_z1 * $pre_z) != 0.0) {
+                            $agv_4 = $zz_a / ($tov_z1 * $pre_z);
+                        }
+
+                        if (($tov_z * $pre_z) != 0.0) {
+                            $agv_6 = $zz_b / ($tov_z * $pre_z);
+                        }
+
+                        // ЗАШТИТНО ЈАЖЕ 2
+                        if (($tov_z12 * $pre_z2) != 0.0) {
+                            $agv_7 = $zz_a / ($tov_z12 * $pre_z2);
+                        }
+
+                        if (($tov_z2 * $pre_z2) != 0.0) {
+                            $agv_8 = $zz_b / ($tov_z2 * $pre_z2);
+                        }
+
+                        $agv_st = min(
+                            $agv_3,
+                            $agv_4,
+                            $agv_6,
+                            $agv_7,
+                            $agv_8
+                        );
                     }
                 }
 
                 if ($agv_st != 0.0) {
+
                     $prc_gv = ((float) ($gp->grr_vpro ?? 0) * 100) / $agv_st;
-                    $prc_gz = ((float) ($gp->grr_vzaj ?? 0) * 100) / $agv_st;
+
+                    if ($numGroundWires >= 1) {
+                        $prc_gz = ((float) ($gp->grr_vzaj ?? 0) * 100) / $agv_st;
+                    }
+
+                    if ($numGroundWires === 2) {
+                        $prc_gz2 = ((float) ($gp->grr_vzaj2 ?? 0) * 100) / $agv_st;
+                    }
                 }
 
                 $gp->update([
                     'proc_gv'  => $prc_gv,
                     'grr_st'   => $agv_st,
                     'proc_gz'  => $prc_gz,
-                    'stol_ag1' => $sto_ag,
-                    'agol_t'   => $ag_t,
+                    'proc_gz2' => $prc_gz2,
                 ]);
 
                 $updated++;

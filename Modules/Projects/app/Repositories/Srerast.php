@@ -16,7 +16,7 @@ class Srerast
 
             // PROJECTS =========================================================================================================
 
-            $project = Projects::with(['conductors', 'groundWires',])->findOrFail($projectId);
+            $project = Projects::with(['conductors', 'groundWires', 'groundWires2',])->findOrFail($projectId);
 
             $broj_ps = (float) ($project->num_cond_bundle ?? 0);
             $dim_p = (float) (optional($project->conductors)->diameter ?? 0);       // pro_dijam
@@ -71,9 +71,6 @@ class Srerast
 //  =======================================================================================================================================================
 
             $updated = 0;
-            $lastAgolT = 0.0;
-            $lastStolAg = 0.0;
-
 
             foreach ($gapresRows as $gp) {
 
@@ -96,8 +93,7 @@ class Srerast
                 $vx_b = (float) (optional(optional($trasa->tower)->towerA)->vxb ?? 0);
                 $zx_b = (float) (optional(optional($trasa->tower)->towerA)->zxb ?? 0);
 
-                $lastAgolT = $ag_t;
-                $lastStolAg = $sto_ag1;
+
 
 
                 // =====================================================
@@ -190,24 +186,11 @@ class Srerast
                 $gp->update([
                     's_ra_st'  => $sr_ra,
                     'proc_sr'  => $prc_sr,
-                    'stol_ag1' => $sto_ag1,
-                    'agol_t'   => $ag_t,
                 ]);
 
                 $updated++;
             }
 
-            // =========================================================
-            // Реплика на DOS "GO BOTTOM / REPLACE"
-            // ако сакаш буквално исто однесување
-            // =========================================================
-            $lastGapres = $gapresRows->last();
-            if ($lastGapres) {
-                $lastGapres->update([
-                    'agol_t'   => $lastAgolT,
-                    'stol_ag1' => $lastStolAg,
-                ]);
-            }
 
             return $updated;
         });

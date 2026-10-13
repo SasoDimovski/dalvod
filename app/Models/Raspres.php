@@ -24,8 +24,11 @@ class Raspres extends Model
         'ras_t2op',
         'ras_totz',
         'ras_t2oz',
+        'ras_totz2',
+        'ras_t2oz2',
         'dol_pro',
         'dol_zaj',
+        'dol_zaj2',
     ];
     public function project(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -44,6 +47,6 @@ class Raspres extends Model
         'vr_pro' => 'float', 'vr_zaj' => 'float', 'kota_pro' => 'float',
         'kota_zaj' => 'float', 'ras_totp' => 'float', 'ras_t2op' => 'float',
         'ras_totz' => 'float', 'ras_t2oz' => 'float', 'dol_pro' => 'float',
-        'dol_zaj' => 'float',
+        'dol_zaj' => 'float','dol_zaj2' => 'float',
     ];
 }

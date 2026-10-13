@@ -137,17 +137,29 @@ class ProjectsRepositories
     }
     public function storeProject($projectsDto)
     {
-        $project= Projects::create([
+        $project = Projects::create([
             'title' => $projectsDto->title,
             'id_voltage' => $projectsDto->id_voltage,
             'id_starting_point' => $projectsDto->id_starting_point,
             'id_ending_point' => $projectsDto->id_ending_point,
+
             'id_conductor' => $projectsDto->id_conductor,
+
             'id_ground_wires' => $projectsDto->id_ground_wires,
             'id_ground_wires2' => $projectsDto->id_ground_wires2,
+
             'tensile_stress_cond' => $projectsDto->tensile_stress_cond,
-            'tensile_stress_ground' => $projectsDto->tensile_stress_ground,
-            'tensile_stress_ground2' => $projectsDto->tensile_stress_ground2,
+
+            'tensile_stress_ground' =>
+                $projectsDto->id_ground_wires != 0
+                    ? $projectsDto->tensile_stress_ground
+                    : null,
+
+            'tensile_stress_ground2' =>
+                $projectsDto->id_ground_wires2 != 0
+                    ? $projectsDto->tensile_stress_ground2
+                    : null,
+
             'kn' => $projectsDto->kn,
             'ki' => $projectsDto->ki,
             'id_wind_pressure' => $projectsDto->id_wind_pressure,
@@ -155,13 +167,15 @@ class ProjectsRepositories
             'num_cond_systems' => $projectsDto->num_cond_systems,
             'num_cond_bundle' => $projectsDto->num_cond_bundle,
             'num_ground_wires' => $projectsDto->num_ground_wires,
+
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
             'active' => $projectsDto->active,
             'deleted' => 0,
+
+
         ]);
         return $project;
-
     }
     public function updateProject($id, ProjectsDto $data)
     {
@@ -178,8 +192,17 @@ class ProjectsRepositories
             $project->id_ground_wires = $data->id_ground_wires;
             $project->id_ground_wires2 = $data->id_ground_wires2;
             $project->tensile_stress_cond = $data->tensile_stress_cond;
-            $project->tensile_stress_ground = $data->tensile_stress_ground;
-            $project->tensile_stress_ground2 = $data->tensile_stress_ground2;
+            // Прво заштитно јаже
+            $project->tensile_stress_ground =
+                $data->id_ground_wires != 0
+                    ? $data->tensile_stress_ground
+                    : null;
+
+            // Второ заштитно јаже
+            $project->tensile_stress_ground2 =
+                $data->id_ground_wires2 != 0
+                    ? $data->tensile_stress_ground2
+                    : null;
             $project->kn = $data->kn;
             $project->ki = $data->ki;
             $project->id_wind_pressure = $data->id_wind_pressure;
@@ -1028,7 +1051,7 @@ class ProjectsRepositories
                 // 3) COPY TRASA
                 // ============================================================
                 $oldTrasaRows = Trasa::where('id_project', $id)
-                    ->orderBy('stac_t', 'asc')
+                    ->orderBy('id', 'asc')
                     ->get();
 
                 foreach ($oldTrasaRows as $oldTrasa) {

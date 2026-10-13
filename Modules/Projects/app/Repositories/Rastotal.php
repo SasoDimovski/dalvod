@@ -17,10 +17,11 @@ class Rastotal
             $project = Projects::with([
                 'conductors',
                 'groundWires',
+                'groundWires2',
                 'insulatorChain',
             ])->findOrFail($projectId);
 
-            $hasGround = (int) ($project->num_ground_wires ?? 0) > 0;
+            $numGroundWires = (int) ($project->num_ground_wires ?? 0);
 
             // 1) сите точки од траса, по редослед
             $allTrasa = Trasa::where('id_project', $projectId)
@@ -48,14 +49,24 @@ class Rastotal
                     'id',
                     'id_trasa_po',
                     'id_trasa_kr',
+
+                    // проводник
                     'tovpro',
                     'tovpro_1',
-                    'tovzaj',
-                    'tovzaj_1',
                     'napreg1_p',
                     'napreg8_p',
+
+                    // прво заштитно јаже
+                    'tovzaj',
+                    'tovzaj_1',
                     'napreg1_z',
                     'napreg8_z',
+
+                    // второ заштитно јаже
+                    'tovzaj2',
+                    'tovzaj_12',
+                    'napreg1_z2',
+                    'napreg8_z2',
                 ]);
 
             if ($poles->isEmpty()) {
@@ -110,16 +121,24 @@ class Rastotal
                 $napP8 = (float) ($pole->napreg8_p ?? 0.0);
                 $napZ1 = (float) ($pole->napreg1_z ?? 0.0);
                 $napZ8 = (float) ($pole->napreg8_z ?? 0.0);
+                $napZ21 = (float) ($pole->napreg1_z2 ?? 0.0);
+                $napZ28 = (float) ($pole->napreg8_z2 ?? 0.0);
+
 
                 $tovp   = (float) ($pole->tovpro   ?? 0.0);
                 $tovp_1 = (float) ($pole->tovpro_1 ?? 0.0);
                 $tovz   = (float) ($pole->tovzaj   ?? 0.0);
                 $tovz_1 = (float) ($pole->tovzaj_1 ?? 0.0);
+                $tovz2   = (float) ($pole->tovzaj2 ?? 0.0);
+                $tovz2_1 = (float) ($pole->tovzaj_12 ?? 0.0);
+
 
                 $tovp   = ($tovp   == 0.0) ? 1e-12 : $tovp;
                 $tovp_1 = ($tovp_1 == 0.0) ? 1e-12 : $tovp_1;
                 $tovz   = ($tovz   == 0.0) ? 1e-12 : $tovz;
                 $tovz_1 = ($tovz_1 == 0.0) ? 1e-12 : $tovz_1;
+                $tovz2   = ($tovz   == 0.0) ? 1e-12 : $tovz2;
+                $tovz2_1 = ($tovz_1 == 0.0) ? 1e-12 : $tovz2_1;
 
                 $virp = (float) ($r->vr_pro ?? 0.0);
                 $virz = (float) ($r->vr_zaj ?? 0.0);
@@ -127,19 +146,33 @@ class Rastotal
                 $ras_totp = $rasp + (2.0 * $napP8 * abs($virp)) / ($rasp * $tovp_1);
                 $ras_t20p = $rasp + (2.0 * $napP1 * abs($virp)) / ($rasp * $tovp);
 
-                if (!$hasGround) {
-                    $ras_totz = 0.0;
-                    $ras_t20z = 0.0;
-                } else {
+                $ras_totz = null;
+                $ras_t20z = null;
+                $ras_totz2 = null;
+                $ras_t20z2 = null;
+
+                if ($numGroundWires===1||$numGroundWires===2) {
                     $ras_totz = $rasp + (2.0 * $napZ8 * abs($virz)) / ($rasp * $tovz_1);
                     $ras_t20z = $rasp + (2.0 * $napZ1 * abs($virz)) / ($rasp * $tovz);
                 }
 
+                if ($numGroundWires===2) {
+                    $ras_totz2 = $rasp + (2.0 * $napZ28 * abs($virz)) / ($rasp * $tovz2_1);
+                    $ras_t20z2 = $rasp + (2.0 * $napZ21 * abs($virz)) / ($rasp * $tovz2);
+                }
+
+
                 Raspres::where('id', (int) $r->id)->update([
-                    'ras_totp' => $ras_totp,
-                    'ras_t2op' => $ras_t20p,
-                    'ras_totz' => $ras_totz,
-                    'ras_t2oz' => $ras_t20z,
+                    'ras_totp'  => $ras_totp,
+                    'ras_t2op'  => $ras_t20p,
+
+                    // прво заштитно јаже
+                    'ras_totz'  => $ras_totz,
+                    'ras_t2oz'  => $ras_t20z,
+
+                    // второ заштитно јаже
+                    'ras_totz2' => $ras_totz2,
+                    'ras_t2oz2' => $ras_t20z2,
                 ]);
 
                 $updated++;

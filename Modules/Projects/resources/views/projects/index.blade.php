@@ -372,6 +372,19 @@
                                                 <th class="sortable {{$style_acs_desc}}" style="white-space: nowrap; width: 1px;"
                                                     onclick="orderBy('{{$column_name}}','{{$sort}}')">{{$column_desc}}&nbsp;&nbsp;&nbsp;&nbsp;</th>
                                                 {{-- ========================================================================--}}
+                                                    <?php
+                                                    $column_name = 'id_ground_wires';
+                                                    $column_desc = __('projects.id_ground_wires');
+                                                    $query_sort = request()->query('sort');
+                                                    $style_acs_desc = match(true) {
+                                                        $query_sort == 'asc' && $order == $column_name => 'asc',
+                                                        $query_sort == 'desc' && $order == $column_name => 'desc',
+                                                        default => $style_acs_desc='',
+                                                    };
+                                                    ?>
+                                                <th class="sortable {{$style_acs_desc}}" style="white-space: nowrap; width: 1px;"
+                                                    onclick="orderBy('{{$column_name}}','{{$sort}}')">{{$column_desc}}&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                                                {{-- ========================================================================--}}
                                                 <th style="white-space: nowrap; width: 1px;"><i class="fas fa-lock"  title="{{__('global.active_status')}}"></i>
                                                 </th>
                                                 {{-- ========================================================================--}}
@@ -393,6 +406,7 @@
                                                     <td  class="text-center">{{ $project->voltages->title }} kV</td>
                                                     <td>{{ $project->conductors->type }}</td>
                                                     <td>{{ $project->groundWires?->type }}</td>
+                                                    <td>{{ $project->groundWires2?->type }}</td>
 
                                                     <td>
                                                         @if($project->active == 0)

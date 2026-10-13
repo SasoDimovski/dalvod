@@ -45,11 +45,13 @@ class Zatpol
             $stacPo = (float) $start->stac_t;
             $stacKr = (float) $end->stac_t;
 
-            $poId = (int) ($start->id_tower ?? 0);
-            $krId = (int) ($end->id_tower ?? 0);
+            $poId = (int) ($start->id_tower ?: $start->id_trafo ?: 0);
+            $krId = (int) ($end->id_tower ?: $end->id_trafo ?: 0);
 
-            $poleDol = $stacKr - $stacPo;
-            if ($poleDol <= 0) {
+
+            //Разлика од крајната и почетната стационажа
+            $pole_dol= $stacKr - $stacPo;
+            if ($pole_dol <= 0) {
                 continue;
             }
 
@@ -83,10 +85,16 @@ class Zatpol
             $sumTri = (float) ($aggr->sum_tri ?? 0.0);
             $sumEde = (float) ($aggr->sum_ede ?? 0.0);
 
-            $idRas = ($sumTri > 0 && $sumEde > 0) ? sqrt($sumTri / $sumEde) : null;
+            //dd($sumEde);
+
+           // $idRas = ($sumTri > 0 && $sumEde > 0) ? sqrt($sumTri / $sumEde) : null;
+            $idRas = ($sumTri > 0 && $sumEde > 0) ? round(sqrt($sumTri / $sumEde), 2) : null;
+
+
 
             $napPro = (float) ($start->nap_pro ?? $project->tensile_stress_cond);
             $napZaj = (float) ($start->nap_zaj ?? $project->tensile_stress_ground);
+            $napZaj2 = (float) ($start->nap_zaj2 ?? $project->tensile_stress_ground2);
             $kndt   = (float) ($start->kndt ?? $project->kn);
             $kidt   = (float) ($start->kidt ?? $project->ki);
             $priv   = (float) ($start->priv ?? optional($project->windPressure)->title);
@@ -99,9 +107,11 @@ class Zatpol
                 'id_trasa_po'    => $start->id,
                 'stac_kr'    => $stacKr,
                 'id_trasa_kr'    => $end->id,
-                'pole_dol'   => $poleDol,
+
+                'pole_dol'   => $pole_dol,
                 'nap_pro'    => $napPro,
                 'nap_zaj'    => $napZaj,
+                'nap_zaj2'    => $napZaj2,
                 'kndt'       => $kndt,
                 'kidt'       => $kidt,
                 'priv'       => $priv,

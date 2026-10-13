@@ -1416,10 +1416,27 @@ class ProjectsServices
 
     public function profileData(int $id_project): array
     {
+        /*
+         * -------------------------------------------------------------
+         * 1. Податоци
+         * -------------------------------------------------------------
+         */
+
         $raspres = $this->projectsRepositories
             ->getRaspresByIdProject($id_project)
             ->sortBy('stac_t')
             ->values();
+
+        /*
+         * getRaspresByIdProject() го вчитува:
+         *
+         * Raspres::with(['project'])
+         *
+         * па проектот можеме да го земеме од првиот Raspres запис.
+         */
+        $project = optional($raspres->first())->project;
+
+        $numGroundWires = (int)($project->num_ground_wires ?? 0);
 
         $trasa = $this->projectsRepositories
             ->_getTrasaByIdProject($id_project)
@@ -1430,47 +1447,109 @@ class ProjectsServices
             ->getZatpolByIdProject($id_project)
             ->values();
 
+
+        /*
+         * -------------------------------------------------------------
+         * 2. Индекс на Trasa според ID
+         * -------------------------------------------------------------
+         */
+
         $trasaById = [];
+
         foreach ($trasa as $t) {
             $trasaById[(int)$t->id] = $t;
         }
 
+
+        /*
+         * -------------------------------------------------------------
+         * 3. Резултат
+         * -------------------------------------------------------------
+         */
+
         $data = [];
+
+
+        /*
+         * -------------------------------------------------------------
+         * 4. Секој распон
+         * -------------------------------------------------------------
+         */
 
         foreach ($raspres as $r) {
 
+            /*
+             * Почетна точка на распонот
+             */
             $startPoint = $trasaById[(int)($r->id_trasa ?? 0)] ?? null;
 
             if (!$startPoint) {
                 continue;
             }
 
+
+            /*
+             * Ја наоѓаме позицијата на почетната точка во Trasa
+             */
             $startIndex = $trasa->search(function ($item) use ($startPoint) {
                 return (int)$item->id === (int)$startPoint->id;
             });
 
+            /*
+             * Следната точка е крајната точка на распонот
+             */
             $endPoint = $trasa[$startIndex + 1] ?? null;
 
             if (!$endPoint) {
                 continue;
             }
 
+
+            /*
+             * ---------------------------------------------------------
+             * 5. Геометрија на распонот
+             * ---------------------------------------------------------
+             */
+
             $stac1 = (float)$startPoint->stac_t;
             $stac2 = (float)$endPoint->stac_t;
-            $rasp  = $stac2 - $stac1;
+
+            $rasp = $stac2 - $stac1;
 
             if ($rasp <= 0) {
                 continue;
             }
 
+
+            /*
+             * Висина на спроводникот во почетната и крајната точка
+             */
             $kotaOp1 = $this->profileConductorPointHeight($startPoint);
             $kotaOp2 = $this->profileConductorPointHeight($endPoint);
 
+
+            /*
+             * Висина на заштитното јаже.
+             *
+             * Истата геометриска висина ја користиме и за второто
+             * заштитно јаже.
+             */
             $kotaOz1 = $this->profileGroundWirePointHeight($startPoint);
             $kotaOz2 = $this->profileGroundWirePointHeight($endPoint);
 
+
+            /*
+             * Висинска разлика
+             */
             $virp = $kotaOp2 - $kotaOp1;
             $virz = $kotaOz2 - $kotaOz1;
+
+
+            /*
+             * ---------------------------------------------------------
+             * 6. Го наоѓаме затезното поле
+             * ---------------------------------------------------------
+             */
 
             $idTrasa = (int)$r->id_trasa;
 
@@ -1483,18 +1562,65 @@ class ProjectsServices
                 continue;
             }
 
+
+            /*
+             * ---------------------------------------------------------
+             * 7. Спроводник
+             * ---------------------------------------------------------
+             */
+
             $tovp = (float)($z->tovpro ?? 0);
             $napP = (float)($z->napreg7_p ?? 0);
 
-            $tovz = (float)($z->tovzaj ?? 0);
-            $napZ = (float)($z->napreg1_z ?? 0);
+
+            /*
+             * ---------------------------------------------------------
+             * 8. Заштитно јаже 1
+             * ---------------------------------------------------------
+             */
+
+            $tovz = 0.0;
+            $napZ = 0.0;
+
+            if ($numGroundWires >= 1) {
+                $tovz = (float)($z->tovzaj ?? 0);
+                $napZ = (float)($z->napreg1_z ?? 0);
+            }
+
+
+            /*
+             * ---------------------------------------------------------
+             * 9. Заштитно јаже 2
+             * ---------------------------------------------------------
+             */
+
+            $tovz2 = 0.0;
+            $napZ2 = 0.0;
+
+            if ($numGroundWires === 2) {
+                $tovz2 = (float)($z->tovzaj2 ?? 0);
+                $napZ2 = (float)($z->napreg1_z2 ?? 0);
+            }
+
+
+            /*
+             * ---------------------------------------------------------
+             * 10. Профил на секои 2 m
+             * ---------------------------------------------------------
+             */
 
             for ($stac = $stac1; $stac <= $stac2; $stac += 2) {
 
-                $conductor = null;
-                $groundwire = null;
+                $conductor   = null;
+                $groundwire  = null;
+                $groundwire2 = null;
 
+
+                /*
+                 * СПРОВОДНИК
+                 */
                 if ($tovp > 0 && $napP > 0) {
+
                     $conductor = $this->profileCableHeight(
                         $kotaOp1,
                         $kotaOp2,
@@ -1508,7 +1634,18 @@ class ProjectsServices
                     );
                 }
 
-                if ($kotaOz1 > 0 && $kotaOz2 > 0 && $tovz > 0 && $napZ > 0) {
+
+                /*
+                 * ЗАШТИТНО ЈАЖЕ 1
+                 */
+                if (
+                    $numGroundWires >= 1 &&
+                    $kotaOz1 > 0 &&
+                    $kotaOz2 > 0 &&
+                    $tovz > 0 &&
+                    $napZ > 0
+                ) {
+
                     $groundwire = $this->profileCableHeight(
                         $kotaOz1,
                         $kotaOz2,
@@ -1522,19 +1659,72 @@ class ProjectsServices
                     );
                 }
 
+
+                /*
+                 * ЗАШТИТНО ЈАЖЕ 2
+                 */
+                if (
+                    $numGroundWires === 2 &&
+                    $kotaOz1 > 0 &&
+                    $kotaOz2 > 0 &&
+                    $tovz2 > 0 &&
+                    $napZ2 > 0
+                ) {
+
+                    $groundwire2 = $this->profileCableHeight(
+                        $kotaOz1,
+                        $kotaOz2,
+                        $stac1,
+                        $stac2,
+                        $stac,
+                        $rasp,
+                        $virz,
+                        $tovz2,
+                        $napZ2
+                    );
+                }
+
+
+                /*
+                 * Резултат
+                 */
                 $data[] = [
                     'x' => round($stac, 2),
-                    'conductor' => $conductor !== null ? round($conductor, 2) : null,
-                    'groundwire' => $groundwire !== null ? round($groundwire, 2) : null,
+
+                    'conductor' => $conductor !== null
+                        ? round($conductor, 2)
+                        : null,
+
+                    'groundwire' => $groundwire !== null
+                        ? round($groundwire, 2)
+                        : null,
+
+                    'groundwire2' => $groundwire2 !== null
+                        ? round($groundwire2, 2)
+                        : null,
                 ];
             }
+
+
+            /*
+             * ---------------------------------------------------------
+             * 11. Ако циклусот не ја погодил точно крајната точка,
+             *     ја додаваме stac2 рачно.
+             * ---------------------------------------------------------
+             */
 
             if (round($stac2, 2) !== round($stac - 2, 2)) {
 
-                $conductor = null;
-                $groundwire = null;
+                $conductor   = null;
+                $groundwire  = null;
+                $groundwire2 = null;
 
+
+                /*
+                 * СПРОВОДНИК
+                 */
                 if ($tovp > 0 && $napP > 0) {
+
                     $conductor = $this->profileCableHeight(
                         $kotaOp1,
                         $kotaOp2,
@@ -1548,7 +1738,18 @@ class ProjectsServices
                     );
                 }
 
-                if ($kotaOz1 > 0 && $kotaOz2 > 0 && $tovz > 0 && $napZ > 0) {
+
+                /*
+                 * ЗАШТИТНО ЈАЖЕ 1
+                 */
+                if (
+                    $numGroundWires >= 1 &&
+                    $kotaOz1 > 0 &&
+                    $kotaOz2 > 0 &&
+                    $tovz > 0 &&
+                    $napZ > 0
+                ) {
+
                     $groundwire = $this->profileCableHeight(
                         $kotaOz1,
                         $kotaOz2,
@@ -1562,13 +1763,59 @@ class ProjectsServices
                     );
                 }
 
+
+                /*
+                 * ЗАШТИТНО ЈАЖЕ 2
+                 */
+                if (
+                    $numGroundWires === 2 &&
+                    $kotaOz1 > 0 &&
+                    $kotaOz2 > 0 &&
+                    $tovz2 > 0 &&
+                    $napZ2 > 0
+                ) {
+
+                    $groundwire2 = $this->profileCableHeight(
+                        $kotaOz1,
+                        $kotaOz2,
+                        $stac1,
+                        $stac2,
+                        $stac2,
+                        $rasp,
+                        $virz,
+                        $tovz2,
+                        $napZ2
+                    );
+                }
+
+
+                /*
+                 * Крајна точка
+                 */
                 $data[] = [
                     'x' => round($stac2, 2),
-                    'conductor' => $conductor !== null ? round($conductor, 2) : null,
-                    'groundwire' => $groundwire !== null ? round($groundwire, 2) : null,
+
+                    'conductor' => $conductor !== null
+                        ? round($conductor, 2)
+                        : null,
+
+                    'groundwire' => $groundwire !== null
+                        ? round($groundwire, 2)
+                        : null,
+
+                    'groundwire2' => $groundwire2 !== null
+                        ? round($groundwire2, 2)
+                        : null,
                 ];
             }
         }
+
+
+        /*
+         * -------------------------------------------------------------
+         * 12. Готов профил
+         * -------------------------------------------------------------
+         */
 
         return $data;
     }

@@ -1345,32 +1345,59 @@
         const activePoint = @json($activePoint);
         const profileLines = @json($profileLines ?? []);
 
+        console.log('PROFILE LINES:', profileLines);
+
+        console.log(
+            'GROUNDWIRE 2:',
+            profileLines.map(p => ({
+                x: p.x,
+                groundwire: p.groundwire,
+                groundwire2: p.groundwire2
+            }))
+        );
+
+
+
+        const hasGroundWire = profileLines.some(
+            p => p.groundwire !== null && p.groundwire !== undefined
+        );
+
+        const hasGroundWire2 = profileLines.some(
+            p => p.groundwire2 !== null && p.groundwire2 !== undefined
+        );
+
         if (!points || !points.length) return;
 
         const xValues = points.map(p => Number(p.x));
         const xMin = Math.min(...xValues);
         const xMax = Math.max(...xValues);
 
-        const terrainY = points.map(p => Number(p.y));
+        const terrainY = points
+            .map(p => Number(p.y))
+            .filter(Number.isFinite);
 
-        const towerY = points.map(p => {
-            return Number(p.y) + Number(p.tower_vis || 0);
-        });
+        const towerY = points
+            .map(p => Number(p.y) + Number(p.tower_vis || 0))
+            .filter(Number.isFinite);
 
         const conductorY = profileLines
             .filter(p => p.conductor !== null && p.conductor !== undefined)
             .map(p => Number(p.conductor));
 
-
         const groundY = profileLines
             .filter(p => p.groundwire !== null && p.groundwire !== undefined)
             .map(p => Number(p.groundwire));
+
+        const groundY2 = profileLines
+            .filter(p => p.groundwire2 !== null && p.groundwire2 !== undefined)
+            .map(p => Number(p.groundwire2));
 
         const allY = [
             ...terrainY,
             ...towerY,
             ...conductorY,
-            ...groundY
+            ...groundY,
+            ...groundY2
         ];
 
         const yMin = Math.min(...allY);
@@ -1475,12 +1502,15 @@
 
         const groundwireDataset = {
             label: 'Заштитно јаже',
-            data: profileLines
-                .filter(p => p.groundwire !== null && p.groundwire !== undefined)
-                .map(p => ({
-                    x: Number(p.x),
-                    y: Number(p.groundwire)
-                })),
+
+            data: hasGroundWire
+                ? profileLines
+                    .filter(p => p.groundwire !== null && p.groundwire !== undefined)
+                    .map(p => ({
+                        x: Number(p.x),
+                        y: Number(p.groundwire)
+                    }))
+                : [],
 
             showLine: true,
             fill: false,
@@ -1491,6 +1521,33 @@
             pointRadius: 0,
             pointHoverRadius: 0,
 
+            borderWidth: 2,
+            lineTension: 0
+        };
+
+        const groundwire2Dataset = {
+            label: 'Заштитно јаже 2',
+
+            data: hasGroundWire2
+                ? profileLines
+                    .filter(p =>
+                        p.groundwire2 !== null &&
+                        p.groundwire2 !== undefined
+                    )
+                    .map(p => ({
+                        x: Number(p.x),
+                        y: Number(p.groundwire2)
+                    }))
+                : [],
+
+            showLine: true,
+            fill: false,
+
+            borderColor: '#dc3545',
+            backgroundColor: '#dc3545',
+
+            pointRadius: 0,
+            pointHoverRadius: 0,
             borderWidth: 2,
             lineTension: 0
         };
@@ -1609,9 +1666,16 @@
         const datasets = [
             terrainDataset,
             conductorDataset,
-            conductorMinus6Dataset,
-            groundwireDataset
+            conductorMinus6Dataset
         ];
+
+        if (hasGroundWire) {
+            datasets.push(groundwireDataset);
+        }
+
+        if (hasGroundWire2) {
+            datasets.push(groundwire2Dataset);
+        }
 
         if (activeDataset) {
             datasets.push(activeDataset);
@@ -1769,6 +1833,13 @@
 
                             if (label === 'Заштитно јаже') {
                                 return 'Заштитно јаже, stac_t: ' +
+                                    Number(p.x).toFixed(2) +
+                                    ', kota: ' +
+                                    Number(p.y).toFixed(2);
+                            }
+
+                            if (label === 'Заштитно јаже 2') {
+                                return 'Заштитно јаже 2, stac_t: ' +
                                     Number(p.x).toFixed(2) +
                                     ', kota: ' +
                                     Number(p.y).toFixed(2);

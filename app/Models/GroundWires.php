@@ -28,7 +28,7 @@ class GroundWires extends Model
 
     public function projects(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Projects::class, 'id_voltage');
+        return $this->hasMany(Projects::class, 'id_ground_wires');
     }
     public function createdBy(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
