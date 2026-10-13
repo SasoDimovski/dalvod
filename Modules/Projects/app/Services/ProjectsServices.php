@@ -576,6 +576,8 @@ class ProjectsServices
         $brojPs = (float)($project->num_cond_systems ?? 1);
 
         $agoTra = (float)($trasa->agol_tr ?? 0);
+        $id_trafo = ($trasa->id_trafo ?? '');
+        $id_tower = ($trasa->id_tower ?? '');
 
         $stoAg = (float)($tower->angle ?? 0);
         $stoNap = $tower ? (float)($tower->voltage ?? 0) : 0;
@@ -602,6 +604,7 @@ class ProjectsServices
 
         $naprmPa = max((float)($zA->napreg1_p ?? 0), (float)($zA->napreg8_p ?? 0));
         $naprmZa = max((float)($zA->napreg1_z ?? 0), (float)($zA->napreg8_z ?? 0));
+
 
         if ($zB) {
             $tovp1b = (float)($zB->tovpro_1 ?? 0);
@@ -644,6 +647,7 @@ class ProjectsServices
 
         if ($stoAg == 0 && $stoNap > 0) {
 
+            // ТАБЕЛА 1 =========================================================================================================
             $vxA = 0;
             $vyA = null;
             $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
@@ -741,13 +745,46 @@ class ProjectsServices
             $syNZ = null;
 
 
-        } else {
+        }
+
+        if (($stoAg > 0 && $stoNap > 0)||($id_trafo)) {
+            // ТАБЕЛА 2 =========================================================================================================
             $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
             $vyA = null;
-            $vzA = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
+            $vzA = ($brojPs * $preseP * $tovp1 * $grVp)  + 2*($izoMd1 + $izoMd2);
+
+//            dd([
+//                '$brojPs'  => $brojPs,
+//                '$preseP'   => $preseP,
+//                '$tovp1'    => $tovp1,
+//                '$grVp'  => $grVp,
+//                '$izoMd1'   => $izoMd1,
+//                '$izoMd2'   => $izoMd2,
+//                '$vzA'   => $vzA,
+//
+//
+//            ]);
+
             $zxA = 2 * $preseZ * $naprmZ * $sinHalf;
             $zyA = null;
             $zzA = ($preseZ * $tovz1 * $grLz) + ($preseZ * $tovz1b * $grDz);
+
+//            dd([
+//                'zB'  => $zB,
+//                'preseZ'  => $preseZ,
+//                'tovz1'   => $tovz1,
+//                'grLz'    => $grLz,
+//
+//                'tovz1b'  => $tovz1b,
+//                'grDz'    => $grDz,
+//
+//                'left'    => $preseZ * $tovz1 * $grLz,
+//                'right'   => $preseZ * $tovz1b * $grDz,
+//
+//                'zzA'     => ($preseZ * $tovz1 * $grLz)
+//                    + ($preseZ * $tovz1b * $grDz),
+//            ]);
+
             $sxA = null;
             $syA = null;
 
