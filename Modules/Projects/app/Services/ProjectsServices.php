@@ -582,6 +582,7 @@ class ProjectsServices
         $stoAg = (float)($tower->angle ?? 0);
         $stoNap = $tower ? (float)($tower->voltage ?? 0) : 0;
         $stoMa = (float)($tower->mass ?? 0);
+        $specification= $tower->specification ?? 0;
 
         $grLp = (float)($g->grr_lpro ?? 0);
         $grDp = (float)($g->grr_dpro ?? 0);
@@ -645,13 +646,21 @@ class ProjectsServices
         $lastBr = (int)$gapres->last()->br_stolb - 1;
         $isFirstOrLast = ($stBr === $firstBr || $stBr === $lastBr);
 
-        if ($stoAg == 0 && $stoNap > 0) {
+//if ($trasa->id==2718) {
+//    dd([
+//        '$specification' => $specification,
+//
+//
+//    ]);
+//}
+
+        if ($specification === 'N') {
 
             // ТАБЕЛА 1 =========================================================================================================
-            $vxA = 0;
+            $vxA =null;
             $vyA = null;
             $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
-            $zxA = 0;
+            $zxA = null;
             $zyA = null;
             $zzA = $preseZ * $tovz1 * $grVz;
             $sxA = null;
@@ -666,10 +675,10 @@ class ProjectsServices
             $sxB = 2.6 * $pritVe;
             $syB = null;
 
-            $vxC = 0;
+            $vxC = null;
             $vyC = $brojPs * 0.25 * 0.001 * $dijamP * $pritVe * $sreR;
             $vzC = $vzB;
-            $zxC = 0;
+            $zxC = null;
             $zyC = 0.25 * 0.001 * $dijamZ * $pritVe * $sreR;
             $zzC = $zzB;
             $sxC = null;
@@ -684,12 +693,12 @@ class ProjectsServices
             $sxD = null;
             $syD = null;
 
-            $vxPP = 0;
-            $vyPP = 0;
+            $vxPP = null;
+            $vyPP = null;
             if ($nomNap > 20) {
                 $vyPP = ($brojPs == 1) ? $brojPs * 0.5 * $naprmP * $preseP : $brojPs * 0.25 * $naprmP * $preseP;
             }
-            $vzPP = 0;
+            $vzPP = null;
             if ($nomNap > 20) {
                 $vzPP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
             }
@@ -699,15 +708,15 @@ class ProjectsServices
             $sxPP = null;
             $syPP = null;
 
-            $vxNP = 0;
+            $vxNP = null;
             $vyNP = null;
-            $vzNP = 0;
+            $vzNP = null;
             if ($nomNap > 20) {
                 $vzNP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
             }
-            $zxNP = 0;
+            $zxNP = null;
             $zyNP = null;
-            $zzNP = 0;
+            $zzNP = null;
             if ($nomNap > 20) {
                 $zzNP = $preseZ * $tovz1 * $grVz;
             }
@@ -717,27 +726,27 @@ class ProjectsServices
             $vxPZ = null;
             $vyPZ = null;
             $vzPZ = null;
-            $zxPZ = 0;
-            $zyPZ = 0;
+            $zxPZ = null;
+            $zyPZ = null;
             if ($nomNap > 20) {
                 $zyPZ = 0.5 * $naprmZ * $preseZ;
             }
-            $zzPZ = 0;
+            $zzPZ = null;
             if ($nomNap > 20) {
                 $zzPZ = $preseZ * $tovz1 * $grVz;
             }
             $sxPZ = null;
             $syPZ = null;
 
-            $vxNZ = 0;
+            $vxNZ = null;
             $vyNZ = null;
-            $vzNZ = 0;
+            $vzNZ = null;
             if ($nomNap > 20) {
                 $vzNZ = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
             }
-            $zxNZ = 0;
+            $zxNZ = null;
             $zyNZ = null;
-            $zzNZ = 0;
+            $zzNZ = null;
             if ($nomNap > 20) {
                 $zzNZ = $preseZ * $tovz1 * $grVz;
             }
@@ -747,7 +756,7 @@ class ProjectsServices
 
         }
 
-        if (($stoAg > 0 && $stoNap > 0)||($id_trafo)) {
+        if (($specification === 'A')||($id_trafo&&!$id_tower)) {
             // ТАБЕЛА 2 =========================================================================================================
             $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
             $vyA = null;
@@ -904,6 +913,7 @@ class ProjectsServices
 
             }
         }
+
         return [
             ['group' => 'Член 69', 'code' => 'A', 'data' => $this->forceRow($vxA, $vyA, $vzA, $zxA, $zyA, $zzA, $sxA, $syA)],
             ['group' => 'Член 69', 'code' => 'B', 'data' => $this->forceRow($vxB, $vyB, $vzB, $zxB, $zyB, $zzB, $sxB, $syB)],
