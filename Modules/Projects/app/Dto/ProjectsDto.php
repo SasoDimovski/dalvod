@@ -57,6 +57,8 @@ class ProjectsDto
         $dto->num_cond_systems = (int)$request->input('num_cond_systems');
         $dto->num_cond_bundle = (int)$request->input('num_cond_bundle');
         $dto->num_ground_wires = (int)$request->input('num_ground_wires');
+        $dto->overtemperature = (int)$request->input('overtemperature');
+        $dto->minimum_safety_clearance = (float)$request->input('minimum_safety_clearance');
         $dto->active = (int)$request->input('active');
         $dto->deleted = (int)$request->input('deleted');
         $dto->created_by = (int)$request->input('created_by');

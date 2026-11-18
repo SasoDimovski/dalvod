@@ -402,6 +402,9 @@ class ProjectsServices
         $project = $this->projectsRepositories->getProjectById($id_project);
         $kongras = $this->controls->kongras($id_project);
         $konelras = $this->controls->konelras($id_project);
+        $konsrras = $this->controls->konsrras($id_project);
+        $konagot = $this->controls->konagot($id_project);
+        $konvis = $this->controls->konvis($id_project);
         $isCalculate = $project->calculation;
 
 
@@ -410,6 +413,9 @@ class ProjectsServices
             'project' => $project,
             'kongras' => $kongras,
             'konelras' => $konelras,
+            'konsrras' => $konsrras,
+            'konagot' => $konagot,
+            'konvis' => $konvis,
             'isCalculate' => $isCalculate,
         ]];
     }

@@ -38,6 +38,7 @@ class ProjectsStoreRequest extends FormRequest
             'id_insulator_chain' => 'required',
             'num_cond_systems' => 'required',
             'num_cond_bundle' => 'required',
+            'minimum_safety_clearance' => 'required|numeric|gt:0',
 
 
         ];
@@ -66,6 +67,7 @@ class ProjectsStoreRequest extends FormRequest
             'num_cond_systems.required' => __('global.required', ['name' => __('projects.num_cond_systems')]),
             'num_cond_bundle.required' => __('global.required', ['name' => __('projects.num_cond_bundle')]),
             'num_ground_wires.required' => __('global.required', ['name' => __('projects.num_ground_wires')]),
+            'minimum_safety_clearance.required' => __('global.required', ['name' => __('projects.minimum_safety_clearance')]),
 
 
         ];

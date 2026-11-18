@@ -167,7 +167,8 @@ class ProjectsRepositories
             'num_cond_systems' => $projectsDto->num_cond_systems,
             'num_cond_bundle' => $projectsDto->num_cond_bundle,
             'num_ground_wires' => $projectsDto->num_ground_wires,
-
+            'overtemperature' => $projectsDto->overtemperature,
+            'minimum_safety_clearance' => $projectsDto->minimum_safety_clearance,
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
             'active' => $projectsDto->active,
@@ -210,6 +211,8 @@ class ProjectsRepositories
             $project->num_cond_systems = $data->num_cond_systems;
             $project->num_cond_bundle = $data->num_cond_bundle;
             $project->num_ground_wires = $data->num_ground_wires;
+            $project->overtemperature = $data->overtemperature;
+            $project->minimum_safety_clearance = $data->minimum_safety_clearance;
             $project->updated_by = Auth::id();
             $project->active = $data->active;
 

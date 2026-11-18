@@ -217,7 +217,7 @@
 
                                     <div class="col-sm-8">
 
-
+                                        {{--=========================================================--}}
                                             <button class="btn btn-success">  <b>{{ __('projects.show-controls.kongras') }}</b></button>
                                             <div class="card card-danger mb-3">
                                                 <div class="card-body">
@@ -289,6 +289,7 @@
                                                 </div>
                                             </div>
 
+                                        {{--=========================================================--}}
 
                                         <button class="btn btn-success">  <b>{{ __('projects.show-controls.konelras') }}</b></button>
                                         <div class="card card-danger mb-3">
@@ -364,6 +365,453 @@
 
                                             </div>
                                         </div>
+
+                                        {{--=========================================================--}}
+
+                                        <button class="btn btn-success">  <b>{{ __('projects.show-controls.konsrras') }}</b></button>
+                                        <div class="card card-danger mb-3">
+                                            <div class="card-body">
+
+                                                @if(($konsrras['count'] ?? 0) > 0)
+
+                                                    <div class="row">
+                                                        <span style="color: #a71d2a">
+                                                            {{ __('projects.show-controls.konsrras_no') }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="row scrollmenu">
+                                                        <table class="table_grid">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center">{{__('projects.show-controls.raspon')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_start_des')}}">{{__('projects.show-controls.tower_name_start')}}</th>
+                                                                <th class="text-center"  title="{{__('projects.show-controls.stac_start')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_start')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+                                                                <th class="text-center" title="{{__('projects.show-controls.tower_name_end_des')}}">{{__('projects.show-controls.tower_name_end')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.stac_end')}}">{{__('projects.show-controls.stac')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.id_trasa_end')}}">{{__('projects.show-controls.id_trasa')}}</th>
+
+                                                                <th class="text-center"   title="{{__('projects.show-controls.konsrras_sre_ras')}}">{{__('projects.show-controls.konsrras_sre_ras')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.konsrras_s_ra_st')}}">{{__('projects.show-controls.konsrras_s_ra_st')}}</th>
+                                                                <th class="text-center"   title="{{__('projects.show-controls.konsrras_sr_razlik')}}">{{__('projects.show-controls.konsrras_sr_razlik')}}</th>
+
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($konsrras['items'] as $item)
+                                                                <tr>
+                                                                    <td class="text-center">
+                                                                        {{ $item['raspon_br'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center" style="background-color: #ddffd9">
+                                                                        {{ $item['start']['tower_name'] ?? '' }}
+                                                                    </td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">
+                                                                        {{ number_format((float)($item['start']['stac_t'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+                                                                    <td class="text-center" style="background-color: #ddffd9">
+                                                                        {{ $item['start']['id_trasa'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center" style="background-color: #ffafaf">
+                                                                        {{ $item['end']['tower_name'] ?? '' }}
+                                                                    </td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">
+                                                                        {{ number_format((float)($item['end']['stac_t'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+                                                                    <td class="text-center" style="background-color: #ffafaf">
+                                                                        {{ $item['end']['id_trasa'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format($item['sr_raspon'], 2, '.', '') }}
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        {{ number_format($item['sr_ras_st'], 2, '.', '') }}
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        {{ number_format($item['sr_razlik'], 2, '.', '') }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                @else
+                                                    <div class="row">
+                                                            <span style="color: #00A000">
+                                                                {{ __('projects.show-controls.konsrras_ok') }}
+                                                            </span>
+                                                    </div>
+                                                @endif
+
+                                            </div>
+                                        </div>
+
+                                        {{--=========================================================--}}
+                                        {{-- ========================================== --}}
+                                        {{-- KONAGOT - Контрола на агли на отклон       --}}
+                                        {{-- ========================================== --}}
+
+                                        <button class="btn btn-success">
+                                            <b>{{ __('projects.show-controls.konagot_angles') }}</b>
+                                        </button>
+                                        <div class="card card-danger mb-3">
+                                            <div class="card-body">
+
+                                                @if(($konagot['angles']['count'] ?? 0) > 0)
+
+                                                    <div class="row">
+                                                    <span style="color: #a71d2a">
+                                                        {{ __('projects.show-controls.konagot_angles_no') }}
+                                                    </span>
+                                                    </div>
+
+                                                    <div class="row scrollmenu">
+                                                        <table class="table_grid">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center">{{ __('projects.show-controls.br_stolb') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.tower_name') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.stac') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.id_trasa') }}</th>
+
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_kr1') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_ot1') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_zab_ot1') }}</th>
+
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_kr2') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_ot2') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_zab_ot2') }}</th>
+
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_tez_teg') }}</th>
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($konagot['angles']['items'] as $item)
+                                                                <tr>
+                                                                    <td class="text-center">
+                                                                        {{ $item['br_stolb'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ $item['tower_name'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['stac_t'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ $item['id_trasa'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['agol_kr1'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center"
+                                                                        style="{{ ($item['agol_ot1'] ?? 0) > ($item['agol_kr1'] ?? 0) ? 'background-color: #ffafaf' : '' }}">
+                                                                        {{ number_format((float)($item['agol_ot1'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        @if($item['zab_ot1'] ?? false)
+                                                                            <i class="fas fa-check" style="color: #a71d2a;"></i>
+                                                                        @endif
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['agol_kr2'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center"
+                                                                        style="{{ ($item['agol_ot2'] ?? 0) > ($item['agol_kr2'] ?? 0) ? 'background-color: #ffafaf' : '' }}">
+                                                                        {{ number_format((float)($item['agol_ot2'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        @if($item['zab_ot2'] ?? false)
+                                                                            <i class="fas fa-check" style="color: #a71d2a;"></i>
+                                                                        @endif
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['tez_teg'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                @else
+                                                    <div class="row">
+                                                    <span style="color: #00A000">
+                                                        {{ __('projects.show-controls.konagot_angles_ok') }}
+                                                    </span>
+                                                    </div>
+                                                @endif
+
+                                            </div>
+                                        </div>
+
+
+                                        {{-- ========================================== --}}
+                                        {{-- KONAGOT - Контрола на струјни мостови      --}}
+                                        {{-- ========================================== --}}
+
+                                        <button class="btn btn-success">
+                                            <b>{{ __('projects.show-controls.konagot_bridges') }}</b>
+                                        </button>
+                                        <div class="card card-danger mb-3">
+                                            <div class="card-body">
+
+                                                @if(($konagot['bridges']['count'] ?? 0) > 0)
+
+                                                    <div class="row">
+                                                    <span style="color: #a71d2a">
+                                                        {{ __('projects.show-controls.konagot_bridges_no') }}
+                                                    </span>
+                                                    </div>
+
+                                                    <div class="row scrollmenu">
+                                                        <table class="table_grid">
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center">{{ __('projects.show-controls.br_stolb') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.tower_name') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.stac') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.id_trasa') }}</th>
+
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_tr') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_sig_rh1') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_sig_rv2') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_agol_pr') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_sig_rh2') }}</th>
+
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_ras_pres') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_ras_sig2') }}</th>
+                                                                <th class="text-center">{{ __('projects.show-controls.konagot_razlika') }}</th>
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                            @foreach($konagot['bridges']['items'] as $item)
+                                                                @php
+                                                                    $razlika = (float)($item['ras_pres'] ?? 0)
+                                                                            - (float)($item['ras_sig2'] ?? 0);
+                                                                @endphp
+
+                                                                <tr>
+                                                                    <td class="text-center">
+                                                                        {{ $item['br_stolb'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ $item['tower_name'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['stac_t'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ $item['id_trasa'] ?? '' }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['agol_tr'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['sig_rh1'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['sig_rv2'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['agol_pr'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['sig_rh2'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center" style="background-color: #ffafaf">
+                                                                        {{ number_format((float)($item['ras_pres'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center">
+                                                                        {{ number_format((float)($item['ras_sig2'] ?? 0), 2, '.', '') }}
+                                                                    </td>
+
+                                                                    <td class="text-center" style="color: #a71d2a">
+                                                                        {{ number_format($razlika, 2, '.', '') }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                @else
+                                                    <div class="row">
+                                                    <span style="color: #00A000">
+                                                        {{ __('projects.show-controls.konagot_bridges_ok') }}
+                                                    </span>
+                                                    </div>
+                                                @endif
+
+                                            </div>
+                                        </div>
+
+                                        {{--=========================================================--}}
+
+                                        {{-- KONVIS - Контрола на висината на спроводниците над теренот --}}
+
+
+                                            <button class="btn btn-success">
+                                                <b>{{ __('projects.show-controls.konvis') }}</b>
+                                            </button>
+
+
+                                        <div class="card card-danger mb-3">
+                                            <div class="card-body">
+
+                                                @if(($konvis['count'] ?? 0) > 0)
+
+                                                    {{-- Порака кога има недозволени висини --}}
+                                                    <div class="row">
+                                                    <span style="color: #a71d2a">
+                                                        {{ __('projects.show-controls.konvis_no') }}
+                                                    </span>
+                                                    </div>
+
+                                                    {{-- Табела со грешки --}}
+                                                    <div class="row scrollmenu">
+
+                                                        <table class="table_grid">
+
+                                                            <thead>
+                                                            <tr>
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.br_raspon') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.stac_ter') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.kota_ter') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.visina_p') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.visina_zj') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.razlika_v') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.vis_pro1') }}
+                                                                </th>
+
+                                                                <th class="text-center">
+                                                                    {{ __('projects.show-controls.vis_pro2') }}
+                                                                </th>
+                                                            </tr>
+                                                            </thead>
+
+                                                            <tbody>
+
+                                                            @foreach(($konvis['items'] ?? []) as $item)
+
+                                                                <tr>
+
+                                                                    {{-- Број на распон --}}
+                                                                    <td class="text-center">
+                                                                        {{ $item['br_raspon'] }}
+                                                                    </td>
+
+                                                                    {{-- Стационажа на теренот --}}
+                                                                    <td class="text-end">
+                                                                        {{ number_format($item['stac_ter'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Кота на теренот --}}
+                                                                    <td class="text-end">
+                                                                        {{ number_format($item['kota_ter'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Минимална висина на спроводник --}}
+                                                                    <td class="text-end"
+                                                                        style="color: #a71d2a; font-weight: bold">
+                                                                        {{ number_format($item['visina_p'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Висина на заштитно јаже --}}
+                                                                    <td class="text-end">
+                                                                        {{ number_format($item['visina_zj'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Недостаток до дозволената висина --}}
+                                                                    <td class="text-end"
+                                                                        style="color: #a71d2a; font-weight: bold">
+                                                                        {{ number_format($item['razlika_v'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Висина за првата состојба --}}
+                                                                    <td class="text-end">
+                                                                        {{ number_format($item['vis_pro1'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                    {{-- Висина за втората состојба --}}
+                                                                    <td class="text-end">
+                                                                        {{ number_format($item['vis_pro2'], 2, '.', '') }}
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            @endforeach
+
+                                                            </tbody>
+
+                                                        </table>
+
+                                                    </div>
+
+                                                @else
+
+                                                    {{-- Порака кога сите висини се дозволени --}}
+                                                    <div class="row">
+                <span style="color: #00A000">
+                    {{ __('projects.show-controls.konvis_ok') }}
+                </span>
+                                                    </div>
+
+                                                @endif
+
+                                            </div>
+                                        </div>
+
+                                        {{--=========================================================--}}
+
 
                                     </div>
 

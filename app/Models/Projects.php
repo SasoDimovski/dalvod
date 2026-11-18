@@ -31,6 +31,7 @@ class Projects extends Model
         'num_cond_systems',
         'num_cond_bundle',
         'num_ground_wires',
+        'overtemperature',
         'calculation',
         'active',
         'deleted',

@@ -34,6 +34,8 @@
     $approx_number_towers = $project->approx_number_towers ?? old('approx_number_towers');
     $num_cond_systems = $project->num_cond_systems ?? old('num_cond_systems');
     $num_cond_bundle = $project->num_cond_bundle ?? old('num_cond_bundle');
+    $overtemperature = $project->overtemperature ?? old('overtemperature');
+    $minimum_safety_clearance = $project->minimum_safety_clearance ?? old('minimum_safety_clearance');
 //    $num_ground_wires = $project->num_ground_wires ?? old('num_ground_wires');
 
 
@@ -251,13 +253,18 @@
                                                         autocomplete="off" {{ $input_readonly }} style="width: 60%">
                                                     @if (count($voltages) > 0)
                                                         <option value="">&nbsp;</option>
+
+
                                                         @foreach ($voltages as $voltage)
                                                             <option
                                                                 value="{{ $voltage->id }}"
-                                                                {{ (($id_voltage)==$voltage->id) ? 'selected' : '' }}>
+                                                                data-kv="{{ $voltage->title }}"
+                                                                {{ ($id_voltage == $voltage->id) ? 'selected' : '' }}>
                                                                 {{ $voltage->title }}
                                                             </option>
                                                         @endforeach
+
+
                                                     @endif
                                                 </select>
                                             </div>
@@ -767,11 +774,74 @@
 
                                     </div>
                                     {{--=========================================================--}}
-                                    <div class="row">
+                                    <div class="row" >
+                                        <div class="col-sm-4">
+                                            <?php
 
+                                            $input_value = $overtemperature;
+                                            $input_name = 'overtemperature';
+                                            $input_desc = __('projects.overtemperature');
+                                            $input_readonly = '';
+                                            $input_css = '';
+                                            $input_style = 'width: 20%;';
 
+                                            ?>
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} </label>
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}" name="{{ $input_name }}"
+                                                        autocomplete="off" {{ $input_readonly }}
+                                                        style="{{$input_style}}"
+                                                >
+                                                    <option value="" {{ ($overtemperature)=='' ? 'selected' : '' }}></option>
+                                                    <option value="50" {{ ($overtemperature)==50 ? 'selected' : '' }}>50</option>
+                                                    <option value="60" {{ ($overtemperature)==60 ? 'selected' : '' }}>60</option>
+                                                    <option value="70" {{ ($overtemperature)==70 ? 'selected' : '' }}>70</option>
+                                                    <option value="80" {{ ($overtemperature)==80 ? 'selected' : '' }}>80</option>
+                                                    <option value="90" {{ ($overtemperature)==90 ? 'selected' : '' }}>90</option>
+                                                    <option value="100" {{ ($overtemperature)==100 ? 'selected' : '' }}>100</option>
+                                                </select>
+                                            </div>
 
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <?php
+
+                                            $input_value = $minimum_safety_clearance;
+                                            $input_name = 'minimum_safety_clearance';
+                                            $input_desc = __('projects.minimum_safety_clearance');
+                                            $input_readonly = '';
+                                            $input_css = 'text-red';
+                                            $input_style = 'width: 20%;';
+
+                                            ?>
+                                            <div class="form-group">
+                                                <label class="{{ $input_css }}">{{ $input_desc }} *</label>
+
+                                                <select class="select2bs4"
+                                                        id="{{ $input_name }}"
+                                                        name="{{ $input_name }}"
+                                                        autocomplete="off"
+                                                        {{ $input_readonly }}
+                                                        style="{{ $input_style }}">
+
+                                                    <option value=""></option>
+
+                                                    @foreach ([6, 7, 8, 9, 10] as $value)
+                                                        <option value="{{ $value }}"
+                                                            {{ (string) $minimum_safety_clearance === (string) $value ? 'selected' : '' }}>
+                                                            {{ $value }}
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+                                            </div>
+
+                                        </div>
                                     </div>
+
+
                                     {{--=========================================================--}}
                                     <button type="button" class="btn btn-success float-right"
                                             onclick="document.getElementById('form_edit').requestSubmit();">
@@ -958,9 +1028,59 @@
             //width: 'auto'
         })
 
+        $(document).ready(function () {
 
-    </script>
-    <script>
+            const $voltage = $('select[name="id_voltage"]');
+            const $clearance = $('#minimum_safety_clearance');
+
+            function updateMinimumSafetyClearance() {
+
+                const kv = parseInt(
+                    $voltage.find('option:selected').attr('data-kv'),
+                    10
+                );
+
+                let minValue = 6;
+
+                if (kv === 220) {
+                    minValue = 7;
+                } else if (kv === 400) {
+                    minValue = 8;
+                }
+
+                const currentValue = $clearance.val();
+
+                // Ги отстрануваме старите опции
+                $clearance.empty();
+
+                // Празна опција
+                $clearance.append(new Option('', ''));
+
+                // Генерирање дозволени опции
+                for (let i = minValue; i <= 10; i++) {
+                    $clearance.append(new Option(i, i));
+                }
+
+                // Ја задржуваме претходната вредност ако е дозволена
+                if (currentValue && Number(currentValue) >= minValue) {
+                    $clearance.val(currentValue);
+                } else {
+                    $clearance.val('');
+                }
+
+                // Освежување на Select2
+                $clearance.trigger('change');
+            }
+
+            // При отворање на формата
+            updateMinimumSafetyClearance();
+
+            // При промена на напонот
+            $voltage.on('change', updateMinimumSafetyClearance);
+
+        });
+
+
         function validateNumberInput(input) {
             // дозволи само бројки и максимум една точка
             let value = input.value.replace(/[^0-9.]/g, '');
