@@ -613,6 +613,9 @@ class ProjectsServices
         $naprmZa = max((float)($zA->napreg1_z ?? 0), (float)($zA->napreg8_z ?? 0));
 
 
+
+
+
         if ($zB) {
             $tovp1b = (float)($zB->tovpro_1 ?? 0);
             $tovz1b = (float)($zB->tovzaj_1 ?? 0);
@@ -633,17 +636,25 @@ class ProjectsServices
         $knDtm = max($knDta, $knDtb);
         $kiDtm = max($kiDta, $kiDtb);
 
-        $naprmP = max($naprmPa, $naprmPb) * $knDtm;
-        $naprmZ = max($naprmZa, $naprmZb) * $kiDtm;
+       // $naprmP = max($naprmPa, $naprmPb) * $knDtm;
+       // $naprmZ = max($naprmZa, $naprmZb) * $kiDtm;
+
+
+        $naprmP = (float)($zA->nap_pro ?? 0);
+        $naprmZ = (float)($zA->nap_zaj ?? 0);
 
         $izoM1 = (float)(optional($trasa->insulator1)->mass ?? 0);
-        $izoMd1 = (float)(optional($trasa->insulator1)->masad ?? $izoM1);
+        $izoMd1 = (float)(optional($trasa->insulator1)->massd ?? 0);
 
         $izoM2 = (float)(optional($trasa->insulator2)->mass ?? 0);
-        $izoMd2 = (float)(optional($trasa->insulator2)->masad ?? $izoM2);
+        $izoMd2 = (float)(optional($trasa->insulator2)->massd ?? 0);
 
-        $izoMd1 = $izoM1 + $knDtm * ($izoMd1 - $izoM1);
-        $izoMd2 = $izoM2 + $knDtm * ($izoMd2 - $izoM2);
+
+
+        $izoMass1 = $izoM1 + $knDtm * ($izoMd1 - $izoM1);
+        $izoMass2 = $izoM2 + $knDtm * ($izoMd2 - $izoM2);
+
+
 
         $sinHalf = $this->sinDeg($agoTra / 2);
         $cosHalf = $this->cosDeg($agoTra / 2);
@@ -665,12 +676,29 @@ class ProjectsServices
             // ТАБЕЛА 1 =========================================================================================================
             $vxA =null;
             $vyA = null;
-            $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+            $vzA = $brojPs * $preseP * $tovp1 * $grVp + $izoMass1;
             $zxA = null;
             $zyA = null;
             $zzA = $preseZ * $tovz1 * $grVz;
             $sxA = null;
             $syA = null;
+
+
+//                        dd([
+//                '$brojPs'  => $brojPs,
+//                '$preseP'   => $preseP,
+//                '$tovp1'    => $tovp1,
+//                '$grVp'  => $grVp,
+//                '$izoMass1'   => $izoMass1,
+//
+//
+//                '$izoM1'   => $izoM1,
+//                '$knDtm'   => $knDtm,
+//                '$izoMd1'   => $izoMd1,
+//                '$vzA'   => $vzA,
+//
+//
+//            ]);
 
             $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
             $vyB = null;
@@ -706,7 +734,7 @@ class ProjectsServices
             }
             $vzPP = null;
             if ($nomNap > 20) {
-                $vzPP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+                $vzPP = $brojPs * $preseP * $tovp1 * $grVp + $izoMass1;
             }
             $zxPP = null;
             $zyPP = null;
@@ -718,7 +746,7 @@ class ProjectsServices
             $vyNP = null;
             $vzNP = null;
             if ($nomNap > 20) {
-                $vzNP = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+                $vzNP = $brojPs * $preseP * $tovp1 * $grVp + $izoMass1;
             }
             $zxNP = null;
             $zyNP = null;
@@ -748,7 +776,7 @@ class ProjectsServices
             $vyNZ = null;
             $vzNZ = null;
             if ($nomNap > 20) {
-                $vzNZ = $brojPs * $preseP * $tovp1 * $grVp + $izoMd1;
+                $vzNZ = $brojPs * $preseP * $tovp1 * $grVp + $izoMass1;
             }
             $zxNZ = null;
             $zyNZ = null;
@@ -766,15 +794,21 @@ class ProjectsServices
             // ТАБЕЛА 2 =========================================================================================================
             $vxA = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
             $vyA = null;
-            $vzA = ($brojPs * $preseP * $tovp1 * $grVp)  + 2*($izoMd1 + $izoMd2);
+
+
+            $vzA = ($brojPs * $preseP * $tovp1 * $grVp)  + $izoMass1 + $izoMass2;
 
 //            dd([
 //                '$brojPs'  => $brojPs,
 //                '$preseP'   => $preseP,
 //                '$tovp1'    => $tovp1,
 //                '$grVp'  => $grVp,
+//                '$izoMass1'   => $izoMass1,
+//                '$izoMass2'   => $izoMass2,
+//
+//                '$izoM1'   => $izoM1,
+//                '$knDtm'   => $knDtm,
 //                '$izoMd1'   => $izoMd1,
-//                '$izoMd2'   => $izoMd2,
 //                '$vzA'   => $vzA,
 //
 //
@@ -808,7 +842,7 @@ class ProjectsServices
                 $vxB = $brojPs * 0.001 * $dijamP * $pritVe * $sreR;
             }
             $vyB = null;
-            $vzB = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $vzB = $brojPs * $preseP * $tovp * $grVp + + $izoMass1 + $izoMass2;
             $zxB = 0.001 * $dijamZ * $pritVe * $sreR + 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
             if ($stoMa == 0) {
                 $zxB = 0.001 * $dijamZ * $pritVe * $sreR;
@@ -823,7 +857,7 @@ class ProjectsServices
             if ($agoTra < 28.955) {
                 $vyC = $brojPs * 0.001 * $dijamP * $pritVe * $sreR * 0.25;
             }
-            $vzC = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $vzC = $brojPs * $preseP * $tovp * $grVp + + $izoMass1 + $izoMass2;
             $zxC = 4 * ($preseZ * $naprmZ * $sinHalf) / 3;
             $zyC = 0.001 * $dijamZ * $pritVe * $sreR * $sinHalf;
             if ($agoTra < 28.955) {
@@ -838,7 +872,7 @@ class ProjectsServices
             if ($agoTra == 0 && $izoM2 == 0) {
                 $vyD = $brojPs * $naprmP * $preseP;
             }
-            $vzD = $brojPs * $preseP * $tovp * $grVp + $izoM1 + $izoM2;
+            $vzD = $brojPs * $preseP * $tovp * $grVp + + $izoMass1 + $izoMass2;
             $zxD = 2 * ($preseZ * $naprmZ * $sinHalf) / 3;
             $zyD = 2 * ($preseZ * $naprmZ * $cosHalf) / 3;
             if ($agoTra == 0 && $izoM2 == 0) {
@@ -895,7 +929,7 @@ class ProjectsServices
                 if ($isFirstOrLast) {
                     $vyPP = $brojPs * $naprmP * $preseP * $this->cosDeg($agoTra);
                 }
-                $vzPP = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) + $izoMd1 + $izoMd2;
+                $vzPP = ($brojPs * $preseP * $tovp1 * $grLp) + ($brojPs * $preseP * $tovp1b * $grDp) +  $izoMass1 + $izoMass2;
 
                 $vxNP = $brojPs * 2 * $preseP * $naprmP * $sinHalf;
                 $vzNP = $vzPP;
